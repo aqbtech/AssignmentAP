@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <title>Custom title in inherit class admin</title>
+</head>
+    <body>
+        <div layout:fragment="content">
+            <!-- Page Content -->
+            <div class="container">
+                <h1>Blank Page</h1>
+                <hr>
+                <p>This is a great starting point for new custom pages [[${students.name}]]</p>
+            </div>
+            <!-- /.container -->
+        </div>
+    </body>
+</html>
