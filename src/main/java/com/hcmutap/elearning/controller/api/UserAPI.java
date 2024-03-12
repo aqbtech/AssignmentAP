@@ -1,48 +1,47 @@
 package com.hcmutap.elearning.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hcmutap.elearning.model.StudentModel;
-import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.model.UserModel;
+import com.hcmutap.elearning.service.IUserService;
 import com.hcmutap.elearning.utils.HttpUtil;
+
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
-public class StudentAPI {
-	@Autowired
-	private IStudentService studentService;
-	@PostMapping("/student")
+public class UserAPI {
+	@Resource
+	private IUserService userService;
+	@PostMapping("/user")
 	public void save(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
-		BufferedReader reader = request.getReader();
-		StudentModel studentModel = HttpUtil.of(request.getReader()).toModel(StudentModel.class);
-		studentService.save(studentModel);
-		mapper.writeValue(response.getOutputStream(), studentModel);
+		UserModel userModel = HttpUtil.of(request.getReader()).toModel(UserModel.class);
+		userService.save(userModel);
+		mapper.writeValue(response.getOutputStream(), userModel);
 	}
-	@PutMapping("/student")
+	@PutMapping("/user")
 	public void update(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
-		StudentModel studentModel = HttpUtil.of(request.getReader()).toModel(StudentModel.class);
-		studentService.update(studentModel);
-		mapper.writeValue(response.getOutputStream(), studentModel);
+		UserModel userModel = HttpUtil.of(request.getReader()).toModel(UserModel.class);
+		userService.update(userModel);
+		mapper.writeValue(response.getOutputStream(), userModel);
 	}
-	@DeleteMapping("/student")
+	@DeleteMapping("/user")
 	public void delete(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
-		StudentModel studentModel = HttpUtil.of(request.getReader()).toModel(StudentModel.class);
-		studentService.delete(studentModel.getId());
+		UserModel userModel = HttpUtil.of(request.getReader()).toModel(UserModel.class);
+		userService.delete(userModel.getId());
 		mapper.writeValue(response.getOutputStream(), "{}");
 	}
 }

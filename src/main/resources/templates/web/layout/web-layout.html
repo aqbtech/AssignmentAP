@@ -13,10 +13,10 @@
     <title>Default title</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="/template/web/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/template/web/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="/template/web/css/small-business.css" rel="stylesheet">
+    <link th:href="@{/template/web/css/small-business.css}" rel="stylesheet">
 
 </head>
 
@@ -33,8 +33,8 @@
     <div th:replace="~{web/frements/footer::footer}"></div>
 
     <!-- Bootstrap core JavaScript -->
-    <script src="/template/web/vendor/jquery/jquery.min.js"></script>
-    <script src="/template/web/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/template/web/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/template/web/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
     </body>
 
