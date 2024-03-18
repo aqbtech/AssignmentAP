@@ -5,16 +5,16 @@ import com.github.fabiomaffioletti.firebase.document.FirebaseId;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
-@FirebaseDocument("/students")
-public class StudentDocument {
+@Setter
+@FirebaseDocument("/users")
+public class UserDocument {
 	@FirebaseId
 	private String id;
-	private String studentId;
-	private String name;
-	// timesptamp
-	// number
-	// boolean
-	// array
+	private String username;
+	private String password;
+	private String role;
+	private Long Status;
+//	private String email;
+	private String usrId; // to store id of teacher or student
 }

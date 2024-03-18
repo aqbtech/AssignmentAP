@@ -9,12 +9,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentModel {
+public class UserModel {
 	private String id;
-	private String studentId;
-	private String name;
-//	private UserModel account;
-	// tkb
-	// ctdt
-
+	private String username;
+	private String password;
+	private String role;
+	private Long Status;
+	private String usrId; // to store id of teacher or student
 }
