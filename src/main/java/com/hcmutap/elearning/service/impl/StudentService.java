@@ -22,7 +22,7 @@ public class StudentService implements IStudentService {
 			StudentModel studentModel = new StudentModel();
 			studentModel.setId(studentDocument.getId());
 			studentModel.setName(studentDocument.getName());
-			studentDocument.setStudentId(studentModel.getStudentId());
+//			studentDocument.setStudentId(studentModel.getMssv());
 			studentModelList.add(studentModel);
 		}
 		return studentModelList;
@@ -33,7 +33,7 @@ public class StudentService implements IStudentService {
 		StudentDocument studentDocument = new StudentDocument();
 		studentDocument.setId(studentModel.getId());
 		studentDocument.setName(studentModel.getName());
-		studentDocument.setStudentId(studentModel.getStudentId());
+//		studentDocument.setStudentId(studentModel.getMssv());
 		studentRepository.push(studentDocument);
 	}
 
@@ -42,7 +42,7 @@ public class StudentService implements IStudentService {
 		StudentDocument studentDocument = new StudentDocument();
 		studentDocument.setId(studentModel.getId());
 		studentDocument.setName(studentModel.getName());
-		studentDocument.setStudentId(studentModel.getStudentId());
+//		studentDocument.setStudentId(studentModel.getMssv());
 		studentRepository.update(studentDocument);
 	}
 
