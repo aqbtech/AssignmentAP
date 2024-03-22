@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-@Repository
+
 public class StudentDAO extends AbstractDAO<StudentModel>{
     public List<StudentModel> findAll(){
         List<StudentModel> studentModelList = null;
