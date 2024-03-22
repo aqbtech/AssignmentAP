@@ -2,6 +2,7 @@ package com.hcmutap.elearning.repository.document;
 
 import com.github.fabiomaffioletti.firebase.document.FirebaseDocument;
 import com.github.fabiomaffioletti.firebase.document.FirebaseId;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,8 +14,7 @@ public class StudentDocument {
 	private String id;
 	private String studentId;
 	private String name;
-	// timesptamp
-	// number
-	// boolean
-	// array
+	private int citizen_identityID;
+	private String gender;
+	private String major;
 }

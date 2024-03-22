@@ -1,9 +1,11 @@
 package com.hcmutap.elearning.service.impl;
 
+import com.hcmutap.elearning.dao.StudentDAO;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.repository.StudentRepository;
 import com.hcmutap.elearning.repository.document.StudentDocument;
 import com.hcmutap.elearning.service.IStudentService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,42 +14,36 @@ import java.util.List;
 
 @Service
 public class StudentService implements IStudentService {
-	@Autowired
-	private StudentRepository studentRepository;
+//	@Autowired
+//	private StudentRepository studentRepository;
+	@Resource
+	private StudentDAO studentDAO;
 	@Override
 	public List<StudentModel> findAll() {
-		List<StudentModel> studentModelList = new ArrayList<>();
-		List<StudentDocument> studentDocumentList = studentRepository.findAll();
-		for(StudentDocument studentDocument:studentDocumentList){
-			StudentModel studentModel = new StudentModel();
-			studentModel.setId(studentDocument.getId());
-			studentModel.setName(studentDocument.getName());
-//			studentDocument.setStudentId(studentModel.getMssv());
-			studentModelList.add(studentModel);
-		}
-		return studentModelList;
+		return studentDAO.findAll();
 	}
-
 	@Override
-	public void save(StudentModel studentModel) {
-		StudentDocument studentDocument = new StudentDocument();
-		studentDocument.setId(studentModel.getId());
-		studentDocument.setName(studentModel.getName());
-//		studentDocument.setStudentId(studentModel.getMssv());
-		studentRepository.push(studentDocument);
+	public String save(StudentModel studentModel) {
+		return studentDAO.save(studentModel);
 	}
-
 	@Override
 	public void update(StudentModel studentModel) {
-		StudentDocument studentDocument = new StudentDocument();
-		studentDocument.setId(studentModel.getId());
-		studentDocument.setName(studentModel.getName());
-//		studentDocument.setStudentId(studentModel.getMssv());
-		studentRepository.update(studentDocument);
+		studentDAO.update(studentModel);
 	}
-
 	@Override
 	public void delete(String id) {
-		studentRepository.remove(id);
+		studentDAO.delete(id);
 	}
+	@Override
+	public StudentModel findById(String id){
+		return studentDAO.findById(id);
+	}
+//	@Override
+//	public String getScore(StudentModel studentModel) {
+//
+//	}
+//	@Override
+//	public void search_AccumulatedCredits(StudentModel studentModel){
+//
+//	}
 }
