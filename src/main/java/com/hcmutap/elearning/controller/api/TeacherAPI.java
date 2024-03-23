@@ -4,43 +4,39 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import com.hcmutap.elearning.utils.HttpUtil;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class TeacherAPI {
-	@Autowired
+	@Resource
 	private ITeacherService teacherService;
+	@GetMapping("/teacher/findAll")
+	public List<TeacherModel> findAll() {
+		return teacherService.findAll();
+	}
+	@GetMapping("/teacher/findById")
+	public TeacherModel findById(@RequestParam String id) {
+		return teacherService.findById(id);
+	}
 	@PostMapping("/teacher")
-	public void save(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		request.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json");
-		TeacherModel teacherModel = HttpUtil.of(request.getReader()).toModel(TeacherModel.class);
-		teacherService.save(teacherModel);
-		mapper.writeValue(response.getOutputStream(), teacherModel);
+	public String save(@RequestBody TeacherModel teacherModel) {
+		return teacherService.save(teacherModel);
 	}
 	@PutMapping("/teacher")
-	public void update(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		request.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json");
-		TeacherModel teacherModel = HttpUtil.of(request.getReader()).toModel(TeacherModel.class);
+	public void update(@RequestBody TeacherModel teacherModel) {
+		// need to handler not found exception in dao -> service -> controller
 		teacherService.update(teacherModel);
-		mapper.writeValue(response.getOutputStream(), teacherModel);
 	}
 	@DeleteMapping("/teacher")
-	public void delete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		request.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json");
-		TeacherModel teacherModel = HttpUtil.of(request.getReader()).toModel(TeacherModel.class);
-		teacherService.delete(teacherModel.getId());
-		mapper.writeValue(response.getOutputStream(), "{}");
+	public void delete(@RequestBody List<String> ids) {
+		ids.forEach(id -> teacherService.delete(id));
 	}
 }
