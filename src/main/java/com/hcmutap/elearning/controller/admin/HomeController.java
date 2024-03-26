@@ -3,6 +3,7 @@ package com.hcmutap.elearning.controller.admin;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.UserModel;
 import com.hcmutap.elearning.service.IStudentService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @Controller(value = "homeControllerOfAdmin")
 public class HomeController {
-	@Autowired
+	@Resource
 	private IStudentService studentService;
 
 	@RequestMapping(value = "/admin-home")
@@ -20,7 +21,7 @@ public class HomeController {
 		List<StudentModel> studentModelList = studentService.findAll();
 //		model.addAttribute("students",studentModelList.get(0));
 		StudentModel studentModel
-				= new StudentModel("1", "2210000", "Nguyen Van B");
+				= new StudentModel("1", "Nguyen Van B", 20L, "nva@hcmut.edu.vn", "nva", "2210000", "B");
 		model.addAttribute("students", studentModel);
 		return "admin/views/home";
 	}

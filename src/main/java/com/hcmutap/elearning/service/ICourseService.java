@@ -1,4 +1,6 @@
 package com.hcmutap.elearning.service;
 
-public interface ICourseService {
+import com.hcmutap.elearning.model.CourseModel;
+
+public interface ICourseService extends IGenericAdminService<CourseModel> {
 }
