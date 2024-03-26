@@ -18,13 +18,8 @@ public class UserAPI {
 	@Resource
 	private IUserService userService;
 	@PostMapping("/user")
-	public void save(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		request.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json");
-		UserModel userModel = HttpUtil.of(request.getReader()).toModel(UserModel.class);
-		userService.save(userModel);
-		mapper.writeValue(response.getOutputStream(), userModel);
+	public String save(@RequestBody UserModel userModel) {
+		return userService.save(userModel);
 	}
 	@PutMapping("/user")
 	public void update(HttpServletRequest request, HttpServletResponse response) throws IOException {

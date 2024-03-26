@@ -1,4 +1,4 @@
-package com.hcmutap.elearning.dao;
+package com.hcmutap.elearning.dao.impl;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
@@ -71,8 +71,7 @@ public class AbstractDAO <T>{
 		Firestore db = FirestoreClient.getFirestore();
 		ApiFuture<QuerySnapshot> querySnapshotApiFuture = db.collection(collection).get();
 		List<QueryDocumentSnapshot> list = querySnapshotApiFuture.get().getDocuments();
-		List<T> listT = list.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(tClass)).toList();
-		return listT;
+		return list.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(tClass)).toList();
 	}
 	/**
 	 * Get model from database by key and value
@@ -98,7 +97,7 @@ public class AbstractDAO <T>{
 	 * @param value value to find
 	 * @return list of id document
 	 */
-	protected List<String> findDocument(String collection, String key, String value) throws ExecutionException, InterruptedException {
+	protected List<String> findDocumentId(String collection, String key, String value) throws ExecutionException, InterruptedException {
 		Firestore db = FirestoreClient.getFirestore();
 		ApiFuture<QuerySnapshot> querySnapshotApiFuture = db.collection(collection)
 				.whereGreaterThanOrEqualTo(key, value)

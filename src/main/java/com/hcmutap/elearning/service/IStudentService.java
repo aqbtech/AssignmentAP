@@ -9,4 +9,5 @@ public interface IStudentService {
 	void save(StudentModel studentModel);
 	void update(StudentModel studentModel);
 	void delete(String id);
+
 }
