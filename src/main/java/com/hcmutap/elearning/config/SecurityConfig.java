@@ -27,11 +27,11 @@ public class SecurityConfig {
 		httpSecurity
 				.httpBasic(Customizer.withDefaults())
 				.csrf((csrf) -> csrf
-						.ignoringRequestMatchers("/api/*")) // TODO: ignore CSRF for API
+						.ignoringRequestMatchers("/api/**")) // TODO: ignore CSRF for API
 				.authorizeHttpRequests(
 						authorizeRequests
 								-> authorizeRequests
-								.requestMatchers("/", "/trang-chu/**", "/api/**", "/login/**", "static/**", "templates/**","/web/**","/admin/**")
+								.requestMatchers("/", "/trang-chu/**", "/api/**", "/login/**", "static/**", "templates/**","template/**")
 								.permitAll()
 								.requestMatchers("/admin-home")
 								.hasAuthority("ADMIN")
