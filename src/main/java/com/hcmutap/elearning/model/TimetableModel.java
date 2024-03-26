@@ -7,9 +7,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class CourseModel {
-	// information of course
+@AllArgsConstructor
+public class TimetableModel {
+	// foreign key of abstract model
 	private String id;
+	// some fields of timetable
 }

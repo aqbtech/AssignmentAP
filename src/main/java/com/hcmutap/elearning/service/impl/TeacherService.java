@@ -1,26 +1,31 @@
 package com.hcmutap.elearning.service.impl;
 
-import com.hcmutap.elearning.dao.TeacherDAO;
+import com.hcmutap.elearning.dao.AdminDAO;
+import com.hcmutap.elearning.dao.impl.TeacherDAO;
 import com.hcmutap.elearning.model.TeacherModel;
-import com.hcmutap.elearning.repository.TeacherRepository;
 import com.hcmutap.elearning.service.ITeacherService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@Service("teacherService")
 public class TeacherService implements ITeacherService {
-	@Autowired
-	private TeacherRepository teacherRepository;
 	@Resource
 	private TeacherDAO teacherDAO;
-
+	@Resource
+	private AdminDAO<TeacherModel> basicDAO;
 	@Override
 	public List<TeacherModel> findAll() {
+//		basicDAO.findAll();
 		return teacherDAO.findAll();
 	}
+
+	@Override
+	public List<TeacherModel> findBy(String key, String value) {
+		return null;
+	}
+
 	@Override
 	public TeacherModel findById(String id) {
 		return teacherDAO.findById(id);
@@ -37,8 +42,10 @@ public class TeacherService implements ITeacherService {
 	}
 
 	@Override
-	public void delete(String id) {
-		teacherDAO.delete(id);
+	public void delete(List<String> ids) {
+		for (String id : ids) {
+			teacherDAO.delete(id);
+		}
 	}
 }
 
