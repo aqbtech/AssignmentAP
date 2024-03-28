@@ -17,8 +17,9 @@ public class StudentModel {
 	private int citizen_identityID;
 	private String gender;
 	private String major;
-	private ScheduleModel schedule;
-
+	private List<ClassModel> classes;
+	private List<CourseModel> courses;
+	private List<CourseModel> finished_courses;
 	public StudentModel(String id, String studentId, String name, int citizen_identityID, String gender, String major){
 		this.id = id;
 		this.studentId = studentId;
@@ -26,6 +27,9 @@ public class StudentModel {
 		this.citizen_identityID = citizen_identityID;
 		this.gender = gender;
 		this.major = major;
+		this.classes = null;
+		this.courses = null;
+		this.finished_courses = null;
 	}
 
 }

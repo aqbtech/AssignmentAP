@@ -1,35 +1,35 @@
 package com.hcmutap.elearning.dao;
 
-import com.hcmutap.elearning.model.StudentModel;
+import com.hcmutap.elearning.model.CourseModel;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 @Repository
-public class StudentDAO extends AbstractDAO<StudentModel>{
-    public List<StudentModel> findAll(){
-        List<StudentModel> studentModelList = null;
+public class CourseDAO extends AbstractDAO<CourseModel>{
+    public List<CourseModel> findAll(){
+        List<CourseModel> courseModelList = null;
         try{
-            studentModelList = query("students", StudentModel.class);
+            courseModelList = query("students", CourseModel.class);
         }
         catch (ExecutionException | InterruptedException e){
             e.printStackTrace();
         }
-        return studentModelList;
+        return courseModelList;
     }
-    public String save(StudentModel studentModel){
-        return create("students", studentModel);
+    public String save(CourseModel CourseModel){
+        return create("students", CourseModel);
     }
-    public StudentModel update(StudentModel studentModel){
+    public CourseModel update(CourseModel CourseModel){
         List<String> ids = null;
         try{
-            ids = findDocument("students","id", studentModel.getStudentId());
+            ids = findDocument("students","id", CourseModel.getCourseID());
         }
         catch (ExecutionException | InterruptedException e){
             e.printStackTrace();
         }
         assert ids != null;
-        return update("students", ids.getFirst(), studentModel);
+        return update("students", ids.getFirst(), CourseModel);
     }
     public void delete(String id){
         List<String> ids = null;
@@ -42,14 +42,14 @@ public class StudentDAO extends AbstractDAO<StudentModel>{
         assert ids != null;
         delete("students", ids.getFirst());
     }
-    public StudentModel findById(String id){
-        StudentModel studentModel = null;
+    public CourseModel findById(String id){
+        CourseModel courseModel = null;
         try{
-            studentModel = queryBy("students", "id", id, StudentModel.class).getFirst();
+            courseModel = queryBy("students", "id", id, CourseModel.class).getFirst();
         }
         catch (ExecutionException | InterruptedException e){
             e.printStackTrace();
         }
-        return studentModel;
+        return courseModel;
     }
 }

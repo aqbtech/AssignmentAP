@@ -23,7 +23,7 @@ public class HomeController {
 		List<StudentModel> studentModelList = studentService.findAll();
 //		model.addAttribute("students",studentModelList.get(0));
 		StudentModel studentModel
-				= new StudentModel("1", "2210000", "Nguyen Van web");
+				= new StudentModel("1", "2210000", "Nguyen Van A", 1, " ", " ");
 		model.addAttribute("students", studentModel);
 		return "web/views/home";
 	}

@@ -35,8 +35,8 @@ public class SecurityConfig {
 								.permitAll()
 								.requestMatchers("/admin-home")
 								.hasAuthority("ADMIN")
-//								.requestMatchers("/edit")
-//								.hasAnyRole("ADMIN", "TEACHER")
+								.requestMatchers("/edit")
+								.hasAnyRole("ADMIN", "TEACHER")
 								.anyRequest()
 								.authenticated()
 //								.permitAll() // TODO: authenticate but allow static resources to use thymeleaf
