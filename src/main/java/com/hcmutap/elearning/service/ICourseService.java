@@ -6,6 +6,7 @@ import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 
 import java.util.List;
+
 public interface ICourseService extends IGenericAdminService<CourseModel> {
     List<CourseModel> findAll();
 
@@ -20,6 +21,7 @@ public interface ICourseService extends IGenericAdminService<CourseModel> {
     CourseModel getCourseInfo(String courseId);
 
     List<ClassModel> getLichTrinh(String courseId);
-
+    CourseModel getCourseInfo(String courseId);
+    List<ClassModel> getLichTrinh(String courseId);
     List<PointModel> getListPointOfStudent(String courseId);
 }
