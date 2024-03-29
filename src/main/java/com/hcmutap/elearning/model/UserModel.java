@@ -18,6 +18,6 @@ public class UserModel {
 	private String username;
 	private String password;
 	private String role;
-	private Long Status;
+	private String Status;
 	private String usrId; // to store id of teacher or student
 }

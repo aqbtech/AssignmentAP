@@ -1,6 +1,5 @@
-package com.hcmutap.elearning.model;
+package com.hcmutap.elearning.dto;
 
-import com.hcmutap.elearning.dao.firebase.DocumentId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,12 +9,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AbstractModel {
-	// information of user
-	@DocumentId
+public class InfoDTO {
 	private String id;
 	private String fullName;
+	private String role;
 	private Long age;
 	private String email;
-	private String username;
+	private String degree;
 }

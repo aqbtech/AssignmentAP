@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+    <head>
+        <title>Trang quản trị</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <!-- Page Content -->
+            <div class="container">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-table"></i>
+                        <span th:switch="${type}">
+                            <span th:case="'teacher'">Bảng giáo viên</span>
+                            <span th:case="'student'">Bảng sinh viên</span>
+                            <span th:case="'course'">Bảng khóa học</span>
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                </tr>
+                                </thead>
+<!--                                <tfoot>-->
+<!--                                <tr>-->
+<!--                                    <th>ID</th>-->
+<!--                                    <th>Name</th>-->
+<!--                                </tr>-->
+<!--                                </tfoot>-->
+                                <tbody>
+                                    <tr th:each="model : ${models}">
+                                        <td th:text="${model.id}"></td>
+                                        <td th:text="${model.fullName}"></td>
+                                        <!--check type of models and present model attribute-->
+
+                                        <!-- Add more data cells as needed -->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+                </div>
+            </div>
+            <!-- /.container -->
+        </div>
+    </body>
+    <!-- Demo scripts for this page-->
+    <script th:src="@{/template/admin/js/demo/datatables-demo.js}"></script>
+</html>
