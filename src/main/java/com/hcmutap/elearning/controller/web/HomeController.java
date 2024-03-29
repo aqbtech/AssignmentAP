@@ -25,11 +25,6 @@ public class HomeController {
 	}
 	@RequestMapping(value = "/trang-chu")
 	public String home(ModelMap model){
-		List<StudentModel> studentModelList = studentService.findAll();
-//		model.addAttribute("students",studentModelList.get(0));
-		StudentModel studentModel
-				= new StudentModel("1", "Nguyen Van B", 20L, "nva@hcmut.edu.vn", "nva", "2210000", "B");
-		model.addAttribute("students", studentModel);
 		return "web/views/home";
 	}
 	@RequestMapping(value = "/about")
