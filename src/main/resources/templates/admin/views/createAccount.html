@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+    <head>
+        <title>Tạo tài khoản</title>
+    </head>
+    <body>
+    <div layout:fragment="content">
+        <!-- Page Content -->
+        <div class="container">
+            <h1></h1>
+            <hr>
+            <form name="data-form" th:action="@{/admin-management/add}" method="post" id="myForm" class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" class="form-control"><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="form-control"><br>
+                <label for="role">Role:</label>
+                <select id="role" name="role" class="form-control">
+                    <option value="TEACHER">Teacher</option>
+                    <option value="STUDENT">Student</option>
+                    <!-- Add more options as needed -->
+                </select><br>
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" class="form-control"><br>
+                <label for="id">ID:</label>
+                <input type="text" id="id" name="id" class="form-control"><br>
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" class="form-control"><br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control"><br>
+                <label for="degree">Degree:</label>
+                <input type="text" id="degree" name="degree" class="form-control"><br>
+                <input type="submit" value="Submit" class="btn btn-primary">
+            </form>
+        </div>
+        <!-- /.container -->
+    </div>
+    </body>
+</html>

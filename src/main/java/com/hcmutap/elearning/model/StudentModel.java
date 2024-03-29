@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @FirebaseCollection("students")
-public class StudentModel extends AbstractModel {
+public class StudentModel {
 	@DocumentId
 	private String id;
 	private String fullName;
