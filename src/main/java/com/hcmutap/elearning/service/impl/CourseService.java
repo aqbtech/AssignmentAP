@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.service.impl;
 
-import com.hcmutap.elearning.dao.CourseDAO;
+
+import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.PointModel;
@@ -27,6 +28,11 @@ public class CourseService implements ICourseService {
     }
 
     @Override
+    public List<CourseModel> findBy(String key, String value) {
+        return null;
+    }
+
+    @Override
     public CourseModel findById(String courseId) {
         return courseDAO.findById(courseId);
     }
@@ -39,6 +45,16 @@ public class CourseService implements ICourseService {
     @Override
     public void update(CourseModel courseModel) {
         courseDAO.update(courseModel);
+    }
+
+    @Override
+    public void delete(List<String> ids) {
+
+    }
+
+    @Override
+    public Object findByUsername(String username) {
+        return null;
     }
 
     @Override

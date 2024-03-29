@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.AdminDAO;
+import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.TeacherDAO;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
@@ -46,6 +47,17 @@ public class TeacherService implements ITeacherService {
 		for (String id : ids) {
 			teacherDAO.delete(id);
 		}
+	}
+
+	@Override
+	public TeacherModel findByUsername(String username) {
+		return teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
+	}
+
+	@Override
+	public boolean isExist(String id) {
+		TeacherModel teacherModel =  teacherDAO.findById(id);
+		return teacherModel != null;
 	}
 }
 

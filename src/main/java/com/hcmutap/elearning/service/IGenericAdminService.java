@@ -39,4 +39,6 @@ public interface IGenericAdminService<T> {
 	 * @param ids list of id need to delete
 	 */
 	void delete(List<String> ids);
+
+	Object findByUsername(String username);
 }
