@@ -1,6 +1,6 @@
 package com.hcmutap.elearning.service.impl;
 
-import com.hcmutap.elearning.dao.ClassDAO;
+import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.IClassService;

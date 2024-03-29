@@ -1,6 +1,6 @@
 package com.hcmutap.elearning.controller.api;
 
-import com.hcmutap.elearning.dao.PointDAO;
+import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.model.PointModel;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
