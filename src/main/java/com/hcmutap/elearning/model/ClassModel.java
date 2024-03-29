@@ -1,17 +1,22 @@
 package com.hcmutap.elearning.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.hcmutap.elearning.dao.firebase.DocumentId;
+import com.hcmutap.elearning.dao.firebase.FirebaseCollection;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@FirebaseCollection("classes")
 public class ClassModel {
+    @DocumentId
+    private String id;
     private String classId;
-    private String name;
+    private String className;
     private String courseId;
     private String teacherId;
     private String teacherName;

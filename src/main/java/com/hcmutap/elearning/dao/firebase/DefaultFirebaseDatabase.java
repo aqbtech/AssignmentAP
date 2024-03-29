@@ -3,6 +3,7 @@ package com.hcmutap.elearning.dao.firebase;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
+import com.hcmutap.elearning.constant.SystemConstant;
 import com.hcmutap.elearning.utils.MapperUtil;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
@@ -12,6 +13,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 @SuppressWarnings("unchecked")
@@ -95,4 +97,21 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		}
 		return null;
 	}
+
+	@Override
+	public List<T> findBy(String key, String value, Options options) {
+		try {
+			CollectionReference db = FirestoreClient.getFirestore().collection(collectionPath);
+			ApiFuture<QuerySnapshot> querySnapshotApiFuture;
+			if (Objects.equals(options.getComparison(), SystemConstant.EQUAL)) {
+				querySnapshotApiFuture = db.whereEqualTo(key, value).get();
+				List<QueryDocumentSnapshot> list = querySnapshotApiFuture.get().getDocuments();
+				return list.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(documentClass)).toList();
+			} else return findBy(key, value);
+		} catch (ExecutionException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 }

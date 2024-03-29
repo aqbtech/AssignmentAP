@@ -36,5 +36,5 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 * @return List of model
 	 */
 	List<T> findBy(String key, String value); // need Filter class for more complex query
-
+	List<T> findBy(String key, String value, Options options);
 }
