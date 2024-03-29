@@ -90,4 +90,7 @@ public class StudentService implements IStudentService {
 		point = pointDAO.findPoint(studentId);
 		return point;
 	}
+	public boolean isExist(String id) {
+		return studentDAO.findById(id) != null;
+	}
 }

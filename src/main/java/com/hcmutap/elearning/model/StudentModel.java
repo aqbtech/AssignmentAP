@@ -1,5 +1,7 @@
 package com.hcmutap.elearning.model;
 
+import com.hcmutap.elearning.dao.firebase.DocumentId;
+import com.hcmutap.elearning.dao.firebase.FirebaseCollection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +12,9 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@FirebaseCollection("students")
 public class StudentModel {
+	@DocumentId
 	private String id;
 	private String studentId;
 	private String name;
