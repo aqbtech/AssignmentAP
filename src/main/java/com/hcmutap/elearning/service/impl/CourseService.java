@@ -1,63 +1,65 @@
 package com.hcmutap.elearning.service.impl;
 
+
+import com.hcmutap.elearning.dao.CourseDAO;
 import com.hcmutap.elearning.model.CourseModel;
-import com.hcmutap.elearning.repository.CourseRepository;
-import com.hcmutap.elearning.repository.document.CourseDocument;
+import com.hcmutap.elearning.model.ClassModel;
+import com.hcmutap.elearning.model.PointModel;
+import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hcmutap.elearning.service.IPointService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CourseService implements ICourseService {
-    @Autowired
-    private CourseRepository courseRepository;
-    private CourseModel getCourseModel(CourseDocument courseDocument) {
-        CourseModel courseModel = new CourseModel();
-        courseModel.setId(courseDocument.getId());
-        courseModel.setCourseId(courseDocument.getCourseId());
-        courseModel.setCourseName(courseDocument.getCourseName());
-        courseModel.setCredit(courseDocument.getCredit());
-        courseModel.setDescription(courseDocument.getDescription());
-        return courseModel;
-    }
-    private CourseDocument getCourseDocument(CourseModel courseModel) {
-        CourseDocument courseDocument = new CourseDocument();
-        courseDocument.setId(courseModel.getId());
-        courseDocument.setCourseId(courseModel.getCourseId());
-        courseDocument.setCourseName(courseModel.getCourseName());
-        courseDocument.setCredit(courseModel.getCredit());
-        courseDocument.setDescription(courseModel.getDescription());
-        return courseDocument;
-    }
+    @Resource
+    private CourseDAO courseDAO;
+    @Resource
+    private IClassService classService;
+    @Resource
+    private IPointService pointService;
 
     @Override
     public List<CourseModel> findAll() {
-        List<CourseModel> courseModelList = new ArrayList<>();
-        List<CourseDocument> courseDocumentList = courseRepository.findAll();
-        for (CourseDocument courseDocument : courseDocumentList) {
-            CourseModel courseModel = getCourseModel(courseDocument);
-            courseModelList.add(courseModel);
-        }
-        return courseModelList;
+        return courseDAO.findAll();
     }
+
     @Override
-    public void save(CourseModel courseModel) {
-        CourseDocument courseDocument = getCourseDocument(courseModel);
-        courseRepository.push(courseDocument);
+    public CourseModel findById(String courseId) {
+        return courseDAO.findById(courseId);
+    }
+
+    @Override
+    public String save(CourseModel courseModel) {
+        return courseDAO.save(courseModel);
     }
 
     @Override
     public void update(CourseModel courseModel) {
-        CourseDocument courseDocument = getCourseDocument(courseModel);
-        courseRepository.update(courseDocument);
+        courseDAO.update(courseModel);
     }
 
     @Override
-    public void delete(String id) {
-        courseRepository.remove(id);
+    public void delete(String courseId) {
+        courseDAO.delete(courseId);
+    }
+
+    @Override
+    public CourseModel getCourseInfo(String courseId) {
+        return this.findById(courseId);
+    }
+
+    @Override
+    public List<ClassModel> getLichTrinh(String courseId) {
+        return classService.getClassOfCourse(courseId);
+    }
+
+    @Override
+    public List<PointModel> getListPointOfStudent(String courseId) {
+        return pointService.getListStudentOfCourse(courseId);
     }
 
 }

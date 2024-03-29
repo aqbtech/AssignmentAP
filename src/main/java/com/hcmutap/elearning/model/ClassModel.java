@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,10 +14,10 @@ public class ClassModel {
     private String classId;
     private String className;
     private String courseId;
-    private String courseName;
     private String teacherId;
     private String teacherName;
+    private String dayOfWeek;
+    private String timeStart;
+    private String timeEnd;
     private String room;
-    private String time;
-    private List<ClassStudentListModel> classStudentList;
 }

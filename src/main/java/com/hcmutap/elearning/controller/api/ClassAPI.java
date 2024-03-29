@@ -1,46 +1,34 @@
 package com.hcmutap.elearning.controller.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IClassService;
-import com.hcmutap.elearning.utils.HttpUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class ClassAPI {
-    @Autowired
+    @Resource
     private IClassService classService;
-    @PostMapping("/class")
-    public void save(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        request.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-        ClassModel classModel = HttpUtil.of(request.getReader()).toModel(ClassModel.class);
-        classService.save(classModel);
-        mapper.writeValue(response.getOutputStream(), classModel);
+    @GetMapping("/class/findAll")
+    public List<ClassModel> findAll() {
+        return classService.findAll();
     }
+    @GetMapping("/class/findById")
+    public ClassModel findById(@RequestParam String id) {
+        return classService.findById(id);
+    }
+    @PostMapping("/class")
+    public String save(@RequestBody ClassModel classModel) { return classService.save(classModel);}
     @PutMapping("/class")
-    public void update(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        request.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-        ClassModel classModel = HttpUtil.of(request.getReader()).toModel(ClassModel.class);
+    public void update(@RequestBody ClassModel classModel) {
+        // need to handler not found exception in dao -> service -> controller
         classService.update(classModel);
-        mapper.writeValue(response.getOutputStream(), classModel);
     }
     @DeleteMapping("/class")
-    public void delete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        request.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-        ClassModel classModel = HttpUtil.of(request.getReader()).toModel(ClassModel.class);
-        classService.delete(classModel.getId());
-        mapper.writeValue(response.getOutputStream(), "{}");
+    public void delete(@RequestBody List<String> ids) {
+        ids.forEach(id -> classService.delete(id));
     }
 }
