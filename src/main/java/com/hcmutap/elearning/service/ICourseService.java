@@ -19,9 +19,6 @@ public interface ICourseService extends IGenericAdminService<CourseModel> {
     void delete(String id);
 
     CourseModel getCourseInfo(String courseId);
-
-    List<ClassModel> getLichTrinh(String courseId);
-    CourseModel getCourseInfo(String courseId);
     List<ClassModel> getLichTrinh(String courseId);
     List<PointModel> getListPointOfStudent(String courseId);
 }
