@@ -24,5 +24,4 @@ public class PointModel {
    private double pointBTL;
    private double pointGK;
    private double pointCK;
-
 }

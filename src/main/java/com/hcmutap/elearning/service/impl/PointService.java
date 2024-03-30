@@ -23,12 +23,18 @@ public class PointService implements IPointService {
     public List<PointModel> findAll() {
         return pointDAO.findAll();
     }
+
+    @Override
+    public List<PointModel> findBy(String key, String value) {
+        return null;
+    }
+
     @Override
     public PointModel findById(String id) { return pointDAO.findById(id); }
 
     @Override
-    public void save(PointModel pointModel) {
-        pointDAO.save(pointModel);
+    public String save(PointModel pointModel) {
+        return pointDAO.save(pointModel);
     }
 
     @Override
@@ -37,10 +43,14 @@ public class PointService implements IPointService {
     }
 
     @Override
-    public void delete(String id) {
-        pointDAO.delete(id);
+    public void delete(List<String> ids) {
+
     }
 
+    @Override
+    public Object findByUsername(String username) {
+        return null;
+    }
     @Override
     public  PointModel getPoint(String studentId, String courseId){
         List<PointModel> pointModelList = pointDAO.findAll();

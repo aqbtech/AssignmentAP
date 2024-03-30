@@ -29,6 +29,6 @@ public class ClassAPI {
     }
     @DeleteMapping("/class")
     public void delete(@RequestBody List<String> ids) {
-        ids.forEach(id -> classService.delete(id));
+        classService.delete(ids);
     }
 }
