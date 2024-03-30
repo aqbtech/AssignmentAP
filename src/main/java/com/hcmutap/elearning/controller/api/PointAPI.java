@@ -1,7 +1,7 @@
 package com.hcmutap.elearning.controller.api;
 
-import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.model.PointModel;
+import com.hcmutap.elearning.service.IPointService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,22 +11,25 @@ import java.util.List;
 @RequestMapping("/api")
 public class PointAPI {
     @Resource
-//    private IPointService pointService;
-    PointDAO pointDAO;
+    private IPointService pointService;
     @GetMapping("/points/findAll")
-    public List<PointModel> findAll() { return pointDAO.findAll(); }
+    public List<PointModel> findAll() {
+        return pointService.findAll();
+    }
     @GetMapping("/points/findById")
     public PointModel findById(@RequestParam String id) {
-        return pointDAO.findById(id);
+        return pointService.findById(id);
     }
     @PostMapping("/points")
     public void save(@RequestBody PointModel pointModel) {
-        pointDAO.save(pointModel);
+        pointService.save(pointModel);
     }
     @PutMapping("/points")
-    public void update(@RequestBody PointModel pointModel) { pointDAO.update(pointModel); }
+    public void update(@RequestBody PointModel pointModel) {
+        pointService.update(pointModel);
+    }
     @DeleteMapping("/points")
     public void delete(@RequestBody List<String> ids) {
-        ids.forEach(id -> pointDAO.delete(id));
+        pointService.delete(ids);
     }
 }
