@@ -10,6 +10,7 @@ import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.service.IClassService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class StudentService implements IStudentService {
 	private  PointDAO pointDAO;
 //	@Resource
 //	private IClassService classService;
+
 	@Override
 	public List<StudentModel> findAll() {
 		return studentDAO.findAll();
@@ -101,6 +103,7 @@ public class StudentService implements IStudentService {
 				return false;
 			}
 		}
+
 
 		if(!CourseFacade.getINSTANCE()
 				.addStudentToClass(studentModel.getStudentId(), classModel.getClassId())){
