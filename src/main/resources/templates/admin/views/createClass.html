@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <title>Tạo lớp học</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Content -->
+    <div class="container">
+        <h1>Tạo lớp học</h1>
+        <hr>
+        <form name="data-form" th:action="@{/admin-management/add-class}" method="post" id="myForm" class="form-group">
+            <label for="className">Class Name:</label>
+            <input type="text" id="className" name="className" class="form-control"><br>
+            <label for="courseId">Course Name:</label>
+            <select id="courseId" name="courseId" class="form-control">
+                <option th:each="course : ${courses}" th:value="${course.courseId}" th:text="${course.courseName}"></option>
+            </select>
+            <label for="dayOfWeek">Day:</label>
+            <input type="text" id="dayOfWeek" name="dayOfWeek" class="form-control"><br>
+            <label for="timeStart">Time Start:</label>
+            <input type="time" id="timeStart" name="timeStart" class="form-control"><br>
+            <label for="timeEnd">Time End:</label>
+            <input type="time" id="timeEnd" name="timeEnd" class="form-control"><br>
+            <label for="room">Room:</label>
+            <input type="text" id="room" name="room" class="form-control"><br>
+            <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
+    </div>
+</div>
+</body>
+</html>
