@@ -14,9 +14,8 @@ public class CourseDTO {
 	private String courseId;
 	private String courseName;
 	private int credit;
-	private int percentBT;
-	private int percentBTL;
-	private int percentGK;
-	private int percentCK;
-	private String role;
+	private double percentBT;
+	private double percentBTL;
+	private double percentGK;
+	private double percentCK;
 }

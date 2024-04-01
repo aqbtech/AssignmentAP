@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.impl.ClassDAO;
+import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.PointModel;
@@ -20,7 +21,7 @@ public class ClassService implements IClassService {
     @Resource
     private IPointService pointService;
     @Resource
-    private IStudentService studentService;
+    private StudentDAO studentDAO;
 
     @Override
     public List<ClassModel> findAll() {
@@ -83,7 +84,7 @@ public class ClassService implements IClassService {
                 return false;
             }
         }
-        StudentModel studentModel = studentService.findBy("studentId", studentId).getFirst();
+        StudentModel studentModel = studentDAO.findById(studentId);
         ClassModel classModel = classDAO.getClassInfo(classId);
         // state = true is learned
         PointModel tmp = new PointModel(null, studentId, studentModel.getName(), classModel.getCourseId(), classId, false, 0, 0, 0, 0);
