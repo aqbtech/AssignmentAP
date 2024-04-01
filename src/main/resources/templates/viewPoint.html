@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>ĐIỂM CỦA BẠN</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div class="card mb-3">
+            <div class="card-header">
+                <p style="text-align: center; color: maroon; "><b>BẢNG ĐIỂM SINH VIÊN</b></p>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Mã MH</th>
+                            <th>TÊN MÔN HỌC</th>
+                            <th>SỐ TC</th>
+                            <th>ĐIỂM THÀNH PHẦN</th>
+                            <th>ĐIỂM THI</th>
+                            <th>ĐIỂM TỔNG KẾT</th>
+                        </tr>
+                        </thead>
+
+                        <tbody th:each="course, iterc : ${courses}">
+                            <td th:text="${course.courseName}" ></td>
+                            <td th:text="${course.credit}" ></td>
+                            <div th:each="point,iterp : ${points}"
+                                th:if="${iterp.index} == ${iterc.index}">
+                                <td th:text="${point.courseId}" ></td>
+                                <td th:text="'BT: '+${point.pointBT} +' BTL: '+${point.pointBTL}+' KT: '+${point.pointGK}" ></td>
+                                <td th:text="${point.pointCK}" ></td>
+                                <div th:each="result,iterr : ${results}"
+                                     th:if="${iterr.index} == ${iterc.index}">
+                                    <td th:text="${result}"></td>
+                                </div>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
