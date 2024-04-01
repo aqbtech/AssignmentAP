@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.impl.ClassDAO;
+import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.model.ClassModel;
@@ -22,6 +23,8 @@ public class ClassService implements IClassService {
     private IPointService pointService;
     @Resource
     private StudentDAO studentDAO;
+    @Resource
+    private PointDAO pointDAO;
 
     @Override
     public List<ClassModel> findAll() {
@@ -78,7 +81,7 @@ public class ClassService implements IClassService {
 
     @Override
     public boolean addStudentToClass(String studentId, String classId) {
-        List<PointModel> checks = pointService.findBy("studentId", studentId);
+        List<PointModel> checks = pointDAO.findBy("studentId", studentId);
         for (PointModel point : checks) {
             if (point.getClassId().equals(classId)) {
                 return false;
@@ -97,11 +100,27 @@ public class ClassService implements IClassService {
     public void NhapDiem(String studentId, String classId, PointDTO point) {
         // TODO: update diem cua 1 sinh vien
         // điểm phải được update trong bảng điểm của lớp -> gọi class service
-
+        List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
+        for (PointModel item : listPoint) {
+            if (item.getClassId().equals(classId)) {
+                PointModel pointUpdate = new PointModel(item.getId(), item.getStudentId(), item.getStudentName(), item.getCourseId(), item.getClassId(), item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
+                pointService.update(pointUpdate);
+                break;
+            }
+        }
     }
 
     @Override
     public void NhapDiemCaLop(String classId, List<PointDTO> listPoint) {
         // TODO: update diem cua 1 lop
+        List<PointModel> listPointClass = pointDAO.findBy("classId", classId);
+        for(PointModel item: listPointClass){
+            for(PointDTO point: listPoint){
+                if(item.getStudentId().equals(point.getStudentId())){
+                    NhapDiem(item.getStudentId(), classId, point);
+                    break;
+                }
+            }
+        }
     }
 }
