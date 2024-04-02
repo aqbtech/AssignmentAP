@@ -17,17 +17,19 @@ public class StudentModel {
 	@DocumentId
 	private String id;
 	private String studentId;
-	private String name;
+	private String fullName;
+	private String email;
+	private Long age;
 	private int citizen_identityID;
 	private String gender;
 	private String major;
 	private List<ClassModel> classes;
 	private List<CourseModel> courses;
 	private List<CourseModel> finished_courses;
-	public StudentModel(String id, String studentId, String name, int citizen_identityID, String gender, String major){
+	public StudentModel(String id, String studentId, String fullName, int citizen_identityID, String gender, String major){
 		this.id = id;
 		this.studentId = studentId;
-		this.name = name;
+		this.fullName = fullName;
 		this.citizen_identityID = citizen_identityID;
 		this.gender = gender;
 		this.major = major;

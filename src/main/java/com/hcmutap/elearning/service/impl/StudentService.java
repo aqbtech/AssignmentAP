@@ -148,6 +148,12 @@ public class StudentService implements IStudentService {
 		return false;
 	}
 
+	@Override
+	public List<ClassModel> getAllClass(String username) {
+		List<ClassModel> classes = findByUsername(username).getClasses();
+		return classes == null ? List.of() : classes;
+	}
+
 	public boolean isExist(String id) {
 		return studentDAO.findById(id) != null;
 	}

@@ -19,5 +19,5 @@ public interface IStudentService extends IGenericAdminService<StudentModel>{
 	List<PointModel> get_point(String studentId);
 	List<ClassModel> get_list_class_of_this_course(String courseId);
 	boolean add_class_to_student();
-
+	List<ClassModel> getAllClass(String username);
 }

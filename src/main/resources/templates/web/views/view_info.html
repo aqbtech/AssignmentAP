@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{web/layout/web-layout.html}">
 <head>
     <title>Thông tin</title>
@@ -63,7 +64,7 @@
                                             </p>
                                         </div>
                                     </div>
-                                    <div th:if="${user.role== 'teacher'}">
+                                    <div th:if="${user.role == 'teacher'}">
                                         <hr>
                                         <div class="row">
                                             <div class="col-sm-3">

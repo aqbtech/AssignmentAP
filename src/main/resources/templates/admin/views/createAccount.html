@@ -30,10 +30,29 @@
                 <input type="number" id="age" name="age" class="form-control"><br>
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" class="form-control"><br>
-                <label for="degree">Degree:</label>
-                <input type="text" id="degree" name="degree" class="form-control"><br>
+                <div id="degreeDiv" style="display: none;">
+                    <label for="degree" id="degreeLabel">Degree:</label>
+                    <input type="text" id="degree" name="degree" class="form-control"><br>
+                </div>
+
+                <div id="studentIdDiv" style="display: none;">
+                    <label for="studentId" id="studentIdLabel">Student ID:</label>
+                    <input type="text" id="studentId" name="studentId" class="form-control"><br>
+                </div>
                 <input type="submit" value="Submit" class="btn btn-primary">
             </form>
+            <script>
+                document.getElementById('role').addEventListener('change', function() {
+                    var role = this.value;
+                    if (role === 'TEACHER') {
+                        document.getElementById('degreeDiv').style.display = 'block';
+                        document.getElementById('studentIdDiv').style.display = 'none';
+                    } else if (role === 'STUDENT') {
+                        document.getElementById('degreeDiv').style.display = 'none';
+                        document.getElementById('studentIdDiv').style.display = 'block';
+                    }
+                });
+            </script>
         </div>
         <!-- /.container -->
     </div>

@@ -3,11 +3,13 @@ package com.hcmutap.elearning.service.impl;
 import com.hcmutap.elearning.dao.AdminDAO;
 import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.TeacherDAO;
+import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service("teacherService")
@@ -58,6 +60,21 @@ public class TeacherService implements ITeacherService {
 	public boolean isExist(String id) {
 		TeacherModel teacherModel =  teacherDAO.findById(id);
 		return teacherModel != null;
+	}
+
+	@Override
+	public List<ClassModel> getAllClass(String username) {
+		List<ClassModel> classModels = new ArrayList<>();
+		TeacherModel teacherModel = teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
+		if (teacherModel.getClasses() == null || teacherModel.getClasses().isEmpty()){
+			return null;
+		} else {
+			for(String classId : teacherModel.getClasses()){
+				ClassModel classModel = CourseFacade.getINSTANCE().findClassById(classId);
+				classModels.add(classModel);
+			}
+		}
+		return classModels;
 	}
 }
 

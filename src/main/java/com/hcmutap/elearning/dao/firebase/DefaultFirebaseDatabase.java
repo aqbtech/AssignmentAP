@@ -103,7 +103,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		try {
 			CollectionReference db = FirestoreClient.getFirestore().collection(collectionPath);
 			ApiFuture<QuerySnapshot> querySnapshotApiFuture;
-			if (Objects.equals(options.getComparison(), SystemConstant.EQUAL)) {
+			if (options.getComparison().equalsIgnoreCase(SystemConstant.EQUAL)) {
 				querySnapshotApiFuture = db.whereEqualTo(key, value).get();
 				List<QueryDocumentSnapshot> list = querySnapshotApiFuture.get().getDocuments();
 				return list.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(documentClass)).toList();

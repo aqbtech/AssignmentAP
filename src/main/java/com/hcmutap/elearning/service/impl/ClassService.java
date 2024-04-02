@@ -90,7 +90,7 @@ public class ClassService implements IClassService {
         StudentModel studentModel = studentDAO.findById(studentId);
         ClassModel classModel = classDAO.getClassInfo(classId);
         // state = true is learned
-        PointModel tmp = new PointModel(null, studentId, studentModel.getName(), classModel.getCourseId(), classId, false, 0, 0, 0, 0);
+        PointModel tmp = new PointModel(null, studentId, studentModel.getFullName(), classModel.getCourseId(), classId, false, 0, 0, 0, 0);
         pointService.save(tmp);
         return true;
     }

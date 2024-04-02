@@ -1,5 +1,5 @@
 package com.hcmutap.elearning.constant;
 
 public class SystemConstant {
-	public static final String EQUAL = "==";
+	public static final String EQUAL = "EQUAL";
 }

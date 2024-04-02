@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/layout/admin-layout.html}">
+      layout:decorate="~{admin/layout/admin-layout.html}"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Trang quản trị</title>
 </head>
@@ -11,7 +12,7 @@
             <div class="container">
                 <h1>Trang chủ</h1>
                 <hr>
-                <p>Xin chào, [[${user.username}]]</p>
+                <p>Xin chào <span sec:authentication="principal.username"></span> </p>
             </div>
             <!-- /.container -->
         </div>

@@ -1,7 +1,9 @@
 package com.hcmutap.elearning.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ui.ModelMap;
 
@@ -17,10 +19,12 @@ public class MapperUtil {
 		return mapperUtil;
 	}
 	public <T> T toModelFromModelMap(ModelMap modelMap, Class<T> tClass) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			String jsonString = new ObjectMapper().writeValueAsString(modelMap);
-			return new ObjectMapper().readValue(jsonString, tClass);
-		} catch (Exception e) {
+			return mapper.readValue(jsonString, tClass);
+		} catch (JsonProcessingException e) {
 			System.out.print(e.getMessage());
 		}
 		return null;

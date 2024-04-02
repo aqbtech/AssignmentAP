@@ -8,19 +8,19 @@
             <!-- Navigation -->
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
                 <div class="container">
-                    <a class="navbar-brand" href="#">E-Learning</a>
+                    <a class="navbar-brand" th:href="@{/trang-chu}">E-Learning</a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarResponsive">
                         <ul class="navbar-nav ml-auto">
                             <li class="nav-item active">
-                                <a class="nav-link" href="#">Home
+                                <a class="nav-link" th:href="@{/trang-chu}">Home
                                     <span class="sr-only">(current)</span>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">About</a>
+                                <a class="nav-link" href="#">Khóa học</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">Services</a>
@@ -28,23 +28,29 @@
                             <li sec:authorize="${isAnonymous()}" class="nav-item">
                                 <a class="nav-link" th:href="@{/login}">Đăng nhập</a>
                             </li>
-                            <li sec:authorize="${isAuthenticated()}">
-                                <a class="nav-link" href="#">Xin chào, <span sec:authentication="principal.username"></span></a>
-                            </li>
-                            <li sec:authorize="${isAuthenticated()}">
-                                <form id="logout" th:action="@{/logout}" method="post">
-                                    <a class="nav-link" onclick="logout()">Đăng xuất</a>
-                                </form>
+                            <li class="nav-item dropdown no-arrow" sec:authorize="${isAuthenticated()}">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-user-circle fa-fw">Xin chao, <span sec:authentication="principal.username"></span></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" th:href="@{/info}">Thông tin</a>
+                                    <a class="dropdown-item" href="#">Quá trình học tập</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#" onclick="logout()" data-toggle="modal" data-target="#logoutModal">
+                                        Logout
+                                        <form id="logout" th:action="@{/logout}" method="post"></form>
+                                    </a>
+                                    <script>
+                                        function logout() {
+                                            document.getElementById('logout').submit();
+                                        }
+                                    </script>
+                                </div>
                             </li>
                         </ul>
                     </div>
                 </div>
             </nav>
         </div>
-        <script>
-            function logout() {
-                document.getElementById('logout').submit();
-            }
-        </script>
     </body>
 </html>

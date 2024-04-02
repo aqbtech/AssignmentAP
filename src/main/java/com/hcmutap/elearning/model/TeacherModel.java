@@ -25,4 +25,5 @@ public class TeacherModel {
 	private String degree;
 	private TimetableModel timetable;
 	private List<String> courses; // save id of courses
+	List<String> classes; // save id of classes
 }
