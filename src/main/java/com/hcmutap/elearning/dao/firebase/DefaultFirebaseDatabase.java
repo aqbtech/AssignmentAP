@@ -49,6 +49,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		assert id != null : String.format("DocumentId of %s must not be null", documentClass.getSimpleName());
 		DocumentReference docRef = db.collection(collectionPath).document(id.toString());
 		ApiFuture<WriteResult> apiFuture = docRef.update(Map.copyOf(MapperUtil.getInstance().toMap(t)));
+		// TODO: need to return response model
 		return t;
 	}
 	private List<String> findDocumentId(ID id) throws ExecutionException, InterruptedException {
@@ -80,7 +81,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		} catch (ExecutionException | InterruptedException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return List.of();
 	}
 	@Override
 	public List<T> findBy(String key, String value) {
@@ -95,7 +96,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		} catch (ExecutionException | InterruptedException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return List.of();
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		} catch (ExecutionException | InterruptedException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return List.of();
 	}
 
 }
