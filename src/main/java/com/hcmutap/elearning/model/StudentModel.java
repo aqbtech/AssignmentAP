@@ -23,10 +23,11 @@ public class StudentModel {
 	private int citizen_identityID;
 	private String gender;
 	private String major;
+	private String username;
 	private List<ClassModel> classes;
 	private List<CourseModel> courses;
 	private List<CourseModel> finished_courses;
-	public StudentModel(String id, String studentId, String fullName, int citizen_identityID, String gender, String major){
+	public StudentModel(String id, String studentId, String fullName, int citizen_identityID, String gender, String major, String username){
 		this.id = id;
 		this.studentId = studentId;
 		this.fullName = fullName;
@@ -36,6 +37,7 @@ public class StudentModel {
 		this.classes = null;
 		this.courses = null;
 		this.finished_courses = null;
+		this.username = username;
 	}
 
 }

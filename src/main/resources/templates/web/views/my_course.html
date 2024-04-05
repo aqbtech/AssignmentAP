@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+  <title>Các khoá học của tôi</title> <!-- kiểm tra và lấy thông tin của khóa học từ courseModel được gửi ra từ controller-->
+  <style>
+    .max-height-100 {
+      max-height: 100px;
+    }
+    .single-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .max-lines-2 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .card {
+      flex-basis: calc(33.3333% - 10px); /* Điều chỉnh flex-basis để tính toán khoảng cách */
+      margin: 10px 10px 5px 10px; /* Điều chỉnh margin */
+    }
+
+    /* Sử dụng media query để điều chỉnh số card trên mỗi hàng */
+    @media screen and (max-width: 992px) {
+      .card {
+        flex-basis: calc(50% - 10px); /* Điều chỉnh flex-basis */
+      }
+    }
+
+    @media screen and (max-width: 576px) {
+      .card {
+        flex-basis: calc(100% - 10px); /* Điều chỉnh flex-basis */
+      }
+    }
+
+    /* Chỉnh sửa phần tử h4 */
+    h4.text-center.mb-4 {
+      margin-top: 20px; /* Thêm khoảng cách giữa phần tử trên nó */
+      font-size: 24px; /* Chữ bự hơn */
+    }
+
+    /* Chỉnh sửa phần 2 của card (ID) */
+    .card-body h3 {
+      font-size: smaller; /* Chữ nhỏ hơn */
+      color: gray; /* Màu xám */
+      margin-bottom: 5px; /* Khoảng cách giữa phần 2 và phần 3 */
+    }
+
+    /* Chỉnh sửa phần 3 của card (Tên khoá học) */
+    .card-body p {
+      color: #007bff; /* Màu xanh dương */
+    }
+  </style>
+</head>
+<body>
+<div layout:fragment="content">
+  <!-- Page Content -->
+  <div class="container">
+    <h4 class="text-center mb-4">Các khoá học của tôi</h4>
+    <div id="accordion">
+      <div class="card">
+
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Học kỳ (Semester) 2/2023-2024
+            </button>
+          </h5>
+        </div>
+
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
+          <div class="row">
+            <div class="col-md-4 mb-4" th:each="course, status : ${courses}">
+              <div class="card">
+                <!-- Sử dụng biến status để truy cập chỉ số của vòng lặp -->
+                <img th:src="${listOfImageLinks[__${status.index % listOfImageLinks.size()}__]}" class="card-img-top max-height-100" alt="cover">
+                <div class="card-body">
+                  <h3 class="card-title single-line">CourseId: <span th:text="${course.courseId}"></span></h3>
+                  <a th:href="'#'"> <!-- Đường link '#' -->
+                    <p class="card-text max-lines-2" th:text="${course.courseName}"></p>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- /.container -->
+</div>
+</body>
+</html>

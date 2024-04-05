@@ -13,6 +13,7 @@ public interface IStudentService extends IGenericAdminService<StudentModel>{
 	void update(StudentModel studentModel);
 	void delete(List<String> ids);
 	StudentModel findById(String id); // Student information by studentID
+	StudentModel findByUsername(String username);
 	boolean DangkiMonhoc(StudentModel studentModel, String classID);
 	List<ClassModel> get_timetable(String studentId);
 	List<CourseModel> Tientrinhhoctap(String studentId);
