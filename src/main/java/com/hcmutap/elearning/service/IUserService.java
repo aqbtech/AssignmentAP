@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.service;
 
+import com.hcmutap.elearning.dto.InfoDTO;
 import com.hcmutap.elearning.model.UserModel;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,5 +12,5 @@ public interface IUserService {
 	void delete(String username);
 	boolean isExist(String username);
 	List<UserModel> findByUsername(String username);
-	Object getInfo(String username);
+	InfoDTO getInfo(String username);
 }
