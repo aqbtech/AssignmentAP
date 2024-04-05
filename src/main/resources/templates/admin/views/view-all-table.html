@@ -24,46 +24,23 @@
                                 <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th th:if="${type == 'teacher'}">Degree</th>
                                     <th>Name</th>
-                                    <th>Update</th>
-                                    <th>Delete</th>
                                 </tr>
                                 </thead>
+<!--                                <tfoot>-->
+<!--                                <tr>-->
+<!--                                    <th>ID</th>-->
+<!--                                    <th>Name</th>-->
+<!--                                </tr>-->
+<!--                                </tfoot>-->
                                 <tbody>
-                                <tr th:each="model : ${models}">
-                                    <td>
-                                        <span th:switch="${type}">
-                                            <span th:case="'teacher'" th:text="${model.id}"></span>
-                                            <span th:case="'student'" th:text="${model.studentId}"></span>
-                                        </span>
-                                    </td>
-                                    <td th:text="${model.fullName}"></td>
-                                    <td th:if="${type == 'teacher'}" th:text="${model.degree}"></td>
-                                    <!-- Update button -->
-                                    <td>
-                                        <a class="btn btn-link update-button" th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}">Update</a>
-                                    </td>
-                                    <!-- Delete button -->
-                                    <td>
-                                        <button class="btn btn-link delete-button" th:data-id="${model.id}" th:data-type="${type}">Delete</button>
-                                    </td>
-                                </tr>
+                                    <tr th:each="model : ${models}">
+                                        <td th:text="${model.id}"></td>
+                                        <td th:text="${model.fullName}"></td>
+                                        <!--check type of models and present model attribute-->
+                                        <!-- Add more data cells as needed -->
+                                    </tr>
                                 </tbody>
-                                <script>
-                                    document.querySelectorAll('.delete-button').forEach(function(button) {
-                                        button.addEventListener('click', function() {
-                                            var id = this.getAttribute('data-id');
-                                            var type = this.getAttribute('data-type');
-                                            deleteElement(id, type);
-                                        });
-                                    });
-                                    function deleteElement(id) {
-                                        // Send a request to the server to delete the element with the given id
-                                        // You'll need to replace this with the actual code to send the request
-                                        console.log('Delete button clicked for element with id:', id);
-                                    }
-                                </script>
                             </table>
                         </div>
                     </div>

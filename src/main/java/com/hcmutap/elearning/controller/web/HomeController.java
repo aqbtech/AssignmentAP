@@ -1,18 +1,24 @@
 package com.hcmutap.elearning.controller.web;
 
 import com.hcmutap.elearning.dto.InfoDTO;
+
 import com.hcmutap.elearning.model.*;
+import com.hcmutap.elearning.model.ClassModel;
+
+import com.hcmutap.elearning.model.FileInfo;
+import com.hcmutap.elearning.service.IFileService;
 import com.hcmutap.elearning.service.IStudentService;
 import com.hcmutap.elearning.service.ITeacherService;
-import com.hcmutap.elearning.service.impl.CourseFacade;
-import com.hcmutap.elearning.service.impl.UserService;
+import com.hcmutap.elearning.service.IUserService;
+
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -25,19 +31,23 @@ public class HomeController {
 	private IStudentService studentService;
 	@Resource
 	private ITeacherService teacherService;
+	@Resource
+	private IUserService userService;
+	private IFileService fileService;
+	@Autowired
+	public void setFileService(IFileService fileService) {
+		this.fileService = fileService;
+	}
 	@Autowired
 	public void setTeacherService(ITeacherService teacherService) {
 		this.teacherService = teacherService;
 	}
-
-	@Resource
-	private UserService userService;
 	@RequestMapping(value = "/")
 	public String index() {
 		return "redirect:trang-chu";
 	}
 	@RequestMapping(value = "/trang-chu")
-	public String home(ModelMap model){
+	public String home(){
 		return "web/views/home";
 	}
 	@RequestMapping(value = "/about")
@@ -65,7 +75,6 @@ public class HomeController {
 		model.addAttribute("classes", classes);
 		return "web/views/view_course";
 	}
-
 	@GetMapping(value="/my-course")
 	public String myCourse(Principal principal, ModelMap model){
 		InfoDTO infoDTO = userService.getInfo(principal.getName());
@@ -93,5 +102,25 @@ public class HomeController {
 		model.addAttribute("listOfImageLinks", listOfImageLinks);
 
 		return "web/views/my_course";
+  }
+	@PostMapping("/upload")
+	public String uploadFile(@RequestParam(value = "file") MultipartFile file, @RequestParam("folder") String folder) {
+		FileInfo fileInfo = new FileInfo(folder, file.getOriginalFilename());
+		fileService.uploadFile(file, fileInfo);
+		return "redirect:/trang-chu"; // redirect to course page
+	}
+	@GetMapping("/download/{folder}/{fileName}")
+	public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String folder, @PathVariable String fileName) {
+		FileInfo fileInfo = new FileInfo(folder, fileName);
+		return fileService.downloadFile(fileInfo);
+	}
+	@DeleteMapping({"/delete/{folder}/{fileName}", "/delete/{fileName}"})
+	public String deleteFile(@PathVariable(required = false) String folder, @PathVariable String fileName) {
+		if (folder == null) {
+			folder = ""; // Set folder to empty string if it's null
+		}
+		FileInfo fileInfo = new FileInfo(folder, fileName);
+		fileService.deleteFile(fileInfo);
+		return "redirect:/trang-chu"; // redirect to course page
 	}
 }
