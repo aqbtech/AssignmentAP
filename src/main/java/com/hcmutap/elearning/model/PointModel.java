@@ -14,11 +14,13 @@ import lombok.Setter;
 @FirebaseCollection("points")
 public class PointModel {
    @DocumentId
-   private String id;
+   private String id; // timestamp
    private String studentId;
    private String studentName;
    private String courseId;
+   private String courseName;
    private String classId;
+   private String className;
    private boolean state;
    private double pointBT;
    private double pointBTL;
