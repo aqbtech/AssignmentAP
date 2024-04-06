@@ -2,34 +2,95 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout/admin-layout.html}">
-    <head>
-        <title>Tạo khóa học</title>
-    </head>
-    <body>
-    <div layout:fragment="content">
-        <!-- Page Content -->
-        <div class="container">
-            <h1>Tạo khóa học</h1>
-            <hr>
-            <form name="data-form" th:action="@{/admin-management/add-course}" method="post" id="myForm" class="form-group">
-                <label for="courseId">Course ID:</label>
-                <input type="text" id="courseId" name="courseId" class="form-control"><br>
-                <label for="courseName">Course Name:</label>
-                <input type="text" id="courseName" name="courseName" class="form-control"><br>
-                <label for="credit">Credit:</label>
-                <input type="number" id="credit" name="credit" class="form-control" min="0"><br>
-                <label for="percentBT">Percent of BT point:</label>
-                <input type="number" id="percentBT" name="percentBT" class="form-control" min="0" max="1" step="0.1"><br>
-                <label for="percentBTL">Percent of BTL point:</label>
-                <input type="number" id="percentBTL" name="percentBTL" class="form-control" min="0" max="1" step="0.1"><br>
-                <label for="percentGK">Percent of GK point:</label>
-                <input type="number" id="percentGK" name="percentGK" class="form-control" min="0" max="1" step="0.1"><br>
-                <label for="percentCK">Percent of CK point:</label>
-                <input type="number" id="percentCK" name="percentCK" class="form-control" min="0" max="1" step="0.1"><br>
-                <input type="submit" value="Submit" class="btn btn-primary">
-            </form>
-        </div>
-        <!-- /.container -->
+<<<<<<< HEAD
+<head>
+    <title>Tạo khóa học</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Content -->
+    <div class="container">
+        <h1>Tạo khóa học</h1>
+        <hr>
+        <form name="data-form" th:action="@{/admin-management/add-course}" method="post" id="myForm" class="form-group">
+            <label for="courseId">Mã khóa học:</label>
+            <input type="text" id="courseId" name="courseId" class="form-control"
+                   th:value="${course.courseId}"required><br>
+            <label for="courseName">Tên khóa học:</label>
+            <input type="text" id="courseName" name="courseName" class="form-control"
+                   th:value="${course.courseName}" required><br>
+            <label for="credit">Tín chỉ:</label>
+            <input type="number" id="credit" name="credit" class="form-control" min="0"
+                   th:value="${course.credit}" required><br>
+            <label for="percentBT">Tỉ lệ điểm BT (%):</label>
+            <input type="number" id="percentBT" name="percentBT" class="form-control" min="0" max="100"
+                   th:value="${course.percentBT}" required><br>
+            <label for="percentBTL">Tỉ lệ điểm BTL (%):</label>
+            <input type="number" id="percentBTL" name="percentBTL" class="form-control" min="0" max="100"
+                   th:value="${course.percentBTL}" required><br>
+            <label for="percentGK">Tỉ lệ điểm GK (%):</label>
+            <input type="number" id="percentGK" name="percentGK" class="form-control" min="0" max="100"
+                   th:value="${course.percentGK}" required><br>
+            <label for="percentCK">Tỉ lệ điểm CK (%):</label>
+            <input type="number" id="percentCK" name="percentCK" class="form-control" min="0" max="100"
+                   th:value="${course.percentCK}" required><br>
+            <div id="errorMessage" class="error" style="display: none; color: red;">Tổng tỉ lệ điểm phải bằng 100%</div>
+            <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
     </div>
-    </body>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var num1 = parseInt(document.getElementById("percentBT").value);
+            var num2 = parseInt(document.getElementById("percentBTL").value);
+            var num3 = parseInt(document.getElementById("percentGK").value);
+            var num4 = parseInt(document.getElementById("percentCK").value);
+            var sum = num1 + num2 + num3 + num4;
+            if(sum === 100) {
+                document.getElementById("errorMessage").style.display = "none";
+                this.submit();
+            } else {
+                document.getElementById("errorMessage").style.display = "block";
+            }
+        });
+
+        window.addEventListener("load", function(){
+            var message = document.getElementById("message").getAttribute("message");
+            if(message) {
+                var modalBody = document.getElementById("modalBody");
+                var modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            } else {
+                document.getElementById("courseId").value = "";
+                document.getElementById("courseName").value = "";
+                document.getElementById("credit").value = "";
+                document.getElementById("percentBT").value = "";
+                document.getElementById("percentBTL").value = "";
+                document.getElementById("percentGK").value = "";
+                document.getElementById("percentCK").value = "";
+            }
+        });
+    </script>
+    <!-- /.container -->
+</div>
+</body>
 </html>

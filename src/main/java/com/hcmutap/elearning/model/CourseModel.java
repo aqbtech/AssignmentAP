@@ -17,8 +17,8 @@ public class CourseModel {
     private String courseId;
     private String courseName;
     private int credit;
-    private double percentBT;
-    private double percentBTL;
-    private double percentGK;
-    private double percentCK;
+    private int percentBT;
+    private int percentBTL;
+    private int percentGK;
+    private int percentCK;
 }
