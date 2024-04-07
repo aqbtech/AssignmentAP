@@ -9,7 +9,6 @@ import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.IPointService;
-import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

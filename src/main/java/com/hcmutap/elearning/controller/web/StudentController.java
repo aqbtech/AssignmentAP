@@ -33,7 +33,7 @@ public class StudentController{
     public String regis(Principal principal,ModelMap model){
         InfoDTO infoDTO = userService.getInfo(principal.getName());
         StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<CourseModel> courses = studentService.get_course(studentModel.getStudentId());
+        List<CourseModel> courses = studentService.get_course(studentModel.getId());
         model.addAttribute("courses", courses);
         return "web/views/student-service/registration";
     }
@@ -41,7 +41,7 @@ public class StudentController{
     public String timetable(Principal principal,ModelMap model){
         InfoDTO infoDTO = userService.getInfo(principal.getName());
         StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<ClassModel> classes = studentService.get_timetable(studentModel.getStudentId());
+        List<ClassModel> classes = studentService.get_timetable(studentModel.getId());
         model.addAttribute("classes", classes);
         return "web/views/student-service/time-table";
     }

@@ -83,7 +83,7 @@ public class HomeController {
 		if (infoDTO.getRole().equalsIgnoreCase("student")){
 			StudentModel studentModel = studentService.findByUsername(principal.getName());
 			courses = studentModel.getCourses();
-		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
+		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
 			TeacherModel teacherModel = teacherService.findByUsername(principal.getName());
 			//courses = teacherModel.getCourses();
 		} else {
@@ -102,7 +102,7 @@ public class HomeController {
 		model.addAttribute("listOfImageLinks", listOfImageLinks);
 
 		return "web/views/my_course";
-  }
+  	}
 	@PostMapping("/upload")
 	public String uploadFile(@RequestParam(value = "file") MultipartFile file, @RequestParam("folder") String folder) {
 		FileInfo fileInfo = new FileInfo(folder, file.getOriginalFilename());
