@@ -15,9 +15,9 @@ import java.util.List;
 @FirebaseCollection("students")
 public class StudentModel {
 	@DocumentId
+	private String username;
 	private String id;
 	private String fullName;
-	private String username;
 	private String email;
 	private Long age;
 	private int citizen_identityID;
@@ -26,4 +26,5 @@ public class StudentModel {
 	private List<String> classes;
 	private List<String> courses;
 	private List<String> finished_courses;
+
 }
