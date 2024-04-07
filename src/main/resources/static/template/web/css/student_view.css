@@ -1,0 +1,18 @@
+.box-modify{
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.no_underline{
+    color: black;
+    text-decoration: none;
+}
+
+.welcome-modify,.welcome-modify-ex{
+    font-size: 14px;
+    color: #00000072;
+}
+
+.welcome-modify-ex{
+    box-shadow: rgba(0, 0, 0, 0.35) 1px 0px 0px;
+    align-items: end;
+}

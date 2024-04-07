@@ -1,0 +1,73 @@
+.box{
+    height: 50px;
+    display: flex;
+    cursor: pointer;
+    padding: 10px 20px;
+    background: white;
+    border-radius: 30px;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.box input{
+    width: 100%;
+    border: none;
+    outline: none;
+    font-weight: 500;
+}
+
+.box-search{
+    height: 700px;
+    border-top: 1px solid black;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    border-radius: 10px;
+    overflow: auto;
+}
+
+.box-search1{
+    height: 500px;
+    border-top: 1px solid black;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    border-radius: 10px;
+    overflow: auto;
+}
+
+.ele{
+    /* display: flex; */
+    width: 95%;
+    height: 100px;
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 10px;
+    margin-left: 15px;
+    margin-top: 20px;
+}
+
+.ele1{
+    width: 95%;
+    height: 75px;
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 10px;
+    margin-left: 8px;
+}
+
+.ele1:hover{
+    color: white;
+    background-color: antiquewhite;
+    transition: 0.3s;
+}
+
+.ele:hover{
+    color: white;
+    background-color: antiquewhite;
+    transition: 0.3s;
+}
+
+.courseid{
+    height: 35px;
+}
+
+.coursename{
+    height: 35px;
+}

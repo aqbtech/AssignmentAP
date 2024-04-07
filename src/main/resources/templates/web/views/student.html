@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Student Management System</title>
+    <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page content -->
+
+        <div class="header">
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h3>Student Service</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-sm-6 p-4">
+                    <div class = "row box-modify">
+                        <div class="col-sm-4 ">
+                            <a href="/info" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a href="/info" class="no_underline">
+                                <h5 class = "mt-4 mb-0">Information</h5>
+                            </a>
+                            <p>Information of student</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 p-4">
+                    <div class="row box-modify">
+                        <div class="col-sm-4">
+                            <a href="#" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a href="#" class="no_underline">
+                                <h5 class="mb-0 mt-4">Score</h5>
+                            </a>
+                            <p mt>Score of student</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 p-4">
+                    <div class="row box-modify">
+                        <div class="col-sm-4">
+                            <a href="/student/timetable" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a href="/student/timetable" class="no_underline">
+                                <h5 class="mb-0 mt-4">Time Table</h5>
+                            </a>
+                            <p mt>Get Time Table</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 p-4">
+                    <div class="row box-modify">
+                        <div class="col-sm-4">
+                            <a href="#" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a href="#" class="no_underline">
+                                <h5 class="mb-0 mt-4">Learning Process</h5>
+                            </a>
+                            <p mt>Get score of finished course</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 p-4">
+                    <div class="row box-modify">
+                        <div class="col-sm-4">
+                            <a href="/student/registration" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a href="/student/registration" class="no_underline">
+                                <h5 class="mb-0 mt-4">Course Registration</h5>
+                            </a>
+                            <p mt>Register study plan, register course</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.container -->
+    </div>
+</body>
+</html>
+

@@ -66,8 +66,9 @@ public class StudentService implements IStudentService {
 		return studentDAO.findById(id);
 	}
 	@Override
-	public boolean DangkiMonhoc(StudentModel studentModel, String classID) {
+	public boolean DangkiMonhoc(String studentId, String classID) {
 		ClassModel classModel = classDAO.getClassInfo(classID);
+		StudentModel studentModel = studentDAO.findById(studentId);
 		// TODO: send message to course service, validate if student can register this course
 		// is this class of course full? call class service to check
 		// is this course conflict with other courses? check student's timetable
@@ -110,8 +111,6 @@ public class StudentService implements IStudentService {
 			return false;
 		}
 
-		CourseModel course = courseDAO.findById(classModel.getCourseId());
-		studentModel.getCourses().add(course);
 		return true;
 	}
 
@@ -121,14 +120,18 @@ public class StudentService implements IStudentService {
 		return studentModel.getClasses();
 	}
 	@Override
-	public List<CourseModel> Tientrinhhoctap(String studentId){
+	public List<PointModel> Tientrinhhoctap(String studentId){
 		StudentModel studentModel = studentDAO.findById(studentId);
 //		List<ClassModel> classes = studentModel.getClasses();
 //		for (ClassModel e : classes) {
 //			PointService
 //		}
 		List<CourseModel> finished_courses = studentModel.getFinished_courses();
-		return finished_courses;
+		List<PointModel> result = null;
+		for(CourseModel e : finished_courses){
+			result.add(pointService.getPoint(studentId, e.getCourseId()));
+		}
+		return result;
 	}
 	@Override
 	public List<PointModel> get_point(String studentId){
@@ -139,12 +142,26 @@ public class StudentService implements IStudentService {
 	}
 
 	@Override
+	public List<CourseModel> get_course(String studentId){
+		StudentModel studentModel = studentDAO.findById(studentId);
+		return studentModel.getCourses() == null ? List.of() : studentModel.getCourses();
+	}
+
+	@Override
 	public List<ClassModel> get_list_class_of_this_course(String courseId){
 		return classDAO.getClassOfCourse(courseId);
 	}
 
 	@Override
-	public boolean add_class_to_student() {
+	public boolean add_class_to_student(String studentId, String classId) {
+		if(this.DangkiMonhoc(studentId, classId)){
+			StudentModel studentModel = studentDAO.findById(studentId);
+			ClassModel classModel = classDAO.getClassInfo(classId);
+			CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
+			studentModel.getCourses().add(courseModel);
+			studentModel.getClasses().add(classModel);
+			return true;
+		}
 		return false;
 	}
 
