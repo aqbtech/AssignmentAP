@@ -15,15 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 @FirebaseCollection("teachers")
 public class TeacherModel {
-	// foreign key of user for get data in users collection
 	@DocumentId
 	private String id;
 	private String fullName;
+	private String gender;
 	private Long age;
 	private String username;
 	private String email;
 	private String degree;
-	private TimetableModel timetable;
-	private List<String> courses; // save id of courses
-	List<String> classes; // save id of classes
+	private List<String> classes;
+	private List<String> courses;
 }

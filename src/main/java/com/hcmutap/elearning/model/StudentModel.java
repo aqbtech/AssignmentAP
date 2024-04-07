@@ -16,26 +16,14 @@ import java.util.List;
 public class StudentModel {
 	@DocumentId
 	private String id;
-	private String studentId;
 	private String fullName;
+	private String username;
 	private String email;
 	private Long age;
 	private int citizen_identityID;
 	private String gender;
 	private String major;
-	private List<ClassModel> classes;
-	private List<CourseModel> courses;
-	private List<CourseModel> finished_courses;
-	public StudentModel(String id, String studentId, String fullName, int citizen_identityID, String gender, String major){
-		this.id = id;
-		this.studentId = studentId;
-		this.fullName = fullName;
-		this.citizen_identityID = citizen_identityID;
-		this.gender = gender;
-		this.major = major;
-		this.classes = null;
-		this.courses = null;
-		this.finished_courses = null;
-	}
-
+	private List<String> classes;
+	private List<String> courses;
+	private List<String> finished_courses;
 }

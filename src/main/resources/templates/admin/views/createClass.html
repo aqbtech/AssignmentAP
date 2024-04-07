@@ -12,23 +12,65 @@
         <h1>Tạo lớp học</h1>
         <hr>
         <form name="data-form" th:action="@{/admin-management/add-class}" method="post" id="myForm" class="form-group">
-            <label for="className">Class Name:</label>
-            <input type="text" id="className" name="className" class="form-control"><br>
-            <label for="courseId">Course Name:</label>
-            <select id="courseId" name="courseId" class="form-control">
-                <option th:each="course : ${courses}" th:value="${course.courseId}" th:text="${course.courseName}"></option>
-            </select>
-            <label for="dayOfWeek">Day:</label>
-            <input type="text" id="dayOfWeek" name="dayOfWeek" class="form-control"><br>
-            <label for="timeStart">Time Start:</label>
-            <input type="time" id="timeStart" name="timeStart" class="form-control"><br>
-            <label for="timeEnd">Time End:</label>
-            <input type="time" id="timeEnd" name="timeEnd" class="form-control"><br>
-            <label for="room">Room:</label>
-            <input type="text" id="room" name="room" class="form-control"><br>
+            <label for="className">Tên lớp:</label>
+            <input type="text" id="className" name="className" class="form-control"
+                   th:value="${class.className}" required><br>
+            <label for="courseId">Khóa học:</label>
+            <select id="courseId" name="courseId" class="select2 form-control" required>
+                <option th:each="course : ${courses}" th:value="${course.courseId}" th:selected="${course.courseId == class.courseId}"
+                        th:text="${course.courseName}+' '+' ('+${course.courseId}+')'"></option>
+            </select><br>
+            <label for="dayOfWeek">Ngày:</label>
+            <input type="text" id="dayOfWeek" name="dayOfWeek" class="form-control"
+                   th:value="${class.dayOfWeek}" required><br>
+            <label for="timeStart">Thời gian vào tiết:</label>
+            <input type="time" id="timeStart" name="timeStart" class="form-control"
+                   th:value="${class.timeStart}" required><br>
+            <label for="timeEnd">Thời gian hết tiết:</label>
+            <input type="time" id="timeEnd" name="timeEnd" class="form-control"
+                   th:value="${class.timeEnd}" required><br>
+            <label for="room">Phòng:</label>
+            <input type="text" id="room" name="room" class="form-control"
+                   th:value="${class.room}" required><br>
             <input type="submit" value="Submit" class="btn btn-primary">
         </form>
     </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener("load", function(){
+            var message = document.getElementById("message").getAttribute("message");
+            if(message) {
+                var modalBody = document.getElementById("modalBody");
+                var modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            } else {
+                document.getElementById("className").value = "";
+                document.getElementById("courseId").value = "";
+                document.getElementById("dayOfWeek").value = "";
+                document.getElementById("timeStart").value = "";
+                document.getElementById("timeEnd").value = "";
+                document.getElementById("room").value = "";
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

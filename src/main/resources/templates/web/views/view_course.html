@@ -6,79 +6,119 @@
 <head>
     <title>Khóa: </title> <!-- kiểm tra và lấy thông tin của khóa học từ courseModel được gửi ra từ controller-->
 </head>
-<body>
-<div layout:fragment="content">
-    <!-- Page Content -->
-    <div class="container">
-        <h4 class="text-center mb-4">Course Modules</h4>
-        <div id="accordion">
-            <div class="card">
-                <div class="card-header" id="headingOne">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            Collapsible Group Item #1
-                        </button>
-                        <!-- Button for adding a PDF -->
-                        <button class="btn btn-link" onclick="addPdf()" sec:authorize="hasAuthority('TEACHER')">
-                            Add PDF
-                        </button>
-                        <script>
-                            function addPdf() {
-                                // Code to add a PDF goes here
-                                alert('Add PDF button clicked');
-                            }
-                        </script>
-                    </h5>
-                </div>
+    <body>
+        <div layout:fragment="content">
+            <!-- Page Content -->
+            <div class="container">
+                <h4 class="text-center mb-4">Course Modules</h4>
+                <div id="accordion">
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Collapsible Group Item #1
+                                </button>
+                                <!-- Button for adding a PDF -->
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pdfModal" sec:authorize="hasAuthority('TEACHER')">
+                                    Add PDF
+                                </button>
+                            </h5>
+                        </div>
 
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
-                    <div class="card-body">
-                        Đối tượng (object)
-                        Đối tượng là một thực thể có trạng thái và hành vi. Nó có thể mang tính vật lý hoặc logic.
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
+                            <div class="card-body">
+                                Đối tượng (object)
+                                Đối tượng là một thực thể có trạng thái và hành vi. Nó có thể mang tính vật lý hoặc logic.
 
-                        Nếu chúng ta xem xét thực tế chúng ta có thể tìm thấy nhiều đồ vật xung quanh chúng ta: cái bàn, con chó, con người, v.v… Tất cả các đối tượng này đều có thuộc tính và hành vi.
+                                Nếu chúng ta xem xét thực tế chúng ta có thể tìm thấy nhiều đồ vật xung quanh chúng ta: cái bàn, con chó, con người, v.v… Tất cả các đối tượng này đều có thuộc tính và hành vi.
 
-                        Nếu chúng ta xem xét một con chó, thuộc tính của nó sẽ là – tên, giống, màu sắc, và các hành vi là: sủa, chạy, ăn, … Nếu bạn so sánh các đối tượng trong phần mềm với một đối tượng trong thế giới thực, chúng sẽ có đặc điểm rất giống nhau: thuộc tính đối tượng trong phần mềm được lưu trữ trong trường (field) và hành vi được lưu trữ trong phương thức (method).
+                                Nếu chúng ta xem xét một con chó, thuộc tính của nó sẽ là – tên, giống, màu sắc, và các hành vi là: sủa, chạy, ăn, … Nếu bạn so sánh các đối tượng trong phần mềm với một đối tượng trong thế giới thực, chúng sẽ có đặc điểm rất giống nhau: thuộc tính đối tượng trong phần mềm được lưu trữ trong trường (field) và hành vi được lưu trữ trong phương thức (method).
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Collapsible Group Item #2
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
+                            <div class="card-body">
+                                Chúng ta có thể xem lớp như một khuôn mẫu (template) của đối tượng (Object). Trong đó bao gồm dữ liệu của đối tượng (fields hay properties) và các phương thức(methods) tác động lên thành phần dữ liệu đó gọi là các phương thức của lớp
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingThree">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Collapsible Group Item #3
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree">
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">An item</li>
+                                    <li class="list-group-item">A second item</li>
+                                    <li class="list-group-item">A third item</li>
+                                    <li class="list-group-item">A fourth item</li>
+                                    <li class="list-group-item">And a fifth one</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-header" id="headingTwo">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            Collapsible Group Item #2
-                        </button>
-                    </h5>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo">
-                    <div class="card-body">
-                        Chúng ta có thể xem lớp như một khuôn mẫu (template) của đối tượng (Object). Trong đó bao gồm dữ liệu của đối tượng (fields hay properties) và các phương thức(methods) tác động lên thành phần dữ liệu đó gọi là các phương thức của lớp
+            </div> <!-- /.container -->
+            <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pdfModalLabel">Add PDF</h5>
+                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+                                <form th:action="@{/upload}" enctype="multipart/form-data" id="uploadForm" method="post">
+                                    <div class="form-group">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="formFileMultiple" multiple name="file">
+                                            <label for="folder">Folder:</label>
+                                            <input type="text" class="text-info" id="folder" name="folder">
+                                            <label class="custom-file-label" for="formFileMultiple">Choose file...</label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="uploadFile()">Save changes</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-header" id="headingThree">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            Collapsible Group Item #3
-                        </button>
-                    </h5>
-                </div>
-                <div id="collapseThree" class="collapse" aria-labelledby="headingThree">
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">An item</li>
-                            <li class="list-group-item">A second item</li>
-                            <li class="list-group-item">A third item</li>
-                            <li class="list-group-item">A fourth item</li>
-                            <li class="list-group-item">And a fifth one</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+            </div> <!-- /.modal add pdf -->
+        </div> <!--/. layout:fragment="content" -->
+    </body>
+    <div layout:fragment="custom-scripts">
+        <script>
+            $(document).ready(function () {
+                $('.custom-file-input').on('change', function() {
+                    let numberOfFiles = $(this)[0].files.length;
+                    let fileLabel = numberOfFiles > 1 ? numberOfFiles + ' files selected' : $(this).val().split('\\').pop();
+                    $(this).next('.custom-file-label').addClass("selected").html(fileLabel);
+                });
+            });
+            function uploadFile() {
+                document.getElementById('uploadForm').submit();
+            }
+            document.querySelector('form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                uploadFile();
+            });
+        </script>
     </div>
-    <!-- /.container -->
-</div>
-</body>
 </html>

@@ -14,14 +14,15 @@ import lombok.Setter;
 @FirebaseCollection("classes")
 public class ClassModel {
     @DocumentId
-    private String id;
     private String classId;
     private String className;
     private String courseId;
+    private String courseName;
     private String teacherId;
     private String teacherName;
     private String dayOfWeek;
     private String timeStart;
     private String timeEnd;
     private String room;
+    private String status; // open, close
 }

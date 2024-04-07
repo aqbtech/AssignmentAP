@@ -21,6 +21,7 @@ public class FirebaseConfig {
 			FileInputStream serviceAccount = new FileInputStream(file);
 			FirebaseOptions options = new FirebaseOptions.Builder()
 					.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+					.setStorageBucket("spring-mvc-aa495.appspot.com")
 					.build();
 
 			FirebaseApp.initializeApp(options);
