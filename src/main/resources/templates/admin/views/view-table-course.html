@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <title>Trang quản trị</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Content -->
+    <div class="container">
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fas fa-table"></i>
+                <span>Bảng khóa học</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Update</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="model : ${models}">
+                            <td th:text="${model.courseId}"></td>
+                            <td th:text="${model.courseName}"></td>
+                            <!-- Update button -->
+                            <td>
+                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-course?id=${model.courseId}|}">Update</a>
+                            </td>
+                            <!-- Delete button -->
+                            <td>
+                                <button class="btn btn-link delete-button" th:data-id="${model.courseId}">Delete</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                        <script>
+                            document.querySelectorAll('.delete-button').forEach(function(button) {
+                                button.addEventListener('click', function() {
+                                    var id = this.getAttribute('data-id');
+                                    deleteElement(id);
+                                });
+                            });
+                            function deleteElement(id) {
+                                window.location.href = "/admin-management-course?action=delete&id=" + id;
+                                console.log('Delete button clicked for element with id:', id);
+                            }
+                        </script>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+        </div>
+    </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener("load", function() {
+            var message = document.getElementById("message").getAttribute("message");
+            if (message) {
+                var modalBody = document.getElementById("modalBody");
+                var modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            }
+        });
+    </script>
+    <!-- /.container -->
+</div>
+</body>
+<!-- Demo scripts for this page-->
+<script th:src="@{/template/admin/js/demo/datatables-demo.js}"></script>
+</html>
