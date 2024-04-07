@@ -8,5 +8,6 @@ import java.util.List;
 public interface ITeacherService extends IGenericAdminService<TeacherModel> {
 	boolean isExist(String username);
 
-	List<ClassModel> getAllClass(String username);
+	List<ClassModel> getAllClass(String name);
+	TeacherModel findByUsername(String username);
 }
