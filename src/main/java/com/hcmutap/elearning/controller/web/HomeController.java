@@ -69,7 +69,7 @@ public class HomeController {
 		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
 			classes = teacherService.getAllClass(principal.getName());
 		} else {
-			model.addAttribute("error", "You are not a student or teacher");
+			model.addAttribute("message", "You are not a student or teacher");
 			return "login/404_page";
 		}
 		model.addAttribute("classes", classes);
@@ -82,7 +82,8 @@ public class HomeController {
 
 		if (infoDTO.getRole().equalsIgnoreCase("student")){
 			StudentModel studentModel = studentService.findByUsername(principal.getName());
-			courses = studentModel.getCourses();
+			// TODO: cap nhat lai theo ham moi
+//			courses = studentModel.getCourses();
 		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
 			TeacherModel teacherModel = teacherService.findByUsername(principal.getName());
 			//courses = teacherModel.getCourses();

@@ -89,8 +89,9 @@ public class ClassService implements IClassService {
         StudentModel studentModel = studentDAO.findById(studentId);
         ClassModel classModel = classDAO.getClassInfo(classId);
         // state = true is learned
-        PointModel tmp = new PointModel(null, studentId, studentModel.getFullName(), classModel.getCourseId(), classId, false, 0, 0, 0, 0);
-        pointService.save(tmp);
+        // TODO: sua lai ham nay
+//        PointModel tmp = new PointModel(null, studentId, studentModel.getFullName(), classModel.getCourseId(), classId, false, 0, 0, 0, 0);
+//        pointService.save(tmp);
         return true;
     }
 
@@ -102,10 +103,11 @@ public class ClassService implements IClassService {
         List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
-                PointModel pointUpdate = new PointModel(item.getId(), item.getStudentId(), item.getStudentName(), item.getCourseId(), item.getClassId(), item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
-                pointService.update(pointUpdate);
+                // TODO: sua lai ham nay
+//                PointModel pointUpdate = new PointModel(item.getId(), item.getStudentId(), item.getStudentName(), item.getCourseId(), item.getClassId(), item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
+//                pointService.update(pointUpdate);
                 break;
-            }
+            }  // TODO : them truong hop khong tim thay
         }
     }
 
