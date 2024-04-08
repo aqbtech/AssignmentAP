@@ -79,6 +79,11 @@ public class UserService implements IUserService {
 				infoDTO.setRole("student");
 				return infoDTO;
 			}
+			else {
+				InfoDTO infoDTO = MapperUtil.getInstance().toDTOFromModel(userModel, InfoDTO.class);
+				infoDTO.setRole("admin");
+				return infoDTO;
+			}
 		}
 		return null;
 	}

@@ -6,10 +6,7 @@ import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.model.ClassModel;
 
 import com.hcmutap.elearning.model.FileInfo;
-import com.hcmutap.elearning.service.IFileService;
-import com.hcmutap.elearning.service.IStudentService;
-import com.hcmutap.elearning.service.ITeacherService;
-import com.hcmutap.elearning.service.IUserService;
+import com.hcmutap.elearning.service.*;
 
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +31,11 @@ public class HomeController {
 	@Resource
 	private IUserService userService;
 	private IFileService fileService;
+	private ICourseFacade courseFacade;
+	@Autowired
+	public void setCourseFacade(ICourseFacade courseFacade) {
+		this.courseFacade = courseFacade;
+	}
 	@Autowired
 	public void setFileService(IFileService fileService) {
 		this.fileService = fileService;
@@ -57,23 +59,33 @@ public class HomeController {
 	@GetMapping(value="/info")
 	public String info(Principal principal, ModelMap model){
 		InfoDTO infoDTO = userService.getInfo(principal.getName());
+		if (infoDTO.getRole().equalsIgnoreCase("ADMIN")){
+			model.addAttribute("message", "You are not a student or teacher");
+			return "login/404_page";
+		}
 		model.addAttribute("user", infoDTO);
 		return "web/views/view_info";
 	}
 	@GetMapping(value="/course")
-	public String course(Principal principal, ModelMap model){
+	public String course(@RequestParam("id") String id,
+						 Principal principal, ModelMap model) {
 		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		List<ClassModel> classes = null;
+		ClassModel classModel = null;
 		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			classes = studentService.getAllClass(principal.getName());
+			classModel = courseFacade.getClassInfo(id);
 		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
-			classes = teacherService.getAllClass(principal.getName());
+			classModel = courseFacade.getClassInfo(id);
 		} else {
 			model.addAttribute("message", "You are not a student or teacher");
 			return "login/404_page";
 		}
-		model.addAttribute("classes", classes);
-		return "web/views/view_course";
+		if (classModel == null) {
+			model.addAttribute("message", "Class not found");
+			return "login/404_page";
+		} else {
+			model.addAttribute("class", classModel);
+			return "web/views/view_course";
+		}
 	}
 	@GetMapping(value="/my-course")
 	public String myCourse(Principal principal, ModelMap model){
