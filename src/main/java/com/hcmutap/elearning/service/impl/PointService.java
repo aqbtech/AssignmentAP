@@ -69,7 +69,7 @@ public class PointService implements IPointService {
                             + pointModel.getPointBTL()*courseModel.getPercentBTL()
                             + pointModel.getPointGK()*courseModel.getPercentGK()
                             + pointModel.getPointCK()*courseModel.getPercentCK();
-        return  averagePoint;
+        return  (averagePoint / 100);
     }
 
     @Override

@@ -59,8 +59,8 @@ public class CourseFacade implements ICourseFacade {
 		return classService.addStudentToClass(studentId, classId);
 	}
 	@Override
-	public void NhapDiem(String studentId, String classId, PointDTO point){
-		 classService.NhapDiem(studentId,classId,point);
+	public boolean NhapDiem(String studentId, String classId, PointDTO point){
+		 return classService.NhapDiem(studentId,classId,point);
 	}
 	@Override
 	public void NhapDiemCaLop(String classId, List<PointDTO> listPoint){
