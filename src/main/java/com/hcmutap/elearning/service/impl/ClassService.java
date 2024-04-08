@@ -9,6 +9,7 @@ import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.IPointService;
+import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class ClassService implements IClassService {
     private ClassDAO classDAO;
     @Resource
     private IPointService pointService;
+    @Resource
+    private IStudentService studentService;
     @Resource
     private StudentDAO studentDAO;
     @Resource
@@ -80,23 +83,25 @@ public class ClassService implements IClassService {
 
     @Override
     public boolean addStudentToClass(String studentId, String classId) {
-        List<PointModel> checks = pointDAO.findBy("studentId", studentId);
-        for (PointModel point : checks) {
-            if (point.getClassId().equals(classId)) {
+        List<String> listClass = studentDAO.findBy("studentId", studentId).getFirst().getClasses();
+        for (String item : listClass) {
+            if (item.equals(classId)) {
                 return false;
             }
         }
+        if(!studentService.add_class_to_student(studentId, classId)){
+            return false;
+        }
+
+        long timestamp = System.currentTimeMillis();
+        String id = String.valueOf(timestamp);
         StudentModel studentModel = studentDAO.findById(studentId);
         ClassModel classModel = classDAO.getClassInfo(classId);
         // state = true is learned
-        // TODO: sua lai ham nay
-        PointModel tmp = new PointModel(studentId + "-" + classId, studentId, studentModel.getFullName(),
-                classModel.getCourseId(), classModel.getCourseName(), classId, classModel.getClassName(),
-                false, 0, 0, 0, 0);
+        PointModel tmp = new PointModel(id, studentId, studentModel.getFullName(), classModel.getCourseId(),classModel.getCourseName(), classId,classModel.getClassName(), false, -1, -1, -1, -1);
         pointService.save(tmp);
         return true;
     }
-
 
     @Override
     public boolean NhapDiem(String studentId, String classId, PointDTO point) {
