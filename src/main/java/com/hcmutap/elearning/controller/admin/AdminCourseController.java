@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -46,10 +45,9 @@ public class AdminCourseController {
 		model.addAttribute("models", courseService.findAll());
 		return "admin/views/view-table-course";
 	}
-
 	@GetMapping("/admin-management/update-course")
 	public String updateCourse(@RequestParam("id") String id) {
-		return "admin/views/createCourse";
+		return "";
 	}
 
 	@PostMapping("/admin-management/update-course")
@@ -102,14 +100,17 @@ public class AdminCourseController {
 
 	@PostMapping("/admin-management/add-class")
 	public String addClass(HttpServletRequest request, ModelMap model) {
+		CourseModel courseModel = courseService.findById(request.getParameter("courseId"));
 		ClassModel classModel = new ClassModel();
 		classModel.setCourseId((request.getParameter("courseId")));
+		classModel.setCourseName(courseModel.getCourseName());
 		classModel.setClassName(request.getParameter("className"));
 		classModel.setClassId(classModel.getCourseId()+"-"+classModel.getClassName());
 		classModel.setDayOfWeek(request.getParameter("dayOfWeek"));
 		classModel.setTimeStart(request.getParameter("timeStart"));
 		classModel.setTimeEnd(request.getParameter("timeEnd"));
 		classModel.setRoom(request.getParameter("room"));
+		classModel.setStatus(request.getParameter("status"));
 
 		boolean notSave = false;
 		List<ClassModel> listClass = classService.findAll();
