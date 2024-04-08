@@ -90,25 +90,30 @@ public class ClassService implements IClassService {
         ClassModel classModel = classDAO.getClassInfo(classId);
         // state = true is learned
         // TODO: sua lai ham nay
-//        PointModel tmp = new PointModel(null, studentId, studentModel.getFullName(), classModel.getCourseId(), classId, false, 0, 0, 0, 0);
-//        pointService.save(tmp);
+        PointModel tmp = new PointModel(studentId + "-" + classId, studentId, studentModel.getFullName(),
+                classModel.getCourseId(), classModel.getCourseName(), classId, classModel.getClassName(),
+                false, 0, 0, 0, 0);
+        pointService.save(tmp);
         return true;
     }
 
 
     @Override
-    public void NhapDiem(String studentId, String classId, PointDTO point) {
+    public boolean NhapDiem(String studentId, String classId, PointDTO point) {
         // TODO: update diem cua 1 sinh vien
         // điểm phải được update trong bảng điểm của lớp -> gọi class service
         List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
                 // TODO: sua lai ham nay
-//                PointModel pointUpdate = new PointModel(item.getId(), item.getStudentId(), item.getStudentName(), item.getCourseId(), item.getClassId(), item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
-//                pointService.update(pointUpdate);
-                break;
+                PointModel pointUpdate = new PointModel(item.getId(), item.getStudentId(), item.getStudentName(),
+                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),
+                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
+                pointService.update(pointUpdate);
+                return true;
             }  // TODO : them truong hop khong tim thay
         }
+        return false;
     }
 
     @Override
