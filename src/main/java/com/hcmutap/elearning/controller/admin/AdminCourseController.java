@@ -2,9 +2,11 @@ package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
+import com.hcmutap.elearning.model.InfoClassModel;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 
+import com.hcmutap.elearning.service.IInfoService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -23,6 +25,8 @@ public class AdminCourseController {
 	private ICourseService courseService;
 	@Resource
 	private IClassService classService;
+	@Resource
+	private IInfoService infoService;
 
 	@GetMapping("/admin-management-course")
 	public String viewCourse(ModelMap model,
@@ -130,6 +134,11 @@ public class AdminCourseController {
 		}
 		if(!notSave) {
 			model.addAttribute("message", "Lớp học đã được tạo thành công!");
+			InfoClassModel info = new InfoClassModel();
+			info.setClassId(classModel.getClassId());
+			info.setClassName(classModel.getClassName());
+			classModel.setInfoId(info.getId());
+			infoService.save(info);
 			classService.save(classModel);
 		}
 		model.addAttribute("courses", courseService.findAll());

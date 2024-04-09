@@ -25,4 +25,5 @@ public class ClassModel {
     private String timeEnd;
     private String room;
     private String status; // open, close
+    private String infoId;
 }

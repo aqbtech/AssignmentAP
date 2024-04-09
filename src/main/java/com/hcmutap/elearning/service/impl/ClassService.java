@@ -4,10 +4,9 @@ import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dto.PointDTO;
-import com.hcmutap.elearning.model.ClassModel;
-import com.hcmutap.elearning.model.PointModel;
-import com.hcmutap.elearning.model.StudentModel;
+import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.IClassService;
+import com.hcmutap.elearning.service.IInfoService;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
@@ -23,6 +22,8 @@ public class ClassService implements IClassService {
     private IPointService pointService;
     @Resource
     private IStudentService studentService;
+    @Resource
+    private IInfoService infoService;
     @Resource
     private StudentDAO studentDAO;
     @Resource
@@ -133,5 +134,47 @@ public class ClassService implements IClassService {
                 }
             }
         }
+    }
+
+    @Override
+    public InfoClassModel getClassDocs(String classId) {
+        ClassModel classModel = findById(classId);
+        return infoService.getClassInfo(classModel.getInfoId());
+    }
+
+    @Override
+    public boolean updateTileOfDoc(String classId, Document docCurrent, String newTitle){
+        ClassModel classModel = findById(classId);
+        return infoService.updateTile(classModel.getInfoId(), docCurrent, newTitle);
+    }
+
+    @Override
+    public boolean addFileOfDoc(String classId, Document docCurrent, FileInfo file){
+        ClassModel classModel = findById(classId);
+        return infoService.addFile(classModel.getInfoId(), docCurrent, file);
+    }
+
+    @Override
+    public boolean deleteFileOfDoc(String classId, Document docCurrent, FileInfo file){
+        ClassModel classModel = findById(classId);
+        return infoService.deleteFile(classModel.getInfoId(), docCurrent, file);
+    }
+
+    @Override
+    public boolean addNewDoc(String classId) {
+        ClassModel classModel = findById(classId);
+        return infoService.addNewDoc(classModel.getInfoId());
+    }
+
+    @Override
+    public boolean addDoc(String classId, Document doc) {
+        ClassModel classModel = findById(classId);
+        return infoService.addDoc(classModel.getInfoId(), doc);
+    }
+
+    @Override
+    public boolean deleteDoc(String classId, Document doc) {
+        ClassModel classModel = findById(classId);
+        return infoService.deleteDoc(classModel.getInfoId(), doc);
     }
 }
