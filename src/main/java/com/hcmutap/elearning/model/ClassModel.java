@@ -14,6 +14,7 @@ import lombok.Setter;
 @FirebaseCollection("classes")
 public class ClassModel {
     @DocumentId
+    private String firebaseId;
     private String classId;
     private String className;
     private String courseId;

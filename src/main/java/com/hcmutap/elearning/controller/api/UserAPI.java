@@ -36,7 +36,7 @@ public class UserAPI {
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
 		UserModel userModel = HttpUtil.of(request.getReader()).toModel(UserModel.class);
-		userService.delete(userModel.getId());
+		userService.delete(userModel.getFirebaseId());
 		mapper.writeValue(response.getOutputStream(), "{}");
 	}
 }

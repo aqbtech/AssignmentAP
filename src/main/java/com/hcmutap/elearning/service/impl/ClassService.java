@@ -90,7 +90,7 @@ public class ClassService implements IClassService {
                 return false;
             }
         }
-        if(!studentService.add_class_to_student(studentId, classId)){
+        if(!studentService.add_class_to_student(studentId, classId)) {
             return false;
         }
 
@@ -99,7 +99,7 @@ public class ClassService implements IClassService {
         StudentModel studentModel = studentDAO.findById(studentId);
         ClassModel classModel = classDAO.getClassInfo(classId);
         // state = true is learned
-        PointModel tmp = new PointModel(id, studentId, studentModel.getFullName(), classModel.getCourseId(),classModel.getCourseName(), classId,classModel.getClassName(), false, -1, -1, -1, -1);
+        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(),classModel.getCourseName(), classId,classModel.getClassName(), false, -1, -1, -1, -1);
         pointService.save(tmp);
         return true;
     }
@@ -112,7 +112,7 @@ public class ClassService implements IClassService {
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
                 // TODO: sua lai ham nay
-                PointModel pointUpdate = new PointModel(item.getId(), item.getStudentId(), item.getStudentName(),
+                PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
                         item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),
                         item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
                 pointService.update(pointUpdate);

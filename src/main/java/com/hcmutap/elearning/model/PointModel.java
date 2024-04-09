@@ -14,6 +14,7 @@ import lombok.Setter;
 @FirebaseCollection("points")
 public class PointModel {
    @DocumentId
+   private String firebaseId;
    private String id; // timestamp
    private String studentId;
    private String studentName;

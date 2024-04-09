@@ -3,16 +3,14 @@ package com.hcmutap.elearning.service.impl;
 import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.UserDAO;
 import com.hcmutap.elearning.dto.InfoDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.model.UserModel;
 import com.hcmutap.elearning.service.IUserService;
 import com.hcmutap.elearning.utils.MapperUtil;
 import jakarta.annotation.Resource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,19 +34,22 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public void update(UserModel userModel) {
-		userDAO.update(userModel);
+	public void update(UserModel userModel) throws NotFoundException {
+		List<UserModel> userModels = userDAO.findBy("username", userModel.getUsername());
+		if (userModels.isEmpty()) {
+			throw new NotFoundException("Username not found");
+		} else {
+			userDAO.update(userModel);
+		}
 	}
 
 	@Override
-	public void delete(String username) {
-		// TODO: find id of user by username or delete by username
+	public void delete(String username) throws NotFoundException {
 		List<UserModel> userModels = userDAO.findBy("username", username);
 		if (!userModels.isEmpty()) {
-			userDAO.delete(userModels.getFirst().getId());
-		}
-		else {
-			// handle not found exception
+			userDAO.delete(userModels.getFirst().getFirebaseId());
+		} else {
+			throw new NotFoundException("Username not found");
 		}
 	}
 
@@ -58,12 +59,16 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public List<UserModel> findByUsername(String username) {
-		return userDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build());
+	public List<UserModel> findByUsername(String username) throws NotFoundException {
+		List<UserModel> userModels = userDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build());
+		if (userModels.isEmpty()) {
+			throw new NotFoundException("Username not found");
+		}
+		return userModels;
 	}
 
 	@Override
-	public InfoDTO getInfo(String username) {
+	public InfoDTO getInfo(String username) throws NotFoundException {
 		List<UserModel> userModels = userDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build());
 		if (!userModels.isEmpty()) {
 			UserModel userModel = userModels.getFirst();
@@ -85,6 +90,6 @@ public class UserService implements IUserService {
 				return infoDTO;
 			}
 		}
-		return null;
+		throw new NotFoundException("Username not found");
 	}
 }

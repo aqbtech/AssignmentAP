@@ -38,6 +38,8 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		ID id = (ID) ReflectionUtils.getField(documentId, t);
 		assert id != null : String.format("DocumentId of %s must not be null", documentClass.getSimpleName());
 		DocumentReference docRef = db.collection(collectionPath).document();
+		// Set the ID to the document reference ID before saving
+		ReflectionUtils.setField(documentId, t, docRef.getId());
 		docRef.set(t);
 		return (ID) docRef.getId();
 	}

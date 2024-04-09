@@ -15,6 +15,7 @@ import lombok.Setter;
 @FirebaseCollection("semesters")
 public class SemesterModel {
 	@DocumentId
+	private String firebaseId;
 	private String id;
 	private String semesterName;
 	private String startDate;

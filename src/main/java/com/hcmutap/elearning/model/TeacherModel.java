@@ -16,6 +16,7 @@ import java.util.List;
 @FirebaseCollection("teachers")
 public class TeacherModel {
 	@DocumentId
+	private String firebaseId;
 	private String id;
 	private String fullName;
 	private String gender;

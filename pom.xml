@@ -50,12 +50,6 @@
             <artifactId>spring-security-crypto</artifactId>
             <version>6.2.2</version>
         </dependency>
-        <!-- Pass data from model ro repository base on firebase database-->
-        <dependency>
-            <groupId>com.github.fabiomaffioletti</groupId>
-            <artifactId>spring-boot-starter-data-firebase</artifactId>
-            <version>1.0.0.RELEASE</version>
-        </dependency>
         <!-- firebase   -->
         <dependency>
             <groupId>com.google.firebase</groupId>

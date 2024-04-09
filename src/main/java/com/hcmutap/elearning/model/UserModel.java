@@ -15,7 +15,7 @@ import lombok.Setter;
 @FirebaseCollection("users")
 public class UserModel {
 	@DocumentId
-	private String id;
+	private String firebaseId;
 	private String username;
 	private String password;
 	private String role;
