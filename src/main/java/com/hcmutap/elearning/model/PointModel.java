@@ -22,6 +22,7 @@ public class PointModel {
    private String courseName;
    private String classId;
    private String className;
+   private String semesterId;
    private boolean state;
    private double pointBT;
    private double pointBTL;

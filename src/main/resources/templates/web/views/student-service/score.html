@@ -8,13 +8,14 @@
     <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
 </head>
 <body>
+
 <div layout:fragment="content">
 
     <div class="header">
         <div class="container mt-3">
             <div class="row">
                 <div class="col-sm-9">
-                    <h3>Time Table</h3>
+                    <h3>Bảng Điểm</h3>
                 </div>
             </div>
         </div>
@@ -24,32 +25,93 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 mt-3">
-                <table class="table table-bordered table-striped" style="overflow: auto">
-                    <thead>
-                    <tr style="text-align: center; color: white; background-color: black;">
-                        <th width = "100px">Course Id</th>
-                        <th width = "200px">Course name</th>
-                        <th width = "200px">Điểm thành phần</th>
-                        <th width = "100px">Điểm thi</th>
-                        <th width = "100px">Điểm tổng kết</th>
-                    </tr>
-                    </thead>
-                    <tbody style="text-align: center">
-                    <tr th:each="point, iterp: ${points}">
-                        <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"> Course </td>
-                        <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"> Name </td>
-                        <td th:if="${point.getPointBT() != ''}" th:text="${'BT: '+point.getPointBT()+'BTL: '+point.getPointBTL()+'GK: '+point.getPointGK()}"> Point </td>
-                        <td th:if="${point.getPointCK() != ''}" th:text="${point.getPointCK()}"> PointCK </td>
-                        <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
-                            <td th:text="${result}"></td>
-                        </div>
-                    </tr>
-                    </tbody>
-                </table>
+                <div th:each="semester:${semesters}">
+                    <p style="color: #b21f2d;font-weight: bold" th:text="${'Học kỳ '+semester.getSemesterName()}"></p>
+                    <table class="table table-bordered table-striped" style="overflow: auto">
+                        <thead>
+                        <tr style="text-align: center; color: white; background-color: black;">
+                            <th width = "100px">Course Id</th>
+                            <th width = "200px">Course name</th>
+                            <th width = "200px">Điểm thành phần</th>
+                            <th width = "100px">Điểm thi</th>
+                            <th width = "100px">Điểm tổng kết</th>
+                        </tr>
+                        </thead>
+                        <tbody style="text-align: center">
+                        <tr th:if="${point.getSemesterId() == semester.getId()}" th:each="point, iterp: ${points}">
+                            <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"></td>
+                            <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"></td>
+                            <td th:if="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'BT: '+point.getPointBT()+'  BTL: '+point.getPointBTL()+'  GK: '+point.getPointGK()}"></td>
+                            <td th:unless="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'15'}"></td>
+                            <td th:if="${point.getPointCK() >= 0}" th:text="${point.getPointCK()}"></td>
+                            <td th:unless="${point.getPointCK() >= 0}" th:text="${'15'}"></td>
+                            <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
+                                <td th:if="${point.getPointCK() >= 0}" th:text="${result}"></td>
+                                <td th:unless="${point.getPointCK() >= 0}" th:text="${'15'}"></td>
+                            </div>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <hr>
+                    <h4>Lưu ý:</h4>
+                    <table class="table table-bordered table-striped" style="overflow: auto">
+                        <thead>
+                        <tr style="text-align: center; color: white; background-color: black;">
+                            <th width = "100px">Loại điểm</th>
+                            <th width = "30px">Điểm thi</th>
+                            <th width = "200px">Ghi chú</th>
+                        </tr>
+                        </thead>
+                        <tbody style="text-align: left">
+                        <tr>
+                            <td>Cấm thi</td>
+                            <td style="text-align: center">11</td>
+                            <td>Được tính như điểm 0</td>
+                        </tr>
+                        <tr>
+                            <td>Miễn học, miễn thi</td>
+                            <td style="text-align: center">12</td>
+                            <td>Đạt nhưng không tính vào ĐTB</td>
+                        </tr>
+                        <tr>
+                            <td>Vắng thi</td>
+                            <td style="text-align: center">13</td>
+                            <td>Được tính như điểm 0</td>
+                        </tr>
+                        <tr>
+                            <td>Hoãn thi, được phép thi sau</td>
+                            <td style="text-align: center">14</td>
+                            <td>Không đạt và không tính vào ĐTB Được thỏa điều kiện môn học trước</td>
+                        </tr>
+                        <tr>
+                            <td>Chưa có điểm</td>
+                            <td style="text-align: center">15</td>
+                            <td>Chưa tính số TCTL và ĐTB</td>
+                        </tr>
+                        <tr>
+                            <td>Rút môn học</td>
+                            <td style="text-align: center">17</td>
+                            <td>Không ghi vào bảng điểm</td>
+                        </tr>
+                        <tr>
+                            <td>Không đạt</td>
+                            <td style="text-align: center">20</td>
+                            <td>Được tính như điểm 0</td>
+                        </tr>
+                        <tr>
+                            <td>Đạt</td>
+                            <td style="text-align: center">21</td>
+                            <td>Đạt nhưng không tính vào ĐTB</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
 </div>
 
 </body>
