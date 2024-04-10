@@ -36,10 +36,6 @@ public class StudentService implements IStudentService {
 	private  PointDAO pointDAO;
 	@Resource
 	private IPointService pointService;
-
-	public boolean checkStudentId(String studentId){
-		return studentId.length() < 8;
-	}
 	@Override
 	public List<StudentModel> findAll() {
 		return studentDAO.findAll();
@@ -75,7 +71,6 @@ public class StudentService implements IStudentService {
 	}
 	@Override
 	public boolean DangkiMonhoc(String studentId, String classID) {
-		if(!checkStudentId(studentId)) return false;
 		ClassModel classModel = classDAO.getClassInfo(classID);
 		StudentModel studentModel = studentDAO.findById(studentId);
 		// TODO: send message to course service, validate if student can register this course
@@ -115,10 +110,10 @@ public class StudentService implements IStudentService {
 		}
 
 
-		if(!CourseFacade.getINSTANCE()
-				.addStudentToClass(studentModel.getId(), classModel.getClassId())){
-			return false;
-		}
+//		if(!CourseFacade.getINSTANCE()
+//				.addStudentToClass(studentModel.getId(), classModel.getClassId())){
+//			return false;
+//		}
 
 		return true;
 	}
@@ -147,7 +142,6 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public List<ClassModel> get_timetable(String studentId) {
-		if (!checkStudentId(studentId)) return List.of();
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<String> classes = studentModel.getClasses();
 		List<ClassModel> result = null;
@@ -162,7 +156,6 @@ public class StudentService implements IStudentService {
 	}
 	@Override
 	public List<PointModel> Tientrinhhoctap(String studentId){
-		if (!checkStudentId(studentId)) return List.of();
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<String> finished_courses = studentModel.getFinished_courses();
 		List<PointModel> result = null;
@@ -174,7 +167,6 @@ public class StudentService implements IStudentService {
 	}
 	@Override
 	public List<PointModel> get_point(String studentId){
-		if (!checkStudentId(studentId)) return List.of();
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<PointModel> point = null;
 		point = pointDAO.findPoint(studentId);
@@ -183,7 +175,6 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public List<CourseModel> get_course(String studentId){
-		if (!checkStudentId(studentId)) return List.of();
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<CourseModel> result = null;
 		List<String> courses = studentModel.getCourses();
@@ -202,13 +193,13 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public boolean add_class_to_student(String studentId, String classId) {
-		if (!checkStudentId(studentId)) return false;
 		if(this.DangkiMonhoc(studentId, classId)){
 			StudentModel studentModel = studentDAO.findById(studentId);
 			ClassModel classModel = classDAO.getClassInfo(classId);
 			CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
 			studentModel.getCourses().add(courseModel.getCourseId());
 			studentModel.getClasses().add(classModel.getClassId());
+			update(studentModel);
 			return true;
 		}
 		return false;
