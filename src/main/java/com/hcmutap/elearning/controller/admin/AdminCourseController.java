@@ -123,7 +123,6 @@ public class AdminCourseController {
 		CourseModel courseModel = courseService.findById(request.getParameter("courseId"));
 		ClassModel classModel = new ClassModel();
 		classModel.setCourseId((request.getParameter("courseId")));
-		classModel.setCourseName(courseModel.getCourseName());
 		classModel.setClassName(request.getParameter("className"));
 		classModel.setClassId(classModel.getCourseId()+"-"+classModel.getClassName());
 		classModel.setDayOfWeek(request.getParameter("dayOfWeek"));

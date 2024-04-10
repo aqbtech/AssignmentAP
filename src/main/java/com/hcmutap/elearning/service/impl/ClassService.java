@@ -1,14 +1,12 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.impl.ClassDAO;
+import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.model.*;
-import com.hcmutap.elearning.service.IClassService;
-import com.hcmutap.elearning.service.IInfoService;
-import com.hcmutap.elearning.service.IPointService;
-import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.service.*;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +31,8 @@ public class ClassService implements IClassService {
     private IStudentService studentService;
     @Resource
     private IInfoService infoService;
+    @Resource
+    private CourseDAO courseDAO;
     @Resource
     private StudentDAO studentDAO;
     @Resource
@@ -107,8 +107,9 @@ public class ClassService implements IClassService {
         String id = String.valueOf(timestamp);
         StudentModel studentModel = studentDAO.findById(studentId);
         ClassModel classModel = classDAO.getClassInfo(classId);
+        CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
         // state = true is learned
-        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(),classModel.getCourseName(), classId,classModel.getClassName(), false, -1, -1, -1, -1);
+        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(), courseModel.getCourseName(), classId,classModel.getClassName(), false, -1, -1, -1, -1);
         pointService.save(tmp);
         return true;
     }
