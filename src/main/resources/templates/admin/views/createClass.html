@@ -12,30 +12,61 @@
     <div class="container">
         <h1>Tạo lớp học</h1>
         <hr>
+        <div class="alert alert-danger" id="errorMessage1" style="display: none;">
+            Cần phải chọn khóa học để tạo lớp
+        </div>
+        <div class="alert alert-danger" id="errorMessage2" style="display: none;">
+            Thời gian hết tiết phải lớn hơn thời gian vào tiết
+        </div>
         <form name="data-form" th:action="@{/admin-management/add-class}" method="post" id="myForm" class="form-group">
-            <label for="className">Tên lớp:</label>
-            <input type="text" id="className" name="className" class="form-control"
-                   th:value="${class.className}" required><br>
-            <label for="courseId">Khóa học:</label>
-            <select id="courseId" name="courseId" class="form-control" required>
-                <option th:each="course : ${courses}" th:value="${course.courseId}" th:selected="${course.courseId == class.courseId}"
-                        th:text="${course.courseName}+' '+' ('+${course.courseId}+')'"></option>
-            </select><br>
-            <label for="dayOfWeek">Ngày:</label>
-            <input type="text" id="dayOfWeek" name="dayOfWeek" class="form-control"
-                   th:value="${class.dayOfWeek}" required><br>
-            <label for="timeStart">Thời gian vào tiết:</label>
-            <input type="time" id="timeStart" name="timeStart" class="form-control"
-                   th:value="${class.timeStart}" required><br>
-            <label for="timeEnd">Thời gian hết tiết:</label>
-            <input type="time" id="timeEnd" name="timeEnd" class="form-control"
-                   th:value="${class.timeEnd}" required><br>
-            <label for="room">Phòng:</label>
-            <input type="text" id="room" name="room" class="form-control"
-                   th:value="${class.room}" required><br>
+            <div class="row">
+                <div class="col">
+                    <label for="className">Tên lớp:</label>
+                    <input type="text" id="className" name="className" class="form-control"
+                           th:value="${class.className}" required><br>
+                </div>
+                <div class="col">
+                    <label for="courseId">Khóa học:</label>
+                    <select id="courseId" name="courseId" class="form-control" required>
+                        <option value="">Chọn khóa học</option>
+                        <option th:each="course : ${courses}" th:value="${course.courseId}" th:selected="${course.courseId == class.courseId}"
+                                th:text="${course.courseName}+' '+' ('+${course.courseId}+')'"></option>
+                    </select><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="dayOfWeek">Ngày học:</label>
+                    <select id="dayOfWeek" name="dayOfWeek" class="form-control" th:attr="day=${class.dayOfWeek}" required>
+                        <option value="Monday">Thứ hai</option>
+                        <option value="Tuesday">Thứ ba</option>
+                        <option value="Wednesday">Thứ tư</option>
+                        <option value="Thursday">Thứ năm</option>
+                        <option value="Friday">Thứ sáu</option>
+                        <option value="Saturday">Thứ bảy</option>
+                        <option value="Sunday">Chủ nhật</option>
+                    </select><br>
+                </div>
+                <div class="col">
+                    <label for="room">Phòng:</label>
+                    <input type="text" id="room" name="room" class="form-control"
+                           th:value="${class.room}" required><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="timeStart">Thời gian vào tiết:</label>
+                    <input type="time" id="timeStart" name="timeStart" class="form-control"
+                           th:value="${class.timeStart}" required><br>
+                </div>
+                <div class="col">
+                    <label for="timeEnd">Thời gian hết tiết:</label>
+                    <input type="time" id="timeEnd" name="timeEnd" class="form-control"
+                           th:value="${class.timeEnd}" required><br>
+                </div>
+            </div>
             <label for="status">Trạng thái:</label>
-            <select id="status" name="status" class="form-control"
-                    th:value="${class.status}" th:attr="status=${class.status}" required>
+            <select id="status" name="status" class="form-control" th:attr="status=${class.status}" required>
                 <option value="open">Mở</option>
                 <option value="close">Đóng</option>
             </select><br>
@@ -61,20 +92,71 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/2.8.0/slimselect.min.js" integrity="sha512-mG8eLOuzKowvifd2czChe3LabGrcIU8naD1b9FUVe4+gzvtyzSy+5AafrHR57rHB+msrHlWsFaEYtumxkC90rg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var check1;
+            var check2;
+            if(document.getElementById("courseId").value === "") {
+                document.getElementById("errorMessage1").style.display = "block";
+                check1=false;
+            }
+            else {
+                document.getElementById("errorMessage1").style.display = "none";
+                check1=true;
+                this.submit();
+            }
+            // const timeStart = document.getElementById("timeStart").value;
+            // const timeEnd = document.getElementById("timeStart").value;
+            // if(timeEnd < timeStart) {
+            //     document.getElementById("errorMessage2").style.display = "block";
+            //     check2=false;
+            // } else {
+            //     document.getElementById("errorMessage2").style.display = "none";
+            //     check2=true;
+            // }
+            // if(check1 && check2)
+
+        });
+
         window.addEventListener("load", function(){
-            var message = document.getElementById("message").getAttribute("message");
+            const message = document.getElementById("message").getAttribute("message");
             if(message) {
-                var modalBody = document.getElementById("modalBody");
-                var modalExit = document.getElementById("modalExit");
+                const modalBody = document.getElementById("modalBody");
+                const modalExit = document.getElementById("modalExit");
                 modalBody.innerText = message;
                 modalExit.innerText = "Đóng";
                 $('#modal').modal('show');
 
-                var selectElement = document.getElementById("status");
-                if(selectElement.getAttribute("status") === "open")
-                    selectElement.option[0] = true;
+                const selectDay = document.getElementById("dayOfWeek");
+                switch (selectDay.getAttribute("day")){
+                    case "Monday":
+                        selectStatus.option[0] = true;
+                        break;
+                    case "Tuesday":
+                        selectStatus.option[1] = true;
+                        break;
+                    case "Wednesday":
+                        selectStatus.option[2] = true;
+                        break;
+                    case "Thursday":
+                        selectStatus.option[3] = true;
+                        break;
+                    case "Friday":
+                        selectStatus.option[4] = true;
+                        break;
+                    case "Saturday":
+                        selectStatus.option[5] = true;
+                        break;
+                    case "Sunday":
+                        selectStatus.option[6] = true;
+                        break;
+                }
+
+                const selectStatus = document.getElementById("status");
+                if(selectStatus.getAttribute("status") === "open")
+                    selectStatus.option[0] = true;
                 else
-                    selectElement.option[1] = true;
+                    selectStatus.option[1] = true;
             } else {
                 document.getElementById("className").value = "";
                 document.getElementById("courseId").value = "";
@@ -85,6 +167,14 @@
                 document.getElementById("status").value = "";
             }
         });
+
+        function parseTime(timeStr) {
+            const [hours, minutes] = timeStr.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hours, 10));
+            date.setMinutes(parseInt(minutes, 10));
+            return date;
+        }
 
         new SlimSelect({
             select: "#courseId"
