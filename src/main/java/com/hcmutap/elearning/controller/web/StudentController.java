@@ -111,4 +111,13 @@ public class StudentController{
         model.addAttribute("points", points);
         return "web/views/student-service/score";
     }
+
+    @GetMapping(value = "/learning-process")
+    public String learningprocess(Principal principal, ModelMap model){
+        InfoDTO infoDTO = userService.getInfo(principal.getName());
+        StudentModel studentModel = studentService.findById(infoDTO.getId());
+        List<CourseModel>courseModels=studentService.get_course(studentModel.getId());
+        model.addAttribute("courses", courseModels);
+        return "web/views/student-service/learning-process";
+    }
 }
