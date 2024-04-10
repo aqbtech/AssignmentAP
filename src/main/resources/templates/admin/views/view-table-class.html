@@ -3,24 +3,16 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout/admin-layout.html}">
 <head>
-    <title>Tạo khóa học</title>
+    <title>Trang quản trị</title>
 </head>
 <body>
 <div layout:fragment="content">
     <!-- Page Content -->
     <div class="container">
-        <h1>Tạo khóa học</h1>
+        <h1 th:text="'Mã khóa học ' + ${course.courseId}"></h1>
         <hr>
-        <div class="alert alert-danger" id="errorMessage" style="display: none;">
-            Tổng tỉ lệ điểm phải bằng 100%
-        </div>
-        <form name="data-form" th:action="@{/admin-management/add-course}" method="post" id="myForm" class="form-group">
+        <form name="data-form" th:action="@{/admin-management/update-course}" method="post" id="myForm" class="form-group">
             <div class="row">
-                <div class="col">
-                    <label for="courseId">Mã khóa học:</label>
-                    <input type="text" id="courseId" name="courseId" class="form-control"
-                           th:value="${course.courseId}"required><br>
-                </div>
                 <div class="col">
                     <label for="courseName">Tên khóa học:</label>
                     <input type="text" id="courseName" name="courseName" class="form-control"
@@ -54,8 +46,56 @@
                            th:value="${course.percentCK}" required><br>
                 </div>
             </div>
+            <div id="errorMessage" class="error" style="display: none; color: red;">Cần phải chọn khóa học để tạo lớp</div>
             <input type="submit" value="Submit" class="btn btn-primary">
         </form>
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fas fa-table"></i>
+                <span th:text="'Danh sách lớp của khóa học ' + ${course.courseId}"></span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Update</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="class : ${classes}">
+                            <td th:text="${class.classId}"></td>
+                            <td th:text="${class.className}"></td>
+                            <!-- Update button -->
+                            <td>
+                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-course?id=${course.courseId}|}">Update</a>
+                            </td>
+                            <!-- Delete button -->
+                            <td>
+                                <button class="btn btn-link delete-button" th:data-id="${class.classId}">Delete</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                        <script>
+                            document.querySelectorAll('.delete-button').forEach(function(button) {
+                                button.addEventListener('click', function() {
+                                    var id = this.getAttribute('data-id');
+                                    deleteElement(id);
+                                });
+                            });
+                            function deleteElement(id) {
+                                window.location.href = "/admin-management-course?action=delete&id=" + id;
+                                console.log('Delete button clicked for element with id:', id);
+                            }
+                        </script>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+        </div>
     </div>
     <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
     <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
@@ -90,26 +130,20 @@
             }
         });
 
-        window.addEventListener("load", function(){
+        window.addEventListener("load", function() {
             var message = document.getElementById("message").getAttribute("message");
-            if(message) {
+            if (message) {
                 var modalBody = document.getElementById("modalBody");
                 var modalExit = document.getElementById("modalExit");
                 modalBody.innerText = message;
                 modalExit.innerText = "Đóng";
                 $('#modal').modal('show');
-            } else {
-                document.getElementById("courseId").value = "";
-                document.getElementById("courseName").value = "";
-                document.getElementById("credit").value = "";
-                document.getElementById("percentBT").value = "";
-                document.getElementById("percentBTL").value = "";
-                document.getElementById("percentGK").value = "";
-                document.getElementById("percentCK").value = "";
             }
         });
     </script>
-    <!-- /.container -->
+     /.container
 </div>
 </body>
+<!-- Demo scripts for this page-->
+<script th:src="@{/template/admin/js/demo/datatables-demo.js}"></script>
 </html>

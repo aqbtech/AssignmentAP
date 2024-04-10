@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -33,6 +34,12 @@ public class AdminCourseController {
 							 @RequestParam("action") String action,
 							 @RequestParam("id") String id) {
 		if(action.equals("delete")) {
+			CourseModel courseModel;
+			try{
+				courseModel = courseService.findById(id);
+			} catch(Exception e) {
+				return"redirect:/admin-management-course?action=view&id=";
+			}
 			List<ClassModel> listClass = courseService.getLichTrinh(id);
 			if(!listClass.isEmpty()) {
 				String message = "Cần xóa các lớp ";
@@ -42,7 +49,7 @@ public class AdminCourseController {
 				message += " của khóa học " + id + " trước khi xóa khóa học!";
 				model.addAttribute("message", message);
 			} else {
-				courseService.delete(id);
+				courseService.delete(courseModel.getFirebaseId());
 				model.addAttribute("message","Xóa thành công khóa học " + id +"!");
 			}
 		}
@@ -50,8 +57,17 @@ public class AdminCourseController {
 		return "admin/views/view-table-course";
 	}
 	@GetMapping("/admin-management/update-course")
-	public String updateCourse(@RequestParam("id") String id) {
-		return "";
+	public String updateCourse(@RequestParam("id") String id, ModelMap model) {
+		CourseModel courseModel;
+		try{
+			courseModel = courseService.findById(id);
+		} catch (Exception e) {
+			return"redirect:/admin-management-course?action=view&id=";
+		}
+		List<ClassModel> listClass = classService.getClassOfCourse(id);
+		model.addAttribute("course", courseModel);
+		model.addAttribute("classes", listClass);
+		return "admin/views/view-table-class";
 	}
 
 	@PostMapping("/admin-management/update-course")
@@ -137,6 +153,7 @@ public class AdminCourseController {
 			InfoClassModel info = new InfoClassModel();
 			info.setClassId(classModel.getClassId());
 			info.setClassName(classModel.getClassName());
+			info.setListDocument(new ArrayList<>());
 			classModel.setInfoId(info.getId());
 			infoService.save(info);
 			classService.save(classModel);
