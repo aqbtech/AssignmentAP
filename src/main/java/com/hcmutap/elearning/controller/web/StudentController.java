@@ -3,14 +3,8 @@ package com.hcmutap.elearning.controller.web;
 
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dto.InfoDTO;
-import com.hcmutap.elearning.model.ClassModel;
-import com.hcmutap.elearning.model.CourseModel;
-import com.hcmutap.elearning.model.PointModel;
-import com.hcmutap.elearning.model.StudentModel;
-import com.hcmutap.elearning.service.IPointService;
-import com.hcmutap.elearning.service.IClassService;
-import com.hcmutap.elearning.service.ICourseService;
-import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.model.*;
+import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
@@ -24,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/student")
@@ -36,6 +31,8 @@ public class StudentController{
     private IClassService classService;
     @Resource
     private ICourseService courseService;
+    @Resource
+    private ISemesterService semesterServicel;
 
     @Resource
     private IPointService pointService;
@@ -113,17 +110,23 @@ public class StudentController{
         for (PointModel pointModel : points){
             resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(),pointModel.getCourseId()));
         }
+        List<SemesterModel> semesterModels = semesterServicel.findAll();
+        model.addAttribute("semesters", semesterModels);
         model.addAttribute("results",resultAverageList);
         model.addAttribute("points", points);
         return "web/views/student-service/score";
     }
 
     @GetMapping(value = "/learning-process")
-    public String learningprocess(Principal principal, ModelMap model){
+    public String learning_process(Principal principal, ModelMap model){
         InfoDTO infoDTO = userService.getInfo(principal.getName());
         StudentModel studentModel = studentService.findById(infoDTO.getId());
         List<CourseModel>courseModels=studentService.get_course(studentModel.getId());
+        List<PointModel> courseModels1=studentService.Tientrinhhoctap(studentModel.getId());
+        List<SemesterModel> semesterModels = semesterServicel.findAll();
+        model.addAttribute("semesters", semesterModels);
         model.addAttribute("courses", courseModels);
+        model.addAttribute("courses1", courseModels1);
         return "web/views/student-service/learning-process";
     }
 }

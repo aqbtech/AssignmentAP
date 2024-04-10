@@ -109,7 +109,7 @@ public class ClassService implements IClassService {
         ClassModel classModel = classDAO.getClassInfo(classId);
         CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
         // state = true is learned
-        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(), courseModel.getCourseName(), classId,classModel.getClassName(), false, -1, -1, -1, -1);
+        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(), courseModel.getCourseName(), classId,classModel.getClassName(),courseModel.getSemesterId(), false, -1, -1, -1, -1);
         pointService.save(tmp);
         return true;
     }
@@ -123,7 +123,7 @@ public class ClassService implements IClassService {
             if (item.getClassId().equals(classId)) {
                 // TODO: sua lai ham nay
                 PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
-                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),
+                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
                         item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
                 pointService.update(pointUpdate);
                 return true;
