@@ -1,10 +1,13 @@
 package com.hcmutap.elearning.controller.web;
 
 
+import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dto.InfoDTO;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
+import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
+import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 import com.hcmutap.elearning.service.IStudentService;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping(value = "/student")
@@ -34,6 +38,9 @@ public class StudentController{
     private IClassService classService;
     @Resource
     private ICourseService courseService;
+
+    @Resource
+    private IPointService pointService;
 
     @RequestMapping("/service")
     public String service(){return "web/views/student";}
@@ -91,5 +98,17 @@ public class StudentController{
         model.addAttribute("classes", classes);
         return "web/views/student-service/time-table";
     }
-
+    @GetMapping(value = "/score")
+    public String score(Principal principal, ModelMap model){
+        InfoDTO infoDTO = userService.getInfo(principal.getName());
+        StudentModel studentModel = studentService.findById(infoDTO.getId());
+        List<PointModel> points = studentService.get_point(studentModel.getId());
+        ArrayList<Double> resultAverageList = new ArrayList<>();
+        for (PointModel pointModel : points){
+            resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(),pointModel.getCourseId()));
+        }
+        model.addAttribute("results",resultAverageList);
+        model.addAttribute("points", points);
+        return "web/views/student-service/score";
+    }
 }
