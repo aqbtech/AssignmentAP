@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
+
+
+
 <div layout:fragment="content">
     <div class="header">
         <div class="container mt-3">
@@ -26,7 +29,7 @@
 
             <div class="col-md-4 col-sm-6 m-4 box-search1">
                 <h4 class="mt-3">Registed</h4>
-                <div class="ele1 mb-3" th:each="course : ${courses}">
+                <div class="ele1 mb-3" th:each="course : ${courses}" style="overflow: auto" id="registed">
                     <div class="courseid">
                         <p th:text="${course.getCourseId()}">Id</p>
                     </div>
@@ -39,36 +42,49 @@
             <div class="col-md-6 col-sm-6 m-4 ">
 
                 <div class="box p-3 mb-4">
-                    <input type="text" class="text" placeholder="Search here..." id="msearch">
-                    <a href="#" class="" id ="mysearch">
-                        <i class="fa fa-search"></i>
-                    </a>
+                    <form method="get" id="my-search">
+                        <input type="text" class="text" placeholder="Search here..." id="courseId" name="courseId">
+                    </form>
                 </div>
 
                 <div class="box-search">
-                    <div class="ele">
+                    <div class="ele" th:each="class : ${classes}" onclick="myfunction()" >
                         <div class="row">
-                            <div class="col-sm-4" style="word-wrap:break-word;"><p>Course Name</p></div>
-                            <div class="col-sm-4" style="word-wrap:break-word;"><p>Here</p></div>
-                            <div class="col-sm-4" style="word-wrap:break-word;"><p>Here</p></div>
+                            <div class="col-sm-10">
+                                <div class="row">
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${class.getCourseName()}">Course Name</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${class.getCourseId()}">Course Id</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${class.getClassId()}">Class Id</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${class.getTimeStart()} + '-' + ${class.getTimeStart()}">Time</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 mt-4" style="overflow: auto">
+                                <form th:action="@{/student/registration?courseId=}" method="post" id="select-course">
+                                    <input type="hidden" id="classId" name="classId" th:value="${class.getClassId()}">
+                                    <input type="submit" style="background-color: antiquewhite;border: none;color: white"  value="select">
+                                </form>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="ele">
-                        <p>Here</p>
-                    </div>
-
-                    <div class="ele">
-                        <p>Here</p>
-                    </div>
+                    <script>
+                        function myfunction(){
+                            alert('123456');
+                        }
+                    </script>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
-
-
+<div th:attr="courses" id="courses" style="display: none"></div>
 
 </body>
 </html>
