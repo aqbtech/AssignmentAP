@@ -9,11 +9,18 @@ import com.hcmutap.elearning.service.ITeacherService;
 import com.hcmutap.elearning.service.IUserService;
 import com.hcmutap.elearning.service.impl.RegisterService;
 import com.hcmutap.elearning.utils.MapperUtil;
+import com.hcmutap.elearning.validator.RegisterDTOValidator;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 
@@ -26,7 +33,13 @@ public class HomeController {
 	@Resource
 	private IUserService userService;
 	private RegisterService registerService;
+	@Autowired
+	private RegisterDTOValidator registerDTOValidator;
 
+//	@Autowired
+//	public void setRegisterDTOValidator(RegisterDTOValidator registerDTOValidator) {
+//		this.registerDTOValidator = registerDTOValidator;
+//	}
 	@Autowired
 	public void setRegisterService(RegisterService registerService) {
 		this.registerService = registerService;
@@ -49,23 +62,16 @@ public class HomeController {
 		}
 		return "admin/views/view-all-table";
 	}
-	@GetMapping("/admin-management/add")
-	public String addAccount(@RequestParam("type") String type){
-		if (type.equals("course")){
-			return "admin/views/createCourse";
-		} else {
-			return "admin/views/createAccount";
-		}
-	}
 	@GetMapping("/admin-management/update")
 	public String updateAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type) {
 		return "redirect:/admin-management/view-info?id=" + id + "&type=" + type;
 	}
+
 	@GetMapping("/admin-management/view-info")
 	public String viewInfo(@RequestParam("id") String id,
 						   @RequestParam("type") String type,
-						   ModelMap model){
+						   Model model) {
 		if (type.equals("student")){
 			model.addAttribute("user", studentService.findById(id));
 			model.addAttribute("type", "student");
@@ -76,10 +82,43 @@ public class HomeController {
 		}
 		return "admin/views/update-account";
 	}
-	@PostMapping("/admin-management/add")
-	public String addAccount(@ModelAttribute RegisterDTO registerDTO){
+
+	@InitBinder("registerForm")
+	protected void initBinder(WebDataBinder dataBinder) {
+		dataBinder.addValidators(registerDTOValidator);
+//		Object target = dataBinder.getTarget();
+//		if (target == null) {
+//			return;
+//		}
+//		System.out.println("Target=" + target);
+//		if (target.getClass() == RegisterDTO.class) {
+//			dataBinder.setValidator(registerDTOValidator);
+//		}
+	}
+
+	@RequestMapping(value = "/admin-management/add-account", method = RequestMethod.GET)
+	public String addAccount(Model model) {
+		RegisterDTO form = new RegisterDTO();
+		model.addAttribute("registerForm", form);
+		return "admin/views/createAccount";
+	}
+
+	@RequestMapping(value = "/admin-management/add", method = RequestMethod.POST)
+	public String addAccount(Model model,
+							 @ModelAttribute("registerForm") @Validated RegisterDTO registerDTO,
+							 BindingResult result,
+							 final RedirectAttributes redirectAttributes) {
+		if (result.hasErrors()) {
+			model.addAttribute("message", "Failed to add account");
+			return "admin/views/createAccount";
+		}
 		ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
-		registerService.register(modelMap);
-		return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
+		String message = registerService.register(modelMap);
+		if (message.equals("Success")){
+			return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
+		} else {
+			redirectAttributes.addFlashAttribute("message", message);
+			return "redirect:/admin-management/add-account";
+		}
 	}
 }

@@ -11,12 +11,10 @@ import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 import com.hcmutap.elearning.service.IStudentService;
-import com.hcmutap.elearning.service.ITeacherService;
-import com.hcmutap.elearning.service.impl.CourseFacade;
 import com.hcmutap.elearning.service.impl.UserService;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +41,15 @@ public class StudentController{
     private IPointService pointService;
 
     @RequestMapping("/service")
-    public String service(){return "web/views/student";}
+    public String service(Model model, Principal principal) {
+        InfoDTO infoDTO = userService.getInfo(principal.getName());
+        if (infoDTO.getRole().equalsIgnoreCase("ADMIN") || infoDTO.getRole().equalsIgnoreCase("TEACHER")) {
+            model.addAttribute("message", "You are not a student");
+            return "login/404_page";
+        }
+        model.addAttribute("type", "student");
+        return "web/views/student";
+    }
 
 
 //    @GetMapping(value = "/registration")

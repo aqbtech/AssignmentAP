@@ -20,6 +20,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -144,7 +145,7 @@ public class StudentService implements IStudentService {
 	public List<ClassModel> get_timetable(String studentId) {
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<String> classes = studentModel.getClasses();
-		List<ClassModel> result = null;
+		List<ClassModel> result = new ArrayList<>();
 		for(String e : classes){
 			ClassModel c = CourseFacade.getINSTANCE().getClassInfo(e);
 			result.add(c);
@@ -176,13 +177,13 @@ public class StudentService implements IStudentService {
 	@Override
 	public List<CourseModel> get_course(String studentId){
 		StudentModel studentModel = studentDAO.findById(studentId);
-		List<CourseModel> result = null;
+		List<CourseModel> result = new ArrayList<>();
 		List<String> courses = studentModel.getCourses();
 		for (String e : courses){
 			CourseModel c = CourseFacade.getINSTANCE().getCourseInfo(e);
 			result.add(c);
 		}
-		return result == null ? List.of() : result;
+		return result;
 	}
 
 	@Override
