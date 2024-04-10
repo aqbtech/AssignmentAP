@@ -10,14 +10,23 @@ import com.hcmutap.elearning.service.IInfoService;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class ClassService implements IClassService {
-    @Resource
+    public ClassService() {
+        classDAO = new ClassDAO();
+        studentDAO = new StudentDAO();
+        pointDAO = new PointDAO();
+    }
     private ClassDAO classDAO;
+    @Autowired
+    public void setClassDAO(ClassDAO classDAO) {
+        this.classDAO = classDAO;
+    }
     @Resource
     private IPointService pointService;
     @Resource

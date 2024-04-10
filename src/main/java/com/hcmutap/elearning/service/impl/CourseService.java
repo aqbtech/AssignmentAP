@@ -14,6 +14,9 @@ import java.util.List;
 
 @Service
 public class CourseService implements ICourseService {
+    public CourseService() {
+        courseDAO = new CourseDAO();
+    }
     @Resource
     private CourseDAO courseDAO;
     @Resource

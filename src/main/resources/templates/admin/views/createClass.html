@@ -66,7 +66,7 @@
                 </div>
             </div>
             <label for="status">Trạng thái:</label>
-            <select id="status" name="status" class="form-control" th:attr="status=${class.status}" required>
+            <select id="status" name="status" class="form-control" th:attr="status=${class.getSemester}" required>
                 <option value="open">Mở</option>
                 <option value="close">Đóng</option>
             </select><br>
@@ -176,9 +176,9 @@
             return date;
         }
 
-        new SlimSelect({
-            select: "#courseId"
-        });
+        // new SlimSelect({
+        //     select: "#courseId"
+        // });
     </script>
 </div>
 </body>

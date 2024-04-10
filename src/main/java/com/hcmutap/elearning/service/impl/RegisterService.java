@@ -13,6 +13,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 @Service
@@ -23,41 +24,50 @@ public class RegisterService implements IRegisterService {
 	private StudentService studentService;
 	@Resource
 	private UserService userService;
-	private void registerTeacher(TeacherResDTO teacher) {
-		if(userService.isExist(teacher.getUsername()) && !teacherService.isExist(teacher.getId())) {
-			System.out.println("Username is already exist"); // throw exist exception
-			return;
-		} else  {
+	private String registerTeacher(TeacherResDTO teacher) {
+		if(userService.isExist(teacher.getUsername())) {
+			return "Username is already exist";
+		} else if (teacherService.isExist(teacher.getId())) {
+			return "Teacher is already exist";
+		} else {
 			UserModel userModel = ModelBuilderUtil.buildModelFromDTO(new UserModel(), teacher);
 			userModel.setUsrId(teacher.getId());
 			TeacherModel teacherModel = ModelBuilderUtil.buildModelFromDTO(new TeacherModel(), teacher);
+			teacherModel.setClasses(new ArrayList<>());
+			teacherModel.setCourses(new ArrayList<>());
 			userService.save(userModel);
 			teacherService.save(teacherModel);
+			return "Success";
 		}
-
 	}
-	private void registerStudent(StudentResDTO student) {
-		if(userService.isExist(student.getUsername()) && !studentService.isExist(student.getId())) {
-			System.out.println("Username is already exist"); // throw exist exception
-			return;
-		} else  {
+	private String registerStudent(StudentResDTO student) {
+		if(userService.isExist(student.getUsername())) {
+			return "Username is already exist";
+		} else if (studentService.isExist(student.getId())) {
+			return "Student is already exist";
+		} else {
 			UserModel userModel = ModelBuilderUtil.buildModelFromDTO(new UserModel(), student);
 			userModel.setUsrId(student.getId());
 			StudentModel studentModel = ModelBuilderUtil.buildModelFromDTO(new StudentModel(), student);
+			studentModel.setClasses(new ArrayList<>());
+			studentModel.setCourses(new ArrayList<>());
+			studentModel.setFinished_courses(new ArrayList<>());
 			userService.save(userModel);
 			studentService.save(studentModel);
+			return "Success";
 		}
 	}
 	@Override
-	public void register(ModelMap model) {
+	public String register(ModelMap model) {
 		if(Objects.equals((Objects.requireNonNull(model.getAttribute("role"))).toString().toLowerCase(), "teacher")) {
 			TeacherResDTO teacher = MapperUtil.getInstance().toModelFromModelMap(model, TeacherResDTO.class);
-			registerTeacher(teacher);
+			return registerTeacher(teacher);
 		}
 		else if(Objects.equals(Objects.requireNonNull(model.getAttribute("role")).toString().toLowerCase(), "student")) {
 			StudentResDTO student = MapperUtil.getInstance().toModelFromModelMap(model, StudentResDTO.class);
-			registerStudent(student);
+			return registerStudent(student);
 		}
+		return "Role is not valid";
 	}
 
 }

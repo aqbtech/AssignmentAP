@@ -130,7 +130,7 @@ public class AdminCourseController {
 		classModel.setTimeStart(request.getParameter("timeStart"));
 		classModel.setTimeEnd(request.getParameter("timeEnd"));
 		classModel.setRoom(request.getParameter("room"));
-		classModel.setStatus(request.getParameter("status"));
+		classModel.setSemester(request.getParameter("status"));
 
 		boolean notSave = false;
 		List<ClassModel> listClass = classService.findAll();

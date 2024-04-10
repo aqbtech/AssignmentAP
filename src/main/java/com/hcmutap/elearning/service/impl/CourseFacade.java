@@ -6,16 +6,20 @@ import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.ICourseFacade;
 import lombok.Getter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.List;
-@Service
+
 public class CourseFacade implements ICourseFacade {
 	@Getter
 	private static final CourseFacade INSTANCE = new CourseFacade();
-	private final CourseService courseService;
-	private final ClassService classService;
-	private final PointService pointService;
+	private CourseService courseService;
+	@Resource
+	private ClassService classService;
+	private PointService pointService;
 	private CourseFacade() {
 		courseService = new CourseService();
 		classService = new ClassService();

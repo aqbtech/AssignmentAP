@@ -25,4 +25,5 @@ public class TeacherResDTO {
 	private Long age;
 	private String email;
 	private String degree;
+	private String gender;
 }

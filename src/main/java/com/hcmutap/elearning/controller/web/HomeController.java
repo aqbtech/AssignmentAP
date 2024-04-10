@@ -8,6 +8,7 @@ import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.service.*;
 
+import com.hcmutap.elearning.service.impl.CourseFacade;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -31,11 +32,6 @@ public class HomeController {
 	@Resource
 	private IUserService userService;
 	private IFileService fileService;
-	private ICourseFacade courseFacade;
-	@Autowired
-	public void setCourseFacade(ICourseFacade courseFacade) {
-		this.courseFacade = courseFacade;
-	}
 	@Autowired
 	public void setFileService(IFileService fileService) {
 		this.fileService = fileService;
@@ -72,9 +68,9 @@ public class HomeController {
 		InfoDTO infoDTO = userService.getInfo(principal.getName());
 		ClassModel classModel = null;
 		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			classModel = courseFacade.getClassInfo(id);
+			classModel = CourseFacade.getINSTANCE().getClassInfo(id);
 		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
-			classModel = courseFacade.getClassInfo(id);
+			classModel = CourseFacade.getINSTANCE().getClassInfo(id);
 		} else {
 			model.addAttribute("message", "You are not a student or teacher");
 			return "login/404_page";
