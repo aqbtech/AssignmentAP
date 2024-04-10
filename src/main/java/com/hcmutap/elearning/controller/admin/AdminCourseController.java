@@ -150,12 +150,6 @@ public class AdminCourseController {
 		}
 		if(!notSave) {
 			model.addAttribute("message", "Lớp học đã được tạo thành công!");
-			InfoClassModel info = new InfoClassModel();
-			info.setClassId(classModel.getClassId());
-			info.setClassName(classModel.getClassName());
-			info.setListDocument(new ArrayList<>());
-			classModel.setInfoId(info.getId());
-			infoService.save(info);
 			classService.save(classModel);
 		}
 		model.addAttribute("courses", courseService.findAll());

@@ -12,6 +12,7 @@ import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,6 +46,15 @@ public class ClassService implements IClassService {
     }
     @Override
     public String save(ClassModel classModel) {
+        InfoClassModel info = new InfoClassModel();
+        long timestamp = System.currentTimeMillis();
+        String id = String.valueOf(timestamp);
+        info.setId(id);
+        info.setClassId(classModel.getClassId());
+        info.setClassName(classModel.getClassName());
+        info.setListDocument(new ArrayList<>());
+        classModel.setInfoId(info.getId());
+        infoService.save(info);
         return classDAO.save(classModel);
     }
     @Override
