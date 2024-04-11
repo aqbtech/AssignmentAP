@@ -17,7 +17,6 @@ public class CourseModel {
     private String firebaseId;
     private String courseId;
     private String courseName;
-    private String semesterId;
     private int credit;
     private int percentBT;
     private int percentBTL;
