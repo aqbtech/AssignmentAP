@@ -16,7 +16,7 @@
                 <div class="col">
                     <label for="courseName">Tên khóa học:</label>
                     <input type="text" id="courseName" name="courseName" class="form-control"
-                           th:value="${course.courseName}" required><br>
+                           th:value="${course.courseName}" required disabled><br>
                 </div>
                 <div class="col">
                     <label for="credit">Tín chỉ:</label>
@@ -47,6 +47,12 @@
                 </div>
             </div>
             <div id="errorMessage" class="error" style="display: none; color: red;">Cần phải chọn khóa học để tạo lớp</div>
+            <form>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="switch1" onclick="toggleInput()">
+                    <label class="custom-control-label" for="switch1">Chỉnh sửa</label>
+                </div>
+            </form>
             <input type="submit" value="Submit" class="btn btn-primary">
         </form>
         <div class="card mb-3">
@@ -140,6 +146,11 @@
                 $('#modal').modal('show');
             }
         });
+
+        function toggleInput() {
+            var inputField = document.getElementById('courseName');
+            inputField.disabled = !inputField.disabled;
+        }
     </script>
      /.container
 </div>

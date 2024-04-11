@@ -16,9 +16,9 @@
             Cần phải chọn khóa học để tạo lớp
         </div>
         <div class="alert alert-danger" id="errorMessage2" style="display: none;">
-            Thời gian hết tiết phải lớn hơn thời gian vào tiết
+            Thời gian không hợp lệ
         </div>
-        <form name="data-form" th:action="@{/admin-management/add-class}" method="post" id="myForm" class="form-group">
+        <form name="data-form" th:action="@{/admin-management/add-class}" th:object="${class}" method="post" id="myForm" class="form-group">
             <div class="row">
                 <div class="col">
                     <label for="className">Tên lớp:</label>
@@ -60,13 +60,13 @@
                            th:value="${class.timeStart}" required><br>
                 </div>
                 <div class="col">
-                    <label for="timeEnd">Thời gian hết tiết:</label>
-                    <input type="time" id="timeEnd" name="timeEnd" class="form-control"
-                           th:value="${class.timeEnd}" required><br>
+                    <label for="timeStudy">Số tiết:</label>
+                    <input type="number" id="timeStudy" name="timeStudy" class="form-control"
+                           th:value="${class.timeStudy}" required min="0"><br>
                 </div>
             </div>
-            <label for="status">Trạng thái:</label>
-            <select id="status" name="status" class="form-control" th:attr="status=${class.getSemester}" required>
+            <label for="semester">Học kì:</label>
+            <select id="semester" name="semester" class="form-control" required>
                 <option value="open">Mở</option>
                 <option value="close">Đóng</option>
             </select><br>
@@ -94,8 +94,8 @@
     <script>
         document.getElementById("myForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            var check1;
-            var check2;
+            let check1;
+            let check2;
             if(document.getElementById("courseId").value === "") {
                 document.getElementById("errorMessage1").style.display = "block";
                 check1=false;
@@ -103,18 +103,21 @@
             else {
                 document.getElementById("errorMessage1").style.display = "none";
                 check1=true;
+            }
+
+            const parts = document.getElementById("timeStart").value.split(':');
+            let hour = parseInt(parts[0], 10);
+            hour += document.getElementById("timeStudy").value.split(':');
+            if(hour > 24) {
+                document.getElementById("errorMessage2").style.display = "block";
+                check2=false;
+            } else {
+                document.getElementById("errorMessage2").style.display = "none";
+                check2=true;
+            }
+            if(check1 && check2) {
                 this.submit();
             }
-            // const timeStart = document.getElementById("timeStart").value;
-            // const timeEnd = document.getElementById("timeStart").value;
-            // if(timeEnd < timeStart) {
-            //     document.getElementById("errorMessage2").style.display = "block";
-            //     check2=false;
-            // } else {
-            //     document.getElementById("errorMessage2").style.display = "none";
-            //     check2=true;
-            // }
-            // if(check1 && check2)
 
         });
 
@@ -152,19 +155,14 @@
                         break;
                 }
 
-                const selectStatus = document.getElementById("status");
-                if(selectStatus.getAttribute("status") === "open")
-                    selectStatus.option[0] = true;
-                else
-                    selectStatus.option[1] = true;
             } else {
                 document.getElementById("className").value = "";
                 document.getElementById("courseId").value = "";
                 document.getElementById("dayOfWeek").value = "";
                 document.getElementById("timeStart").value = "";
-                document.getElementById("timeEnd").value = "";
+                document.getElementById("timeStudy").value = "";
                 document.getElementById("room").value = "";
-                document.getElementById("status").value = "";
+                document.getElementById("semester").value = "";
             }
         });
 

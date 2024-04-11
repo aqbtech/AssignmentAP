@@ -14,7 +14,7 @@
         <div class="alert alert-danger" id="errorMessage" style="display: none;">
             Tổng tỉ lệ điểm phải bằng 100%
         </div>
-        <form name="data-form" th:action="@{/admin-management/add-course}" method="post" id="myForm" class="form-group">
+        <form name="data-form" th:action="@{/admin-management/add-course}" th:object="${course}" method="post" id="myForm" class="form-group">
             <div class="row">
                 <div class="col">
                     <label for="courseId">Mã khóa học:</label>
