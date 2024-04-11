@@ -6,7 +6,7 @@ import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 
-import com.hcmutap.elearning.service.IInfoService;
+import com.hcmutap.elearning.service.ISemesterService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -23,6 +23,9 @@ public class AdminCourseController {
 	private ICourseService courseService;
 	@Resource
 	private IClassService classService;
+
+	@Resource
+	private ISemesterService semesterService;
 
 	@GetMapping("/admin-management-course")
 	public String viewCourse(ModelMap model,
@@ -66,8 +69,14 @@ public class AdminCourseController {
 	}
 
 	@PostMapping("/admin-management/update-course")
-	public String updateCourse(HttpServletRequest request){
-		return "";
+	public String updateCourse(@RequestParam("id") String id, @ModelAttribute("course") CourseModel courseModel, ModelMap model){
+		courseModel.setCourseId(id);
+		model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được chỉnh sửa thành công!");
+		courseService.update(courseModel);
+		List<ClassModel> listClass = classService.getClassOfCourse(id);
+		model.addAttribute("course", courseModel);
+		model.addAttribute("classes", listClass);
+		return "admin/views/view-table-class";
 	}
 
 
@@ -87,6 +96,7 @@ public class AdminCourseController {
 			courseService.findById(courseModel.getCourseId());
 			model.addAttribute("message", "Khóa học " + courseModel.getCourseId() +" đã tồn tại!");
 			model.addAttribute("course",courseModel);
+			model.addAttribute("error","error");
 		} catch (Exception e) {
 			model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được tạo thành công!");
 			courseService.save(courseModel);
@@ -101,6 +111,7 @@ public class AdminCourseController {
 	public String addClass(ModelMap model) {
 
 		model.addAttribute("courses", courseService.findAll());
+		model.addAttribute("semester", semesterService.findAll());
 		if(!model.containsAttribute("class"))
 			model.addAttribute("class",new ClassResDTO());
 		return "admin/views/createClass";
@@ -126,6 +137,7 @@ public class AdminCourseController {
 						+" của khóa học " + classModel.getCourseId() + " đã tồn tại!");
 				notSave = true;
 				model.addAttribute("class",classRes);
+				model.addAttribute("error","error");
 				break;
 			} else if(conflictTime(cls, classModel)) {
 				model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
@@ -133,6 +145,7 @@ public class AdminCourseController {
 						+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
 				notSave = true;
 				model.addAttribute("class",classRes);
+				model.addAttribute("error","error");
 				break;
 			}
 		}
@@ -142,6 +155,7 @@ public class AdminCourseController {
 			model.addAttribute("class",new ClassResDTO());
 		}
 		model.addAttribute("courses", courseService.findAll());
+		model.addAttribute("semester", semesterService.findAll());
 		return "admin/views/createClass";
 	}
 

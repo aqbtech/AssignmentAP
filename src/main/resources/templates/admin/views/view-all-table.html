@@ -25,6 +25,8 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
+                                    <th>Update</th>
+                                    <th>Delete</th>
                                 </tr>
                                 </thead>
 <!--                                <tfoot>-->
@@ -39,6 +41,13 @@
                                         <td th:text="${model.fullName}"></td>
                                         <!--check type of models and present model attribute-->
                                         <!-- Add more data cells as needed -->
+                                        <td>
+                                            <a class="btn btn-link update-button" th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}">Update</a>
+                                        </td>
+                                        <!-- Delete button -->
+                                        <td>
+                                            <button class="btn btn-link delete-button" th:data-id="${model.id}">Delete</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
