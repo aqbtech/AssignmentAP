@@ -24,30 +24,27 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 mt-3">
-                <div th:each="semester:${semesters}">
-                    <p style="color: #b21f2d;font-weight: bold" th:text="${'Học kỳ '+semester.getSemesterName()}"></p>
-                    <table class="table table-bordered table-striped" style="overflow: auto">
-                        <thead>
-                        <tr style="text-align: center; color: white; background-color: black;">
-                            <th width = "100px">Course Id</th>
-                            <th width = "200px">Course name</th>
-                            <th width = "200px">Trạng thái</th>
-                        </tr>
-                        </thead>
-                        <tbody style="text-align: center">
-                        <tr th:if="${course.getSemesterId() == semester.getId()}" th:each="course: ${courses}">
-                            <td th:if="${course.getCourseId() != ''}" th:text="${course.getCourseId()}"> Course </td>
-                            <td th:if="${course.getCourseName() != ''}" th:text="${course.getCourseName()}"> Name </td>
-                            <td th:text="'Đang học'"></td>
-                        </tr>
-                        <tr th:if="${course1.getSemesterId() == semester.getId()}" th:each="course1: ${courses1}">
-                            <td th:if="${course1.getCourseId() != ''}" th:text="${course1.getCourseId()}"> Course </td>
-                            <td th:if="${course1.getCourseName() != ''}" th:text="${course1.getCourseName()}"> Name </td>
-                            <td th:text="'Đã xong'"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="table table-bordered table-striped" style="overflow: auto">
+                    <thead>
+                    <tr style="text-align: center; color: white; background-color: black;">
+                        <th width = "100px">Course Id</th>
+                        <th width = "200px">Course name</th>
+                        <th width = "200px">Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody style="text-align: center">
+                    <tr th:each="course: ${courses}">
+                        <td th:if="${course.getCourseId() != ''}" th:text="${course.getCourseId()}"> Course </td>
+                        <td th:if="${course.getCourseName() != ''}" th:text="${course.getCourseName()}"> Name </td>
+                        <td th:text="'Đang học'"></td>
+                    </tr>
+                    <tr th:each="course1: ${courses1}">
+                        <td th:if="${course1.getCourseId() != ''}" th:text="${course1.getCourseId()}"> Course </td>
+                        <td th:if="${course1.getCourseName() != ''}" th:text="${course1.getCourseName()}"> Name </td>
+                        <td th:text="'Đã xong'"></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

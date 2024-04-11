@@ -1,19 +1,16 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.impl.ClassDAO;
+import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.model.*;
-import com.hcmutap.elearning.service.IClassService;
-import com.hcmutap.elearning.service.IInfoService;
-import com.hcmutap.elearning.service.IPointService;
-import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.service.*;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,6 +32,10 @@ public class ClassService implements IClassService {
     @Resource
     private IInfoService infoService;
     @Resource
+    private ISemesterService semesterService;
+    @Resource
+    private CourseDAO courseDAO;
+    @Resource
     private StudentDAO studentDAO;
     @Resource
     private PointDAO pointDAO;
@@ -55,15 +56,6 @@ public class ClassService implements IClassService {
     }
     @Override
     public String save(ClassModel classModel) {
-        InfoClassModel info = new InfoClassModel();
-        long timestamp = System.currentTimeMillis();
-        String id = String.valueOf(timestamp);
-        info.setId(id);
-        info.setClassId(classModel.getClassId());
-        info.setClassName(classModel.getClassName());
-        info.setListDocument(new ArrayList<>());
-        classModel.setInfoId(info.getId());
-        infoService.save(info);
         return classDAO.save(classModel);
     }
     @Override
@@ -117,8 +109,9 @@ public class ClassService implements IClassService {
         String id = String.valueOf(timestamp);
         StudentModel studentModel = studentDAO.findById(studentId);
         ClassModel classModel = classDAO.getClassInfo(classId);
+        CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
         // state = true is learned
-        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(),"classModel.getCourseName()", classId,classModel.getClassName(), false, -1, -1, -1, -1);
+        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(), courseModel.getCourseName(), classId,classModel.getClassName(),classModel.getSemesterId(),false, -1, -1, -1, -1);
         pointService.save(tmp);
         return true;
     }
@@ -132,7 +125,7 @@ public class ClassService implements IClassService {
             if (item.getClassId().equals(classId)) {
                 // TODO: sua lai ham nay
                 PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
-                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),
+                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
                         item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
                 pointService.update(pointUpdate);
                 return true;
