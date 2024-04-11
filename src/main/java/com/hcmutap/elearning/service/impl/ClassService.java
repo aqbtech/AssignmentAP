@@ -5,9 +5,9 @@ import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dto.PointDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,30 +15,40 @@ import java.util.List;
 
 @Service
 public class ClassService implements IClassService {
-    public ClassService() {
-        classDAO = new ClassDAO();
-        studentDAO = new StudentDAO();
-        pointDAO = new PointDAO();
-    }
-    private ClassDAO classDAO;
+    private final CourseDAO courseDAO;
+    private final StudentDAO studentDAO;
+    private final PointDAO pointDAO;
+    private final ClassDAO classDAO;
+
     @Autowired
-    public void setClassDAO(ClassDAO classDAO) {
+    public ClassService(CourseDAO courseDAO, StudentDAO studentDAO, PointDAO pointDAO, ClassDAO classDAO) {
+        this.courseDAO = courseDAO;
+        this.studentDAO = studentDAO;
+        this.pointDAO = pointDAO;
         this.classDAO = classDAO;
     }
-    @Resource
+
     private IPointService pointService;
-    @Resource
     private IStudentService studentService;
-    @Resource
     private IInfoService infoService;
-    @Resource
     private ISemesterService semesterService;
-    @Resource
-    private CourseDAO courseDAO;
-    @Resource
-    private StudentDAO studentDAO;
-    @Resource
-    private PointDAO pointDAO;
+
+    @Autowired
+    public void setPointService(IPointService pointService) {
+        this.pointService = pointService;
+    }
+    @Autowired
+    public void setStudentService(IStudentService studentService) {
+        this.studentService = studentService;
+    }
+    @Autowired
+    public void setInfoService(IInfoService infoService) {
+        this.infoService = infoService;
+    }
+    @Autowired
+    public void setSemesterService(ISemesterService semesterService) {
+        this.semesterService = semesterService;
+    }
 
     @Override
     public List<ClassModel> findAll() {
@@ -69,10 +79,6 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public Object findByUsername(String username) {
-        return null;
-    }
-    @Override
     public ClassModel getClassInfo(String classId) {
         return classDAO.getClassInfo(classId);
     }
@@ -81,11 +87,11 @@ public class ClassService implements IClassService {
         return classDAO.getClassOfCourse(courseId);
     }
     @Override
-    public List<PointModel> getListStudentOfClass(String classId) {
-        return pointService.getListStudentOfClass(classId);
+    public List<PointModel> getListStudentOfClass(String classId) throws NotFoundException {
+        return pointService.getListStudentByClassId(classId);
     }
     @Override
-    public List<ClassModel> getTimeTableSV(String studentId){
+    public List<ClassModel> getTimeTableSV(String studentId) throws NotFoundException {
         return classDAO.getTimeTableSV(studentId);
     }
     @Override
@@ -94,7 +100,7 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public boolean addStudentToClass(String studentId, String classId) {
+    public boolean addStudentToClass(String studentId, String classId) throws NotFoundException {
         List<String> listClass = studentDAO.findBy("studentId", studentId).getFirst().getClasses();
         for (String item : listClass) {
             if (item.equals(classId)) {
@@ -117,26 +123,22 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public boolean NhapDiem(String studentId, String classId, PointDTO point) {
-        // TODO: update diem cua 1 sinh vien
-        // điểm phải được update trong bảng điểm của lớp -> gọi class service
+    public boolean NhapDiem(String studentId, String classId, PointDTO point) throws NotFoundException {
         List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
-                // TODO: sua lai ham nay
                 PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
                         item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
                         item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
                 pointService.update(pointUpdate);
                 return true;
-            }  // TODO : them truong hop khong tim thay
+            }
         }
         return false;
     }
 
     @Override
-    public void NhapDiemCaLop(String classId, List<PointDTO> listPoint) {
-        // TODO: update diem cua 1 lop
+    public void NhapDiemCaLop(String classId, List<PointDTO> listPoint) throws NotFoundException {
         List<PointModel> listPointClass = pointDAO.findBy("classId", classId);
         for(PointModel item: listPointClass){
             for(PointDTO point: listPoint){

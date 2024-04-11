@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.impl.CourseDAO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.PointModel;
@@ -55,11 +56,6 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public Object findByUsername(String username) {
-        return null;
-    }
-
-    @Override
     public void delete(String courseId) {
         courseDAO.delete(courseId);
     }
@@ -70,12 +66,12 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public List<ClassModel> getLichTrinh(String courseId) {
+    public List<ClassModel> getLichTrinh(String courseId) throws NotFoundException {
         return classService.getClassOfCourse(courseId);
     }
 
     @Override
-    public List<PointModel> getListPointOfStudent(String courseId) {
-        return pointService.getListStudentOfCourse(courseId);
+    public List<PointModel> getListPointOfStudent(String courseId) throws NotFoundException {
+        return pointService.getListStudentByCourseId(courseId);
     }
 }

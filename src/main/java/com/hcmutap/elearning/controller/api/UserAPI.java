@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.UserModel;
 import com.hcmutap.elearning.service.IUserService;
 import com.hcmutap.elearning.utils.HttpUtil;
@@ -27,7 +28,11 @@ public class UserAPI {
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
 		UserModel userModel = HttpUtil.of(request.getReader()).toModel(UserModel.class);
-		userService.update(userModel);
+		try {
+			userService.update(userModel);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		mapper.writeValue(response.getOutputStream(), userModel);
 	}
 	@DeleteMapping("/user")
@@ -36,7 +41,11 @@ public class UserAPI {
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
 		UserModel userModel = HttpUtil.of(request.getReader()).toModel(UserModel.class);
-		userService.delete(userModel.getFirebaseId());
+		try {
+			userService.delete(userModel.getFirebaseId());
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		mapper.writeValue(response.getOutputStream(), "{}");
 	}
 }

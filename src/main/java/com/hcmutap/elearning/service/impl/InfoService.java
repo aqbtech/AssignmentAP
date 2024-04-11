@@ -5,15 +5,19 @@ import com.hcmutap.elearning.model.Document;
 import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.model.InfoClassModel;
 import com.hcmutap.elearning.service.IInfoService;
-import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class InfoService implements IInfoService {
-    @Resource
-    private InfoDAO infoDAO;
+    private final InfoDAO infoDAO;
+
+    @Autowired
+    public InfoService(InfoDAO infoDAO) {
+        this.infoDAO = infoDAO;
+    }
 
     @Override
     public List<InfoClassModel>  findAll() {
@@ -44,11 +48,6 @@ public class InfoService implements IInfoService {
     public void delete(List<String> ids) {
         for(String id : ids)
             infoDAO.delete((id));
-    }
-
-    @Override
-    public Object findByUsername(String username) {
-        return null;
     }
 
     @Override

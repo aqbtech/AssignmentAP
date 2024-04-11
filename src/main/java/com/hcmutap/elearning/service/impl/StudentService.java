@@ -5,14 +5,13 @@ import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
-import com.hcmutap.elearning.service.IClassService;
-import groovy.transform.Undefined;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,8 +41,12 @@ public class StudentService implements IStudentService {
 	}
 
 	@Override
-	public List<StudentModel> findBy(String key, String value) {
-		return studentDAO.findBy(key, value, Options.OptionBuilder.Builder().setEqual().build());
+	public List<StudentModel> findBy(String key, String value) throws NotFoundException {
+		List<StudentModel> studentModels = studentDAO.findBy(key, value, Options.OptionBuilder.Builder().setEqual().build());
+		if (studentModels.isEmpty()) {
+			throw new NotFoundException("Student not found");
+		}
+		return studentModels;
 	}
 
 	@Override
@@ -52,7 +54,10 @@ public class StudentService implements IStudentService {
 		return studentDAO.save(studentModel);
 	}
 	@Override
-	public void update(StudentModel studentModel) {
+	public void update(StudentModel studentModel) throws NotFoundException {
+		if (!isExist(studentModel.getId())) {
+			throw new NotFoundException("Student not found");
+		}
 		studentDAO.update(studentModel);
 	}
 
@@ -62,16 +67,24 @@ public class StudentService implements IStudentService {
 	}
 
 	@Override
-	public StudentModel findByUsername(String username) {
-		return studentDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
+	public StudentModel findByUsername(String username) throws NotFoundException {
+		List<StudentModel> studentModels = studentDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build());
+		if (studentModels.isEmpty()) {
+			throw new NotFoundException("Student not found");
+		}
+		return studentModels.getFirst();
 	}
 
 	@Override
-	public StudentModel findById(String id){
-		return studentDAO.findById(id);
+	public StudentModel findById(String id) throws NotFoundException {
+		try {
+			return studentDAO.findById(id);
+		} catch (Exception e) {
+			throw new NotFoundException("Student not found in StudentService.findById");
+		}
 	}
 	@Override
-	public boolean DangkiMonhoc(String studentId, String classID) {
+	public boolean DangkiMonhoc(String studentId, String classID) throws NotFoundException {
 		ClassModel classModel = classDAO.getClassInfo(classID);
 		StudentModel studentModel = studentDAO.findById(studentId);
 		// TODO: send message to course service, validate if student can register this course
@@ -84,7 +97,7 @@ public class StudentService implements IStudentService {
 		// call class service to add student to class
 		List<String> finished_course = studentModel.getFinished_courses();
 		List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
-		for(ClassModel e : timetable){
+		for(ClassModel e : timetable) {
 			if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
 				break;
 			}
@@ -142,32 +155,32 @@ public class StudentService implements IStudentService {
 	}
 
 	@Override
-	public List<ClassModel> get_timetable(String studentId) {
+	public List<ClassModel> getTimetableById(String studentId) throws NotFoundException {
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<String> classes = studentModel.getClasses();
 		List<ClassModel> result = new ArrayList<>();
 		for(String e : classes){
-			ClassModel c = CourseFacade.getINSTANCE().getClassInfo(e);
+			ClassModel c = CourseFacade.getInstance().getClassInfo(e);
 			result.add(c);
 		}
 
 //		classes.sort(getDateTimeComparator());
 
-		return result == null ? List.of() : result;
+		return result;
 	}
 	@Override
-	public List<PointModel> Tientrinhhoctap(String studentId){
+	public List<PointModel> LearningProcess(String studentId) throws NotFoundException {
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<String> finished_courses = studentModel.getFinished_courses();
-		List<PointModel> result = null;
+		List<PointModel> result = new ArrayList<>();
 		for(String e : finished_courses){
-			CourseModel c = CourseFacade.getINSTANCE().getCourseInfo(e);
+			CourseModel c = CourseFacade.getInstance().getCourseInfo(e);
 			result.add(pointService.getPoint(studentId, c.getCourseId()));
 		}
 		return result;
 	}
 	@Override
-	public List<PointModel> get_point(String studentId){
+	public List<PointModel> getPointById(String studentId) throws NotFoundException {
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<PointModel> point = null;
 		point = pointDAO.findPoint(studentId);
@@ -175,25 +188,25 @@ public class StudentService implements IStudentService {
 	}
 
 	@Override
-	public List<CourseModel> get_course(String studentId){
+	public List<CourseModel> getCourseByIf(String studentId) throws NotFoundException {
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<CourseModel> result = new ArrayList<>();
 		List<String> courses = studentModel.getCourses();
 		for (String e : courses){
-			CourseModel c = CourseFacade.getINSTANCE().getCourseInfo(e);
+			CourseModel c = CourseFacade.getInstance().getCourseInfo(e);
 			result.add(c);
 		}
 		return result;
 	}
 
 	@Override
-	public List<ClassModel> get_list_class_of_this_course(String courseId){
+	public List<ClassModel> getListClassByCourseId(String courseId){
 
 		return classDAO.getClassOfCourse(courseId);
 	}
 
 	@Override
-	public boolean add_class_to_student(String studentId, String classId) {
+	public boolean add_class_to_student(String studentId, String classId) throws NotFoundException {
 		if(this.DangkiMonhoc(studentId, classId)){
 			StudentModel studentModel = studentDAO.findById(studentId);
 			ClassModel classModel = classDAO.getClassInfo(classId);
@@ -207,17 +220,17 @@ public class StudentService implements IStudentService {
 	}
 
 	@Override
-	public List<ClassModel> getAllClass(String username) {
+	public List<ClassModel> getAllClass(String username) throws NotFoundException {
 		List<String> classes = findByUsername(username).getClasses();
-		List<ClassModel> result = null;
+		List<ClassModel> result = new ArrayList<>();
 		for (String e : classes){
-			ClassModel c = CourseFacade.getINSTANCE().getClassInfo(e);
+			ClassModel c = CourseFacade.getInstance().getClassInfo(e);
 			result.add(c);
 		}
-		return result == null ? List.of() : result;
+		return result;
 	}
 
-	public boolean isExist(String id) {
+	public boolean isExist(String id) throws NotFoundException {
 		return studentDAO.findById(id) != null;
 	}
 }

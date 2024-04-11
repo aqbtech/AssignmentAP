@@ -1,8 +1,8 @@
 package com.hcmutap.elearning.controller.web;
 
 
-import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dto.InfoDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.UserService;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/student")
@@ -39,8 +38,13 @@ public class StudentController{
 
     @RequestMapping("/service")
     public String service(Model model, Principal principal) {
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        if (infoDTO.getRole().equalsIgnoreCase("ADMIN") || infoDTO.getRole().equalsIgnoreCase("TEACHER")) {
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+		if (infoDTO.getRole().equalsIgnoreCase("ADMIN") || infoDTO.getRole().equalsIgnoreCase("TEACHER")) {
             model.addAttribute("message", "You are not a student");
             return "login/404_page";
         }
@@ -60,20 +64,37 @@ public class StudentController{
 
     @GetMapping(value = "/registration")
     public String regis(@RequestParam("courseId") String id, Principal principal, ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        List<ClassModel> classes = classService.getClassOfCourse(id);
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<CourseModel> courses = studentService.get_course(studentModel.getId());
-        model.addAttribute("courses", courses);
-        model.addAttribute("classes", classes);
-        return "web/views/student-service/registration";
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+            List<ClassModel> classes = classService.getClassOfCourse(id);
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<CourseModel> courses = studentService.getCourseByIf(studentModel.getId());
+            model.addAttribute("courses", courses);
+            model.addAttribute("classes", classes);
+            return "web/views/student-service/registration";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
     }
 
     @PostMapping(value = "/registration")
     public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        ClassModel classModel = classService.getClassInfo(classId);
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            ClassModel classModel = classService.getClassInfo(classId);
+            studentModel.getClasses().add(classModel.getClassId());
+            studentModel.getCourses().add(classModel.getCourseId());
+            studentService.update(studentModel);
+            List<CourseModel> courses = studentService.getCourseByIf(studentModel.getId());
+            modelMap.addAttribute("courses", courses);
+            return "web/views/student-service/registration";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 
 //        boolean con1 = studentService.DangkiMonhoc(studentModel.getId(), classModel.getClassId());
 //        if(con1){
@@ -86,47 +107,59 @@ public class StudentController{
 //            modelMap.addAttribute("message", "This course is exist");
 //        }
 
-        studentModel.getClasses().add(classModel.getClassId());
-        studentModel.getCourses().add(classModel.getCourseId());
-        studentService.update(studentModel);
-        List<CourseModel> courses = studentService.get_course(studentModel.getId());
-        modelMap.addAttribute("courses", courses);
-        return "web/views/student-service/registration";
+
     }
     @GetMapping(value = "/timetable")
     public String timetable(Principal principal,ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<ClassModel> classes = studentService.get_timetable(studentModel.getId());
-        model.addAttribute("classes", classes);
-        return "web/views/student-service/time-table";
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<ClassModel> classes = studentService.getTimetableById(studentModel.getId());
+            model.addAttribute("classes", classes);
+            return "web/views/student-service/time-table";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
     }
     @GetMapping(value = "/score")
     public String score(Principal principal, ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<PointModel> points = studentService.get_point(studentModel.getId());
-        ArrayList<Double> resultAverageList = new ArrayList<>();
-        for (PointModel pointModel : points){
-            resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(),pointModel.getCourseId()));
-        }
-        List<SemesterModel> semesterModels = semesterServicel.findAll();
-        model.addAttribute("semesters", semesterModels);
-        model.addAttribute("results",resultAverageList);
-        model.addAttribute("points", points);
-        return "web/views/student-service/score";
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<PointModel> points = studentService.getPointById(studentModel.getId());
+            ArrayList<Double> resultAverageList = new ArrayList<>();
+            for (PointModel pointModel : points){
+                resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(),pointModel.getCourseId()));
+            }
+            List<SemesterModel> semesterModels = semesterServicel.findAll();
+            model.addAttribute("semesters", semesterModels);
+            model.addAttribute("results",resultAverageList);
+            model.addAttribute("points", points);
+            return "web/views/student-service/score";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
     }
 
     @GetMapping(value = "/learning-process")
     public String learning_process(Principal principal, ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<CourseModel>courseModels=studentService.get_course(studentModel.getId());
-        List<PointModel> courseModels1=studentService.Tientrinhhoctap(studentModel.getId());
-        List<SemesterModel> semesterModels = semesterServicel.findAll();
-        model.addAttribute("semesters", semesterModels);
-        model.addAttribute("courses", courseModels);
-        model.addAttribute("courses1", courseModels1);
-        return "web/views/student-service/learning-process";
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<CourseModel>courseModels=studentService.getCourseByIf(studentModel.getId());
+            List<PointModel> courseModels1=studentService.LearningProcess(studentModel.getId());
+            List<SemesterModel> semesterModels = semesterServicel.findAll();
+            model.addAttribute("semesters", semesterModels);
+            model.addAttribute("courses", courseModels);
+            model.addAttribute("courses1", courseModels1);
+            return "web/views/student-service/learning-process";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
     }
 }

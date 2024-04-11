@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.RegisterDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.UserModel;
 import com.hcmutap.elearning.service.IStudentService;
@@ -12,7 +13,6 @@ import com.hcmutap.elearning.utils.MapperUtil;
 import com.hcmutap.elearning.validator.RegisterDTOValidator;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -33,22 +33,26 @@ public class HomeController {
 	@Resource
 	private IUserService userService;
 	private RegisterService registerService;
-	@Autowired
 	private RegisterDTOValidator registerDTOValidator;
-
-//	@Autowired
-//	public void setRegisterDTOValidator(RegisterDTOValidator registerDTOValidator) {
-//		this.registerDTOValidator = registerDTOValidator;
-//	}
+	@Autowired
+	public HomeController(RegisterDTOValidator registerDTOValidator) {
+		this.registerDTOValidator = registerDTOValidator;
+	}
 	@Autowired
 	public void setRegisterService(RegisterService registerService) {
 		this.registerService = registerService;
 	}
 	@GetMapping("/admin-home")
 	public String index(Principal principal, ModelMap model) {
-		UserModel userModel = userService.findByUsername(principal.getName()).getFirst();
-		model.addAttribute("user", userModel);
-		return "admin/views/home";
+		UserModel userModel = null;
+		try {
+			userModel =  userService.findByUsername(principal.getName());
+			model.addAttribute("user", userModel);
+			return "admin/views/home";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 	@GetMapping("/admin-management")
 	public String viewAll(ModelMap model, @RequestParam("type") String type){
@@ -73,12 +77,20 @@ public class HomeController {
 						   @RequestParam("type") String type,
 						   Model model) {
 		if (type.equals("student")){
-			model.addAttribute("user", studentService.findById(id));
-			model.addAttribute("type", "student");
+			try {
+				model.addAttribute("user", studentService.findById(id));
+				model.addAttribute("type", "student");
+			} catch (NotFoundException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		else if (type.equals("teacher")){
-			model.addAttribute("type", "teacher");
-			model.addAttribute("user", teacherService.findById(id));
+			try {
+				model.addAttribute("user", teacherService.findById(id));
+				model.addAttribute("type", "teacher");
+			} catch (NotFoundException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return "admin/views/update-account";
 	}
@@ -113,12 +125,17 @@ public class HomeController {
 			return "admin/views/createAccount";
 		}
 		ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
-		String message = registerService.register(modelMap);
-		if (message.equals("Success")){
-			return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
-		} else {
-			redirectAttributes.addFlashAttribute("message", message);
-			return "redirect:/admin-management/add-account";
+		String message = null;
+		try {
+			message = registerService.register(modelMap);
+			if (message.equals("Success")){
+				return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
+			} else {
+				redirectAttributes.addFlashAttribute("message", message);
+				return "redirect:/admin-management/add-account";
+			}
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

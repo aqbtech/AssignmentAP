@@ -2,6 +2,7 @@ package com.hcmutap.elearning.controller.web;
 
 import com.hcmutap.elearning.dto.InfoDTO;
 
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.model.ClassModel;
 
@@ -9,6 +10,7 @@ import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.service.*;
 
 import com.hcmutap.elearning.service.impl.CourseFacade;
+import com.hcmutap.elearning.utils.ModelBuilderUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -19,9 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Controller(value = "homeControllerOfWeb")
 public class HomeController {
@@ -54,7 +56,12 @@ public class HomeController {
 	}
 	@GetMapping(value="/info")
 	public String info(Principal principal, ModelMap model){
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		if (infoDTO.getRole().equalsIgnoreCase("ADMIN")){
 			model.addAttribute("message", "You are not a student or teacher");
 			return "login/404_page";
@@ -65,12 +72,17 @@ public class HomeController {
 	@GetMapping(value="/course")
 	public String course(@RequestParam("id") String id,
 						 Principal principal, ModelMap model) {
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		ClassModel classModel = null;
 		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			classModel = CourseFacade.getINSTANCE().getClassInfo(id);
+			classModel = CourseFacade.getInstance().getClassInfo(id);
 		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
-			classModel = CourseFacade.getINSTANCE().getClassInfo(id);
+			classModel = CourseFacade.getInstance().getClassInfo(id);
 		} else {
 			model.addAttribute("message", "You are not a student or teacher");
 			return "login/404_page";
@@ -85,15 +97,28 @@ public class HomeController {
 	}
 	@GetMapping(value="/my-course")
 	public String myCourse(Principal principal, ModelMap model){
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
+		InfoDTO infoDTO = null;
+		try {
+			infoDTO = userService.getInfo(principal.getName());
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		List<CourseModel> courses = null;
 
 		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			StudentModel studentModel = studentService.findByUsername(principal.getName());
+			try {
+				StudentModel studentModel = (StudentModel) studentService.findByUsername(principal.getName());
+			} catch (NotFoundException e) {
+				throw new RuntimeException(e);
+			}
 			// TODO: cap nhat lai theo ham moi
 //			courses = studentModel.getCourses();
 		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
-			TeacherModel teacherModel = teacherService.findByUsername(principal.getName());
+			try {
+				TeacherModel teacherModel = (TeacherModel) teacherService.findByUsername(principal.getName());
+			} catch (NotFoundException e) {
+				throw new RuntimeException(e);
+			}
 			//courses = teacherModel.getCourses();
 		} else {
 			model.addAttribute("error", "You are not a student or teacher");

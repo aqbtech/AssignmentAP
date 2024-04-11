@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.controller.admin;
 
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.InfoClassModel;
@@ -34,23 +35,23 @@ public class AdminCourseController {
 							 @RequestParam("action") String action,
 							 @RequestParam("id") String id) {
 		if(action.equals("delete")) {
-			CourseModel courseModel;
+
 			try{
-				courseModel = courseService.findById(id);
+				CourseModel courseModel = courseService.findById(id);
+				List<ClassModel> listClass = courseService.getLichTrinh(id);
+				if(!listClass.isEmpty()) {
+					String message = "Cần xóa các lớp ";
+					for (ClassModel cls : listClass) {
+						message += cls.getClassName() + " ";
+					}
+					message += " của khóa học " + id + " trước khi xóa khóa học!";
+					model.addAttribute("message", message);
+				} else {
+					courseService.delete(courseModel.getFirebaseId());
+					model.addAttribute("message","Xóa thành công khóa học " + id +"!");
+				}
 			} catch(Exception e) {
 				return"redirect:/admin-management-course?action=view&id=";
-			}
-			List<ClassModel> listClass = courseService.getLichTrinh(id);
-			if(!listClass.isEmpty()) {
-				String message = "Cần xóa các lớp ";
-				for (ClassModel cls : listClass) {
-					message += cls.getClassName() + " ";
-				}
-				message += " của khóa học " + id + " trước khi xóa khóa học!";
-				model.addAttribute("message", message);
-			} else {
-				courseService.delete(courseModel.getFirebaseId());
-				model.addAttribute("message","Xóa thành công khóa học " + id +"!");
 			}
 		}
 		model.addAttribute("models", courseService.findAll());
@@ -64,7 +65,12 @@ public class AdminCourseController {
 		} catch (Exception e) {
 			return"redirect:/admin-management-course?action=view&id=";
 		}
-		List<ClassModel> listClass = classService.getClassOfCourse(id);
+		List<ClassModel> listClass = null;
+		try {
+			listClass = classService.getClassOfCourse(id);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		model.addAttribute("course", courseModel);
 		model.addAttribute("classes", listClass);
 		return "admin/views/view-table-class";
@@ -120,7 +126,11 @@ public class AdminCourseController {
 
 	@PostMapping("/admin-management/add-class")
 	public String addClass(HttpServletRequest request, ModelMap model) {
-		CourseModel courseModel = courseService.findById(request.getParameter("courseId"));
+		try {
+			CourseModel courseModel = courseService.findById(request.getParameter("courseId"));
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		ClassModel classModel = new ClassModel();
 		classModel.setCourseId((request.getParameter("courseId")));
 		classModel.setClassName(request.getParameter("className"));

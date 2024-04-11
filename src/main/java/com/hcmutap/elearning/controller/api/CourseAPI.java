@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.service.ICourseService;
 import com.hcmutap.elearning.utils.HttpUtil;
@@ -24,8 +25,12 @@ public class CourseAPI {
     }
     @GetMapping("/courses/findById")
     public CourseModel findById(@RequestParam String id) {
-        return courseService.findById(id);
-    }
+		try {
+			return courseService.findById(id);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
     @PostMapping("/courses")
     public String save(@RequestBody CourseModel courseModel) {
         return courseService.save(courseModel);
@@ -33,8 +38,12 @@ public class CourseAPI {
     @PutMapping("/courses")
     public void update(@RequestBody CourseModel courseModel) {
         // need to handler not found exception in dao -> service -> controller
-        courseService.update(courseModel);
-    }
+		try {
+			courseService.update(courseModel);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
     @DeleteMapping("/courses")
     public void delete(@RequestBody List<String> ids) {
         ids.forEach(id -> courseService.delete(id));

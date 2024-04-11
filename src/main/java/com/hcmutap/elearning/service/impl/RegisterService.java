@@ -2,6 +2,7 @@ package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dto.StudentResDTO;
 import com.hcmutap.elearning.dto.TeacherResDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.model.UserModel;
@@ -40,7 +41,7 @@ public class RegisterService implements IRegisterService {
 			return "Success";
 		}
 	}
-	private String registerStudent(StudentResDTO student) {
+	private String registerStudent(StudentResDTO student) throws NotFoundException {
 		if(userService.isExist(student.getUsername())) {
 			return "Username is already exist";
 		} else if (studentService.isExist(student.getId())) {
@@ -58,7 +59,7 @@ public class RegisterService implements IRegisterService {
 		}
 	}
 	@Override
-	public String register(ModelMap model) {
+	public String register(ModelMap model) throws NotFoundException {
 		if(Objects.equals((Objects.requireNonNull(model.getAttribute("role"))).toString().toLowerCase(), "teacher")) {
 			TeacherResDTO teacher = MapperUtil.getInstance().toModelFromModelMap(model, TeacherResDTO.class);
 			return registerTeacher(teacher);
