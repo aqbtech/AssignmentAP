@@ -84,7 +84,7 @@ public class StudentService implements IStudentService {
 		}
 	}
 	@Override
-	public boolean DangkiMonhoc(String studentId, String classID) throws NotFoundException {
+	public String DangkiMonhoc(String studentId, String classID) throws NotFoundException {
 		ClassModel classModel = classDAO.getClassInfo(classID);
 		StudentModel studentModel = studentDAO.findById(studentId);
 		// TODO: send message to course service, validate if student can register this course
@@ -97,9 +97,14 @@ public class StudentService implements IStudentService {
 		// call class service to add student to class
 		List<String> finished_course = studentModel.getFinished_courses();
 		List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
-		for(ClassModel e : timetable) {
+		for (String e : studentModel.getCourses()){
+			if (e.equals(classModel.getCourseId())){
+				return "Dang ki khong thanh cong vi ban da dang ky mon nay";
+			}
+		}
+		for(ClassModel e : timetable){
 			if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
-				break;
+				continue;
 			}
 			else {
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
@@ -113,13 +118,13 @@ public class StudentService implements IStudentService {
 					break;
 				}
 				else {
-					return false;
+					return "Dang ki khong thanh cong vi trung thoi gian";
 				}
 			}
 		}
 		for (String e : finished_course){
 			if (e.equals(classModel.getCourseId())){
-				return false;
+				return "Dang ki khong thanh cong vi ban da hoc qua mon nay";
 			}
 		}
 
@@ -129,7 +134,7 @@ public class StudentService implements IStudentService {
 //			return false;
 //		}
 
-		return true;
+		return add_class_to_student(studentId, classID);
 	}
 
 	public static Comparator<ClassModel> getDateTimeComparator() {
@@ -182,7 +187,7 @@ public class StudentService implements IStudentService {
 	@Override
 	public List<PointModel> getPointById(String studentId) throws NotFoundException {
 		StudentModel studentModel = studentDAO.findById(studentId);
-		List<PointModel> point = null;
+		List<PointModel> point = new ArrayList<>();
 		point = pointDAO.findPoint(studentId);
 		return point;
 	}
@@ -201,22 +206,18 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public List<ClassModel> getListClassByCourseId(String courseId){
-
 		return classDAO.getClassOfCourse(courseId);
 	}
 
 	@Override
-	public boolean add_class_to_student(String studentId, String classId) throws NotFoundException {
-		if(this.DangkiMonhoc(studentId, classId)){
-			StudentModel studentModel = studentDAO.findById(studentId);
-			ClassModel classModel = classDAO.getClassInfo(classId);
-			CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
-			studentModel.getCourses().add(courseModel.getCourseId());
-			studentModel.getClasses().add(classModel.getClassId());
-			update(studentModel);
-			return true;
-		}
-		return false;
+	public String add_class_to_student(String studentId, String classId) throws NotFoundException {
+		StudentModel studentModel = studentDAO.findById(studentId);
+		ClassModel classModel = classDAO.getClassInfo(classId);
+		CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
+		studentModel.getCourses().add(courseModel.getCourseId());
+		studentModel.getClasses().add(classModel.getClassId());
+		update(studentModel);
+		return "Dang ki thanh cong";
 	}
 
 	@Override

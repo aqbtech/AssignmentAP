@@ -29,12 +29,15 @@
 
             <div class="col-md-4 col-sm-6 m-4 box-search1">
                 <h4 class="mt-3">Registed</h4>
-                <div class="ele1 mb-3" th:each="e : ${class_course_of_student}" style="overflow: auto" id="registed">
+                <div class="ele1 mb-3" th:each="e : ${class_course_of_teacher}" style="overflow: auto" id="registed">
                     <div class="courseid">
                         <p th:text="${e.getCourse().getCourseId()}">Id</p>
                     </div>
                     <div class="coursename">
                         <p th:text="${e.getCourse().getCourseName()}">Name</p>
+                    </div>
+                    <div class="time">
+                        <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeStart()}">Time</p>
                     </div>
                 </div>
             </div>
@@ -62,15 +65,18 @@
                                         <p th:text="${e.getLophoc().getClassId()}">Class Id</p>
                                     </div>
                                     <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getLophoc().getClassName()}">Class Name</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
                                         <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-sm-2 mt-4" style="overflow: auto">
-                                <form th:action="@{/student/registration?courseId=}" method="post" id="select-course">
+                                <form th:action="@{/teacher/registration?courseId=}" method="post" id="select-course">
                                     <input type="hidden" id="classId" name="classId" th:value="${e.getLophoc().getClassId()}">
-                                    <input type="submit" style="background-color: antiquewhite;border: none;color: white"  value="select">
+                                    <input type="submit" style="background-color: #212529; border-radius: 5px;border: none;color: white"  value="select">
                                 </form>
                             </div>
                             <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
@@ -97,11 +103,13 @@
                     <script>
                         window.addEventListener("load", function(){
                             var message = document.getElementById("message").getAttribute("message");
+                            if(message != null) {
                                 var modalBody = document.getElementById("modalBody");
                                 var modalExit = document.getElementById("modalExit");
                                 modalBody.innerText = message;
                                 modalExit.innerText = "Đóng";
                                 $('#modal').modal('show');
+                            }
                         });
                     </script>
                 </div>

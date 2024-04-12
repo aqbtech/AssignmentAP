@@ -69,8 +69,10 @@ public class MapperUtil {
 		return null;
 	}
 	public Map<String,?> toMap(Object object) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
-			return new ObjectMapper().convertValue(object, new TypeReference<Map<String, Object>>() {});
+			return mapper.convertValue(object, new TypeReference<Map<String, Object>>() {});
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
 		}

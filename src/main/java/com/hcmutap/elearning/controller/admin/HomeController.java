@@ -1,9 +1,11 @@
 package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.RegisterDTO;
-import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
+import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.model.UserModel;
+import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 
 import com.hcmutap.elearning.service.ITeacherService;
@@ -13,6 +15,7 @@ import com.hcmutap.elearning.utils.MapperUtil;
 import com.hcmutap.elearning.validator.RegisterDTOValidator;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -23,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller(value = "homeControllerOfAdmin")
 public class HomeController {
@@ -32,27 +37,25 @@ public class HomeController {
 	private ITeacherService teacherService;
 	@Resource
 	private IUserService userService;
+	@Resource
+	private IPointService pointService;
 	private RegisterService registerService;
-	private RegisterDTOValidator registerDTOValidator;
 	@Autowired
-	public HomeController(RegisterDTOValidator registerDTOValidator) {
-		this.registerDTOValidator = registerDTOValidator;
-	}
+	private RegisterDTOValidator registerDTOValidator;
+
+//	@Autowired
+//	public void setRegisterDTOValidator(RegisterDTOValidator registerDTOValidator) {
+//		this.registerDTOValidator = registerDTOValidator;
+//	}
 	@Autowired
 	public void setRegisterService(RegisterService registerService) {
 		this.registerService = registerService;
 	}
 	@GetMapping("/admin-home")
 	public String index(Principal principal, ModelMap model) {
-		UserModel userModel = null;
-		try {
-			userModel =  userService.findByUsername(principal.getName());
-			model.addAttribute("user", userModel);
-			return "admin/views/home";
-		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
-		}
-
+		UserModel userModel = userService.findByUsername(principal.getName()).getFirst();
+		model.addAttribute("user", userModel);
+		return "admin/views/home";
 	}
 	@GetMapping("/admin-management")
 	public String viewAll(ModelMap model, @RequestParam("type") String type){
@@ -66,10 +69,72 @@ public class HomeController {
 		}
 		return "admin/views/view-all-table";
 	}
+
+	@GetMapping("/admin-management/deleteAccount")
+	public String deleteAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type,
+								final RedirectAttributes redirectAttributes) {
+		if(type.equals("teacher")) {
+			TeacherModel teacher = teacherService.findById(id);
+			if(teacher.getClasses().isEmpty()) {
+				List<String> del = new ArrayList<>();
+				del.add(teacher.getFirebaseId());
+				teacherService.delete(del);
+				userService.delete(teacher.getUsername());
+				redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
+			} else {
+				String message = "Giáo viên vẫn còn dạy các lớp";
+				for(String classId : teacher.getClasses()) {
+					message += " " + classId;
+				}
+				message += " nên chưa thể xóa!";
+				redirectAttributes.addFlashAttribute("message", message);
+			}
+		} else {
+			StudentModel student = studentService.findById(id);
+			List<String> del = new ArrayList<>();
+			del.add(student.getFirebaseId());
+			studentService.delete(del);
+			userService.delete(student.getUsername());
+			List<PointModel> points = pointService.getListPointOfStudent(student.getId());
+			List<String> delPoint = new ArrayList<>();
+			for(PointModel point : points) {
+				delPoint.add(point.getFirebaseId());
+			}
+			pointService.delete(delPoint);
+			redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + id + " thành công!");
+		}
+		return "redirect:/admin-management?type=" + type;
+	}
+
 	@GetMapping("/admin-management/update")
 	public String updateAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type) {
 		return "redirect:/admin-management/view-info?id=" + id + "&type=" + type;
+	}
+
+	@PostMapping("/admin-management/view-info")
+	public String updateAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type,
+								@ModelAttribute("form") RegisterDTO form, ModelMap model) {
+		if(type.equals("teacher")) {
+			TeacherModel teacherModel = teacherService.findById(id);
+			teacherModel.setFullName(form.getFullName());
+			teacherModel.setAge(form.getAge());
+			teacherModel.setDegree(form.getDegree());
+			teacherService.update(teacherModel);
+			model.addAttribute("type", "teacher");
+			model.addAttribute("user", teacherModel);
+		} else {
+			StudentModel studentModel = studentService.findById(id);
+			studentModel.setFullName(form.getFullName());
+			studentModel.setAge(form.getAge());
+			studentService.update(studentModel);
+			model.addAttribute("user", studentService.findById(id));
+			model.addAttribute("type", studentModel);
+		}
+		model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
+		return "admin/views/update-account";
 	}
 
 	@GetMapping("/admin-management/view-info")
@@ -77,21 +142,14 @@ public class HomeController {
 						   @RequestParam("type") String type,
 						   Model model) {
 		if (type.equals("student")){
-			try {
-				model.addAttribute("user", studentService.findById(id));
-				model.addAttribute("type", "student");
-			} catch (NotFoundException e) {
-				throw new RuntimeException(e);
-			}
+			model.addAttribute("user", studentService.findById(id));
+			model.addAttribute("type", "student");
 		}
 		else if (type.equals("teacher")){
-			try {
-				model.addAttribute("user", teacherService.findById(id));
-				model.addAttribute("type", "teacher");
-			} catch (NotFoundException e) {
-				throw new RuntimeException(e);
-			}
+			model.addAttribute("type", "teacher");
+			model.addAttribute("user", teacherService.findById(id));
 		}
+		model.addAttribute("form", new RegisterDTO());
 		return "admin/views/update-account";
 	}
 
@@ -125,17 +183,12 @@ public class HomeController {
 			return "admin/views/createAccount";
 		}
 		ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
-		String message = null;
-		try {
-			message = registerService.register(modelMap);
-			if (message.equals("Success")){
-				return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
-			} else {
-				redirectAttributes.addFlashAttribute("message", message);
-				return "redirect:/admin-management/add-account";
-			}
-		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+		String message = registerService.register(modelMap);
+		if (message.equals("Success")){
+			return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
+		} else {
+			redirectAttributes.addFlashAttribute("message", message);
+			return "redirect:/admin-management/add-account";
 		}
 	}
 }

@@ -25,6 +25,8 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
+                                    <th>Update</th>
+                                    <th>Delete</th>
                                 </tr>
                                 </thead>
 <!--                                <tfoot>-->
@@ -39,14 +41,49 @@
                                         <td th:text="${model.fullName}"></td>
                                         <!--check type of models and present model attribute-->
                                         <!-- Add more data cells as needed -->
+                                        <td>
+                                            <a class="btn btn-link update-button" th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}">Update</a>
+                                        </td>
+                                        <!-- Delete button -->
+                                        <td>
+                                            <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteAccount?id=${model.id}&type=${type}|}">Delete</a>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
                 </div>
             </div>
+            <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+                    </div>
+                </div>
+            </div>
+            <script>
+                window.addEventListener("load", function() {
+                    var message = document.getElementById("message").getAttribute("message");
+                    if (message) {
+                        var modalBody = document.getElementById("modalBody");
+                        var modalExit = document.getElementById("modalExit");
+                        modalBody.innerText = message;
+                        modalExit.innerText = "Đóng";
+                        $('#modal').modal('show');
+                    }
+                });
+            </script>
             <!-- /.container -->
         </div>
     </body>

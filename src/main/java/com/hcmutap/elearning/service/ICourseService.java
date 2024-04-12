@@ -12,4 +12,5 @@ public interface ICourseService extends IGenericAdminService<CourseModel> {
     CourseModel getCourseInfo(String courseId);
     List<ClassModel> getLichTrinh(String courseId) throws NotFoundException;
     List<PointModel> getListPointOfStudent(String courseId) throws NotFoundException;
+    boolean isExist(String id);
 }
