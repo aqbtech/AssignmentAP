@@ -35,7 +35,6 @@
 .ele{
     /* display: flex; */
     width: 95%;
-    height: 100px;
     box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 10px;
@@ -45,7 +44,6 @@
 
 .ele1{
     width: 95%;
-    height: 75px;
     box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 10px;
@@ -54,13 +52,13 @@
 
 .ele1:hover{
     color: white;
-    background-color: antiquewhite;
+    background-color: gray;
     transition: 0.3s;
 }
 
 .ele:hover{
     color: white;
-    background-color: antiquewhite;
+    background-color: gray;
     transition: 0.3s;
 }
 

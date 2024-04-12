@@ -68,6 +68,19 @@ public class HomeController {
 		model.addAttribute("user", infoDTO);
 		return "web/views/view_info";
 	}
+
+	@RequestMapping("/service")
+	public String service(ModelMap model, Principal principal) {
+		InfoDTO infoDTO = userService.getInfo(principal.getName());
+		if (infoDTO.getRole().equalsIgnoreCase("ADMIN")) {
+			model.addAttribute("message", "You are not a student or teacher");
+			return "login/404_page";
+		}
+		String role = infoDTO.getRole();
+		model.addAttribute("type", role);
+		return "web/views/service";
+	}
+
 	@GetMapping(value="/course")
 	public String course(@RequestParam("id") String id,
 						 Principal principal, ModelMap model) {

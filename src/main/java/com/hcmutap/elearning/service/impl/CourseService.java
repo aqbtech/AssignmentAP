@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.service.impl;
 
+import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.ClassModel;
@@ -77,5 +78,9 @@ public class CourseService implements ICourseService {
     @Override
     public List<PointModel> getListPointOfStudent(String courseId) {
         return pointService.getListStudentOfCourse(courseId);
+    }
+    @Override
+    public boolean isExist(String id) {
+        return !courseDAO.findBy("courseId", id, Options.OptionBuilder.Builder().setEqual().build()).isEmpty();
     }
 }

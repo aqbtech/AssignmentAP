@@ -13,13 +13,13 @@ public interface IStudentService extends IGenericAdminService<StudentModel>{
 	void update(StudentModel studentModel);
 	void delete(List<String> ids);
 	StudentModel findById(String id); // Student information by studentID
-	boolean DangkiMonhoc(String studentId, String classID);
+	String DangkiMonhoc(String studentId, String classID);
 	StudentModel findByUsername(String username);
 	List<ClassModel> get_timetable(String studentId);
 	List<CourseModel> get_course(String studentId);
 	List<PointModel> Tientrinhhoctap(String studentId);
 	List<PointModel> get_point(String studentId);
 	List<ClassModel> get_list_class_of_this_course(String courseId);
-	boolean add_class_to_student(String studentId, String classId);
+	String add_class_to_student(String studentId, String classId);
 	List<ClassModel> getAllClass(String username);
 }

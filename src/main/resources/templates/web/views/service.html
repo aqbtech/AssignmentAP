@@ -15,7 +15,7 @@
             <div class="container mt-3">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h3>Student Service</h3>
+                        <h3 th:text="${type.toUpperCase()} + ' SERVICE'">Service</h3>
                     </div>
                 </div>
             </div>
@@ -23,16 +23,16 @@
         <hr>
 
         <div class="container mt-4">
-            <div class="row">
+            <div  th:if="${type == 'student'}" class="row">
                 <div class="col-sm-6 p-4">
                     <div class = "row box-modify">
                         <div class="col-sm-4 ">
-                            <a href="/info" class="">
+                            <a th:href="@{/info}" class="">
                                 <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
-                            <a href="/info" class="no_underline">
+                            <a th:href="@{/info}" class="no_underline">
                                 <h5 class = "mt-4 mb-0">Information</h5>
                             </a>
                             <p>Information of student</p>
@@ -43,12 +43,12 @@
                 <div class="col-sm-6 p-4">
                     <div class="row box-modify">
                         <div class="col-sm-4">
-                            <a href="#" class="">
+                            <a th:href="@{/student/score}" class="">
                                 <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
-                            <a href="/student/score" class="no_underline">
+                            <a th:href="@{/student/score}" class="no_underline">
                                 <h5 class="mb-0 mt-4">Score</h5>
                             </a>
                             <p mt>Score of student</p>
@@ -64,10 +64,10 @@
                             </a>
                         </div>
                         <div class="col-sm-8">
-                            <a href="/student/timetable" class="no_underline">
+                            <a th:href="@{/student/timetable}" class="no_underline">
                                 <h5 class="mb-0 mt-4">Time Table</h5>
                             </a>
-                            <p mt>Get Time Table</p>
+                            <p>Get Time Table</p>
                         </div>
                     </div>
                 </div>
@@ -75,15 +75,15 @@
                 <div class="col-sm-6 p-4">
                     <div class="row box-modify">
                         <div class="col-sm-4">
-                            <a href="#" class="">
+                            <a th:href="@{/student/learning-process}" class="">
                                 <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
-                            <a href="/student/learning-process" class="no_underline">
+                            <a th:href="@{/student/learning-process}" class="no_underline">
                                 <h5 class="mb-0 mt-4">Learning Process</h5>
                             </a>
-                            <p mt>Get score of finished course</p>
+                            <p>Get score of finished course</p>
                         </div>
                     </div>
                 </div>
@@ -96,15 +96,67 @@
                             </a>
                         </div>
                         <div class="col-sm-8">
-                            <a href="/student/registration?courseId=" class="no_underline">
+                            <a th:href="@{/student/registration?courseId=}" class="no_underline">
                                 <h5 class="mb-0 mt-4">Course Registration</h5>
                             </a>
-                            <p mt>Register study plan, register course</p>
+                            <p>Register study plan, register course</p>
                         </div>
                     </div>
                 </div>
 
             </div>
+
+            <div  th:if="${type == 'teacher'}" class="row">
+                <div class="col-sm-6 p-4">
+                    <div class = "row box-modify">
+                        <div class="col-sm-4 ">
+                            <a th:href="@{/info}" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a th:href="@{/info}" class="no_underline">
+                                <h5 class = "mt-4 mb-0">Information</h5>
+                            </a>
+                            <p>Information of teacher</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 p-4">
+                    <div class="row box-modify">
+                        <div class="col-sm-4">
+                            <a th:href="@{/teacher/timetable}" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a th:href="@{/teacher/timetable}" class="no_underline">
+                                <h5 class="mb-0 mt-4">Time Table</h5>
+                            </a>
+                            <p>Get Time Table</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 p-4">
+                    <div class="row box-modify">
+                        <div class="col-sm-4">
+                            <a th:href="@{/teacher/registration?courseId=}" class="">
+                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <a th:href="@{/teacher/registration?courseId=}" class="no_underline">
+                                <h5 class="mb-0 mt-4">Course Registration</h5>
+                            </a>
+                            <p>Register study plan, register course</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
         <!-- /.container -->
     </div>

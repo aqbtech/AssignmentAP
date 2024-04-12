@@ -117,10 +117,9 @@ public class ClassService implements IClassService {
                 return false;
             }
         }
-        if(!studentService.add_class_to_student(studentId, classId)) {
-            return false;
-        }
-
+//        if(!studentService.add_class_to_student(studentId, classId)) {
+//            return false;
+//        }
         long timestamp = System.currentTimeMillis();
         String id = String.valueOf(timestamp);
         StudentModel studentModel = studentDAO.findById(studentId);
@@ -215,5 +214,10 @@ public class ClassService implements IClassService {
     public boolean deleteDoc(String classId, Document doc) {
         ClassModel classModel = findById(classId);
         return infoService.deleteDoc(classModel.getInfoId(), doc);
+    }
+
+
+    public boolean isExist(String id) {
+        return classDAO.findBy("classId", id, Options.OptionBuilder.Builder().setEqual().build()) != null;
     }
 }

@@ -22,4 +22,5 @@ public interface ICourseService extends IGenericAdminService<CourseModel> {
     List<ClassModel> getLichTrinh(String courseId);
 
     List<PointModel> getListPointOfStudent(String courseId);
+    boolean isExist(String id);
 }
