@@ -20,9 +20,15 @@ import java.util.List;
 @Service("teacherService")
 public class TeacherService implements ITeacherService {
 	private final TeacherDAO teacherDAO;
+	private final ClassDAO classDAO;
+	private final CourseService courseService;
+	private final ClassService classService;
 	@Autowired
-	public TeacherService(TeacherDAO teacherDAO) {
+	public TeacherService(TeacherDAO teacherDAO, ClassDAO classDAO, CourseService courseService, ClassService classService) {
 		this.teacherDAO = teacherDAO;
+		this.classDAO = classDAO;
+		this.courseService = courseService;
+		this.classService = classService;
 	}
 	@Override
 	public List<TeacherModel> findAll() {
@@ -96,8 +102,8 @@ public class TeacherService implements ITeacherService {
 		List<ClassModel> classModels = new ArrayList<>();
 		try {
 			TeacherModel teacherModel = teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
-			if (teacherModel.getClasses() == null || teacherModel.getClasses().isEmpty()){
-				throw new NotFoundException("Teacher not found");
+			if (teacherModel.getClasses() == null){
+				return new ArrayList<>();
 			} else {
 				for(String classId : teacherModel.getClasses()){
 					ClassModel classModel = CourseFacade.getInstance().findClassById(classId);
@@ -116,17 +122,17 @@ public class TeacherService implements ITeacherService {
 		List<CourseModel> result = new ArrayList<>();
 		List<String> courses = teacherModel.getCourses();
 		for (String e : courses){
-			CourseModel c = CourseFacade.getINSTANCE().getCourseInfo(e);
+			CourseModel c = CourseFacade.getInstance().getCourseInfo(e);
 			result.add(c);
 		}
 		return result;
 	}
 
 	@Override
-	public String Dangkilophoc(String teacherId, String classId){
+	public String Dangkilophoc(String teacherId, String classId) throws NotFoundException {
 		ClassModel classModel = classDAO.getClassInfo(classId);
 		TeacherModel teacherModel = teacherDAO.findById(teacherId);
-		List<ClassModel> timetable = classDAO.getTimeTableSV(teacherId);
+		List<ClassModel> timetable = classDAO.getTimeTableGV(teacherId);
 
 		if (classModel.getTeacherId() != null) return "Da co giang vien dang ki";
 

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/student")
@@ -62,73 +61,98 @@ public class StudentController{
 
     @GetMapping(value = "/registration")
     public String regis(@RequestParam("courseId") String id, Principal principal, ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<Class_CourseDTO> class_course = new ArrayList<>();
-        List<Class_CourseDTO> class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
-        if(courseService.isExist(id)){
-            class_course = class_courseService.getByCourseId(id);
-            model.addAttribute("message", "Lop hoc hien dang mo");
+        try {
+            InfoDTO infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<Class_CourseDTO> class_course = new ArrayList<>();
+            List<Class_CourseDTO> class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
+            if (courseService.isExist(id)) {
+                class_course = class_courseService.getByCourseId(id);
+                model.addAttribute("message", "Lop hoc hien dang mo");
+                model.addAttribute("class_course_of_student", class_course_of_student);
+                model.addAttribute("class_course", class_course);
+                return "web/views/student-service/registration";
+            }
+            model.addAttribute("message", "Lop hoc khong kha dung");
             model.addAttribute("class_course_of_student", class_course_of_student);
             model.addAttribute("class_course", class_course);
             return "web/views/student-service/registration";
+        } catch (Exception e) {
+            model.addAttribute("message", "User not found");
+            return "login/404_page";
         }
-        model.addAttribute("message", "Lop hoc khong kha dung");
-        model.addAttribute("class_course_of_student", class_course_of_student);
-        model.addAttribute("class_course", class_course);
-        return "web/views/student-service/registration";
     }
 
     @PostMapping(value = "/registration")
     public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        String message = studentService.DangkiMonhoc(studentModel.getId(),classId);
+        try {
+            InfoDTO infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            String message = studentService.DangkiMonhoc(studentModel.getId(), classId);
 
-        List<Class_CourseDTO> class_course = new ArrayList<>();
-        List<Class_CourseDTO> class_course_of_student = new ArrayList<>();
+            List<Class_CourseDTO> class_course = new ArrayList<>();
+            List<Class_CourseDTO> class_course_of_student = new ArrayList<>();
 
-        class_course = class_courseService.getByCourseId(classId);
-        class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
-        modelMap.addAttribute("class_course_of_student", class_course_of_student);
-        modelMap.addAttribute("message", message);
-        modelMap.addAttribute("class_course", class_course);
-        return "web/views/student-service/registration";
+            class_course = class_courseService.getByCourseId(classId);
+            class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
+            modelMap.addAttribute("class_course_of_student", class_course_of_student);
+            modelMap.addAttribute("message", message);
+            modelMap.addAttribute("class_course", class_course);
+            return "web/views/student-service/registration";
+        } catch (Exception e) {
+            modelMap.addAttribute("message", "User not found");
+            return "login/404_page";
+        }
     }
     @GetMapping(value = "/timetable")
     public String timetable(Principal principal,ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<ClassModel> classes = studentService.get_timetable(studentModel.getId());
-        model.addAttribute("classes", classes);
-        return "web/views/student-service/time-table";
+        try {
+            InfoDTO infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<ClassModel> classes = studentService.getTimetableById(studentModel.getId());
+            model.addAttribute("classes", classes);
+            return "web/views/student-service/time-table";
+        } catch (Exception e) {
+            model.addAttribute("message", "User not found");
+            return "login/404_page";
+        }
     }
     @GetMapping(value = "/score")
     public String score(Principal principal, ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<PointModel> points = studentService.get_point(studentModel.getId());
-        ArrayList<Double> resultAverageList = new ArrayList<>();
-        for (PointModel pointModel : points){
-            resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(),pointModel.getCourseId()));
+        try {
+            InfoDTO infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<PointModel> points = studentService.getPointById(studentModel.getId());
+            ArrayList<Double> resultAverageList = new ArrayList<>();
+            for (PointModel pointModel : points) {
+                resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(), pointModel.getCourseId()));
+            }
+            List<SemesterModel> semesterModels = semesterServicel.findAll();
+            model.addAttribute("semesters", semesterModels);
+            model.addAttribute("results", resultAverageList);
+            model.addAttribute("points", points);
+            return "web/views/student-service/score";
+        } catch (Exception e) {
+            model.addAttribute("message", "User not found");
+            return "login/404_page";
         }
-        List<SemesterModel> semesterModels = semesterServicel.findAll();
-        model.addAttribute("semesters", semesterModels);
-        model.addAttribute("results",resultAverageList);
-        model.addAttribute("points", points);
-        return "web/views/student-service/score";
     }
 
     @GetMapping(value = "/learning-process")
     public String learning_process(Principal principal, ModelMap model){
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<CourseModel>courseModels=studentService.get_course(studentModel.getId());
-        List<PointModel> courseModels1=studentService.Tientrinhhoctap(studentModel.getId());
-        List<SemesterModel> semesterModels = semesterServicel.findAll();
-        model.addAttribute("semesters", semesterModels);
-        model.addAttribute("courses", courseModels);
-        model.addAttribute("courses1", courseModels1);
-        return "web/views/student-service/learning-process";
+        try {
+            InfoDTO infoDTO = userService.getInfo(principal.getName());
+            StudentModel studentModel = studentService.findById(infoDTO.getId());
+            List<CourseModel> courseModels = studentService.getCourseByIf(studentModel.getId());
+            List<PointModel> courseModels1 = studentService.LearningProcess(studentModel.getId());
+            List<SemesterModel> semesterModels = semesterServicel.findAll();
+            model.addAttribute("semesters", semesterModels);
+            model.addAttribute("courses", courseModels);
+            model.addAttribute("courses1", courseModels1);
+            return "web/views/student-service/learning-process";
+        } catch (Exception e) {
+            model.addAttribute("message", "User not found");
+            return "login/404_page";
+        }
     }
 }

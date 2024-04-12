@@ -1,9 +1,6 @@
 package com.hcmutap.elearning.service.impl;
 
-import com.hcmutap.elearning.dao.impl.ClassDAO;
-import com.hcmutap.elearning.dao.impl.CourseDAO;
-import com.hcmutap.elearning.dao.impl.PointDAO;
-import com.hcmutap.elearning.dao.impl.StudentDAO;
+import com.hcmutap.elearning.dao.impl.*;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
@@ -27,7 +24,7 @@ public class CourseFacade implements ICourseFacade {
 	}
 	private CourseFacade() {
 		courseService = new CourseService();
-		classService = new ClassService(new CourseDAO(), new StudentDAO(), new PointDAO(), new ClassDAO());
+		classService = new ClassService(new CourseDAO(), new StudentDAO(), new PointDAO(), new ClassDAO(), new TeacherDAO());
 		pointService = new PointService();
 	}
 	//course service
@@ -45,7 +42,7 @@ public class CourseFacade implements ICourseFacade {
 	}
 	//class service
 	@Override
-	public ClassModel getClassInfo(String classId){
+	public ClassModel getClassInfo(String classId) throws NotFoundException {
 		return  classService.getClassInfo(classId);
 	}
 	@Override
@@ -90,7 +87,7 @@ public class CourseFacade implements ICourseFacade {
 		return pointService.getListStudentByCourseId(courseID);
 	}//------------------------------------------------
 	@Override
-	public ClassModel findClassById(String classId) {
+	public ClassModel findClassById(String classId) throws NotFoundException {
 		return classService.findById(classId);
 	}
 }

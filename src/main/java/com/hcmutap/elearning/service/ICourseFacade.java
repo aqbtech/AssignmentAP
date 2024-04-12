@@ -14,7 +14,7 @@ public interface ICourseFacade {
 	List<ClassModel> getLichTrinh(String courseId) throws NotFoundException;
 	List<PointModel> getListPointOfStudent(String courseId) throws NotFoundException;
 	//class service
-	ClassModel getClassInfo(String classId);
+	ClassModel getClassInfo(String classId) throws NotFoundException;
 	List<ClassModel> getClassOfCourse(String courseId);
 	List<PointModel> getListStudentOfClass(String classId) throws NotFoundException;
 	List<ClassModel> getTimeTableSV(String studentId);
@@ -27,5 +27,5 @@ public interface ICourseFacade {
 	double getAveragePoint(String studentID, String courseID);
 	List<PointModel> getListStudentOfCourse(String courseID) throws NotFoundException;
 	//--------------------------
-	ClassModel findClassById(String classId);
+	ClassModel findClassById(String classId) throws NotFoundException;
 }

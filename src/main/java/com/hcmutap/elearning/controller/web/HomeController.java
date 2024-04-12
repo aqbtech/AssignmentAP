@@ -60,132 +60,157 @@ public class HomeController {
 	}
 	@GetMapping(value="/info")
 	public String info(Principal principal, ModelMap model){
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		if (infoDTO.getRole().equalsIgnoreCase("ADMIN")){
-			model.addAttribute("message", "You are not a student or teacher");
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			if (infoDTO.getRole().equalsIgnoreCase("ADMIN")) {
+				model.addAttribute("message", "You are not a student or teacher");
+				return "login/404_page";
+			}
+			model.addAttribute("user", infoDTO);
+			return "web/views/view_info";
+		} catch (Exception e) {
+			model.addAttribute("message", "User not found");
 			return "login/404_page";
 		}
-		model.addAttribute("user", infoDTO);
-		return "web/views/view_info";
 	}
 
 	@RequestMapping("/service")
 	public String service(ModelMap model, Principal principal) {
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		if (infoDTO.getRole().equalsIgnoreCase("ADMIN")) {
-			model.addAttribute("message", "You are not a student or teacher");
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			if (infoDTO.getRole().equalsIgnoreCase("ADMIN")) {
+				model.addAttribute("message", "You are not a student or teacher");
+				return "login/404_page";
+			}
+			String role = infoDTO.getRole();
+			model.addAttribute("type", role);
+			return "web/views/service";
+		} catch (Exception e) {
+			model.addAttribute("message", "User not found");
 			return "login/404_page";
 		}
-		String role = infoDTO.getRole();
-		model.addAttribute("type", role);
-		return "web/views/service";
 	}
 
 	@GetMapping(value="/course")
 	public String course(@RequestParam("id") String id,
 						 Principal principal, ModelMap model) {
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		ClassModel classModel = null;
-		InfoClassModel info = infoService.getClassInfo(id);
-		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			List<ClassModel> cl = studentService.getAllClass(principal.getName());
-			boolean check = false;
-			for (ClassModel classModel1 : cl) {
-				if (classModel1.getClassId().equals(id)) {
-					check = true;
-					break;
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			ClassModel classModel = null;
+			InfoClassModel info = infoService.getClassInfo(id);
+			if (infoDTO.getRole().equalsIgnoreCase("student")) {
+				List<ClassModel> cl = studentService.getAllClass(principal.getName());
+				boolean check = false;
+				for (ClassModel classModel1 : cl) {
+					if (classModel1.getClassId().equals(id)) {
+						check = true;
+						break;
+					}
 				}
-			}
-			if(check)
-				classModel = CourseFacade.getINSTANCE().getClassInfo(id);
-			else{
-				model.addAttribute("message", "You are not in this class");
+				if (check)
+					classModel = CourseFacade.getInstance().getClassInfo(id);
+				else {
+					model.addAttribute("message", "You are not in this class");
+					return "login/404_page";
+				}
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
+				List<ClassModel> cl = teacherService.getAllClass(principal.getName());
+				boolean check = false;
+				for (ClassModel classModel1 : cl) {
+					if (classModel1.getClassId().equals(id)) {
+						check = true;
+						break;
+					}
+				}
+				if (check)
+					classModel = CourseFacade.getInstance().getClassInfo(id);
+				else {
+					model.addAttribute("message", "You are not in this class");
+					return "login/404_page";
+				}
+			} else {
+				model.addAttribute("message", "You are not a student or teacher");
 				return "login/404_page";
 			}
-		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
-			List<ClassModel> cl = teacherService.getAllClass(principal.getName());
-			boolean check = false;
-			for (ClassModel classModel1 : cl) {
-				if (classModel1.getClassId().equals(id)) {
-					check = true;
-					break;
-				}
-			}
-			if(check)
-				classModel = CourseFacade.getINSTANCE().getClassInfo(id);
-			else{
-				model.addAttribute("message", "You are not in this class");
+			if (classModel == null) {
+				model.addAttribute("message", "Class not found");
 				return "login/404_page";
+			} else {
+				model.addAttribute("class", classModel);
+				model.addAttribute("info", info);
+				String courseName = courseService.findById(classModel.getCourseId()).getCourseName();
+				model.addAttribute("courseName", courseName);
+				return "web/views/view_course";
 			}
-		} else {
-			model.addAttribute("message", "You are not a student or teacher");
-			return "login/404_page";
-		}
-		if (classModel == null) {
+		} catch (Exception e) {
 			model.addAttribute("message", "Class not found");
 			return "login/404_page";
-		} else {
-			model.addAttribute("class", classModel);
-			model.addAttribute("info", info);
-			String courseName = courseService.findById(classModel.getCourseId()).getCourseName();
-			model.addAttribute("courseName", courseName);
-			return "web/views/view_course";
 		}
 	}
 	@GetMapping(value="/my-course")
 	public String myCourse(Principal principal, ModelMap model){
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		List<ClassModel> classes = null;
-		List<String> coursesName = new ArrayList<>();
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			List<ClassModel> classes = null;
+			List<String> coursesName = new ArrayList<>();
 
-		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			classes = studentService.getAllClass(principal.getName());
-		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
-			classes = teacherService.getAllClass(principal.getName());
-		} else {
-			model.addAttribute("error", "You are not a student or teacher");
+			if (infoDTO.getRole().equalsIgnoreCase("student")) {
+				classes = studentService.getAllClass(principal.getName());
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
+				classes = teacherService.getAllClass(principal.getName());
+			} else {
+				model.addAttribute("error", "You are not a student or teacher");
+				return "login/404_page";
+			}
+			model.addAttribute("classes", classes);
+
+			for (ClassModel classModel : classes) {
+				CourseModel courseModel = courseService.findById(classModel.getCourseId());
+				coursesName.add(courseModel.getCourseName());
+			}
+
+			model.addAttribute("coursesName", coursesName);
+
+			List<String> listOfImageLinks = Arrays.asList(
+					"https://i.imgur.com/ocueq8H.png",
+					"https://i.imgur.com/derGMH0.png",
+					"https://i.imgur.com/xz6aeKH.png",
+					"https://i.imgur.com/TDfhls4.png",
+					"https://i.imgur.com/EHXPUkU.png"
+			);
+			model.addAttribute("listOfImageLinks", listOfImageLinks);
+
+			return "web/views/my_course";
+		} catch (Exception e) {
+			model.addAttribute("error", "User not found");
 			return "login/404_page";
 		}
-		model.addAttribute("classes", classes);
-
-		for (ClassModel classModel : classes) {
-			CourseModel courseModel = courseService.findById(classModel.getCourseId());
-			coursesName.add(courseModel.getCourseName());
-		}
-
-		model.addAttribute("coursesName", coursesName);
-
-		List<String> listOfImageLinks = Arrays.asList(
-				"https://i.imgur.com/ocueq8H.png",
-				"https://i.imgur.com/derGMH0.png",
-				"https://i.imgur.com/xz6aeKH.png",
-				"https://i.imgur.com/TDfhls4.png",
-				"https://i.imgur.com/EHXPUkU.png"
-		);
-		model.addAttribute("listOfImageLinks", listOfImageLinks);
-
-		return "web/views/my_course";
 	}
+
 	@PostMapping("/upload")
 	public String uploadFile(@RequestParam(value = "file") MultipartFile file,
 							 @RequestParam("folder") String folder,
 							 @RequestParam("classId") String classId,
 							 @RequestParam("infoId") String infoId,
 							 @RequestParam("currentTitleForUpload") String currentTitle) {
-		System.out.println(folder);
-		FileInfo fileInfo = new FileInfo(folder, file.getOriginalFilename());
-		fileService.uploadFile(file, fileInfo);
-		InfoClassModel info = infoService.findById(infoId);
-		List<Document> listDocument = info.getListDocument();
-		Document matchedDocument = null;
-		for (Document document : listDocument) {
-			if (document.getTitle().equals(currentTitle)) {
-				matchedDocument = document;
-				break;
+		try {
+			System.out.println(folder);
+			FileInfo fileInfo = new FileInfo(folder, file.getOriginalFilename());
+			fileService.uploadFile(file, fileInfo);
+			InfoClassModel info = infoService.findById(infoId);
+			List<Document> listDocument = info.getListDocument();
+			Document matchedDocument = null;
+			for (Document document : listDocument) {
+				if (document.getTitle().equals(currentTitle)) {
+					matchedDocument = document;
+					break;
+				}
 			}
+			infoService.addFile(infoId, matchedDocument, fileInfo);
+			return "redirect:/course?id=" + classId;
+		} catch (Exception e) {
+			return "redirect:/course?id=" + classId;
 		}
-		infoService.addFile(infoId, matchedDocument, fileInfo);
-		return "redirect:/course?id=" + classId;
 	}
 	@GetMapping("/download/{folder}/{fileName}")
 	public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String folder, @PathVariable String fileName) {
@@ -204,50 +229,62 @@ public class HomeController {
 	public String deleteGroup(@RequestParam("groupToDelete") String title,
 							  @RequestParam("classId") String classId,
 							  @RequestParam("infoId") String infoId) {
-		InfoClassModel info = infoService.findById(infoId);
-		List<Document> listDocument = info.getListDocument();
-		Document matchedDocument = null;
-		for (Document document : listDocument) {
-			if (document.getTitle().equals(title)) {
-				matchedDocument = document;
-				break;
+		try {
+			InfoClassModel info = infoService.findById(infoId);
+			List<Document> listDocument = info.getListDocument();
+			Document matchedDocument = null;
+			for (Document document : listDocument) {
+				if (document.getTitle().equals(title)) {
+					matchedDocument = document;
+					break;
+				}
 			}
+			infoService.deleteDoc(infoId, matchedDocument);
+			return "redirect:/course?id=" + classId;
+		} catch (Exception e) {
+			return "redirect:/course?id=" + classId;
 		}
-		infoService.deleteDoc(infoId, matchedDocument);
-		return "redirect:/course?id=" + classId;
 	}
 	@PostMapping("/saveNewTitle")
 	public String saveNewTitle(@RequestParam("currentTitle") String currentTitle,
 							   @RequestParam("newTitle") String newTitle,
 							   @RequestParam("classId") String classId,
 							   @RequestParam("infoId") String infoId) {
-		InfoClassModel info = infoService.findById(infoId);
-		List<Document> listDocument = info.getListDocument();
-		Document matchedDocument = null;
-		for (Document document : listDocument) {
-			if (document.getTitle().equals(currentTitle)) {
-				matchedDocument = document;
-				break;
+		try {
+			InfoClassModel info = infoService.findById(infoId);
+			List<Document> listDocument = info.getListDocument();
+			Document matchedDocument = null;
+			for (Document document : listDocument) {
+				if (document.getTitle().equals(currentTitle)) {
+					matchedDocument = document;
+					break;
+				}
 			}
+			infoService.updateTile(infoId, matchedDocument, newTitle);
+			return "redirect:/course?id=" + classId;
+		} catch (Exception e) {
+			return "redirect:/course?id=" + classId;
 		}
-		infoService.updateTile(infoId,matchedDocument,newTitle);
-		return "redirect:/course?id=" + classId;
 	}
 	@GetMapping("/delete/{folder}/{fileName}/{classId}/{title}/{infoId}")
 	public String delete(@PathVariable String folder, @PathVariable String fileName,
 						 @PathVariable String classId, @PathVariable String title,@PathVariable String infoId){
-		InfoClassModel info = infoService.findById(infoId);
-		List<Document> listDocument = info.getListDocument();
-		Document matchedDocument = null;
-		for (Document document : listDocument) {
-			if (document.getTitle().equals(title)) {
-				matchedDocument = document;
-				break;
+		try {
+			InfoClassModel info = infoService.findById(infoId);
+			List<Document> listDocument = info.getListDocument();
+			Document matchedDocument = null;
+			for (Document document : listDocument) {
+				if (document.getTitle().equals(title)) {
+					matchedDocument = document;
+					break;
+				}
 			}
+			FileInfo fileInfo = new FileInfo(folder, fileName);
+			infoService.deleteFile(infoId, matchedDocument, fileInfo);
+			fileService.deleteFile(fileInfo);
+			return "redirect:/course?id=" + classId;
+		} catch (Exception e) {
+			return "redirect:/course?id=" + classId;
 		}
-		FileInfo fileInfo = new FileInfo(folder, fileName);
-		infoService.deleteFile(infoId, matchedDocument,fileInfo);
-		fileService.deleteFile(fileInfo);
-		return "redirect:/course?id=" + classId;
 	}
 }

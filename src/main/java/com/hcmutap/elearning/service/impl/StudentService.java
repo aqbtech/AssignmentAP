@@ -231,7 +231,11 @@ public class StudentService implements IStudentService {
 		return result;
 	}
 
-	public boolean isExist(String id) throws NotFoundException {
-		return studentDAO.findById(id) != null;
+	public boolean isExist(String id) {
+		try {
+			return studentDAO.findById(id) != null;
+		} catch (NotFoundException e) {
+			return false;
+		}
 	}
 }

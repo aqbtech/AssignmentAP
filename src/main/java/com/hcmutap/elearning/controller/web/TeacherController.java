@@ -2,6 +2,7 @@ package com.hcmutap.elearning.controller.web;
 
 import com.hcmutap.elearning.dto.Class_CourseDTO;
 import com.hcmutap.elearning.dto.InfoDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.StudentModel;
@@ -49,57 +50,72 @@ public class TeacherController {
 	}
 
 	@GetMapping(value = "/registration")
-	public String regis(@RequestParam("courseId") String id, Principal principal, ModelMap model){
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+	public String regis(@RequestParam("courseId") String id, Principal principal, ModelMap model) {
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
 
-		List<Class_CourseDTO> class_course = new ArrayList<>();
-		List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
+			List<Class_CourseDTO> class_course = new ArrayList<>();
+			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
 
-		if(id == null){
-			model.addAttribute("message", null);
+			if(id == null){
+				model.addAttribute("message", null);
+				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
+				model.addAttribute("class_course", class_course);
+				return "web/views/teacher-service/registration";
+			}
+
+			if(courseService.isExist(id)){
+				class_course = class_courseService.getByCourseId(id);
+				model.addAttribute("message", "Khoa hoc hien dang kha dung");
+				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
+				model.addAttribute("class_course", class_course);
+				return "web/views/teacher-service/registration";
+			}
+			model.addAttribute("message", "Lop hoc khong kha dung");
 			model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 			model.addAttribute("class_course", class_course);
 			return "web/views/teacher-service/registration";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
 		}
 
-		if(courseService.isExist(id)){
-			class_course = class_courseService.getByCourseId(id);
-			model.addAttribute("message", "Khoa hoc hien dang kha dung");
-			model.addAttribute("class_course_of_teacher", class_course_of_teacher);
-			model.addAttribute("class_course", class_course);
-			return "web/views/teacher-service/registration";
-		}
-		model.addAttribute("message", "Lop hoc khong kha dung");
-		model.addAttribute("class_course_of_teacher", class_course_of_teacher);
-		model.addAttribute("class_course", class_course);
-		return "web/views/teacher-service/registration";
 	}
 
 	@PostMapping(value = "/registration")
 	public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap){
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
 
-		String message = teacherService.Dangkilophoc(teacherModel.getId(), classId);
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
 
-		List<Class_CourseDTO> class_course = new ArrayList<>();
-		List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
+			String message = teacherService.Dangkilophoc(teacherModel.getId(), classId);
+
+			List<Class_CourseDTO> class_course = new ArrayList<>();
+			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
 
 
-		modelMap.addAttribute("message", message);
-		modelMap.addAttribute("class_course_of_teacher", class_course_of_teacher);
-		modelMap.addAttribute("class_course", class_course);
-		return "web/views/teacher-service/registration";
+			modelMap.addAttribute("message", message);
+			modelMap.addAttribute("class_course_of_teacher", class_course_of_teacher);
+			modelMap.addAttribute("class_course", class_course);
+			return "web/views/teacher-service/registration";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	@GetMapping(value = "/timetable")
 	public String timetable(Principal principal,ModelMap model){
-		InfoDTO infoDTO = userService.getInfo(principal.getName());
-		TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
-		List<ClassModel> classes = teacherService.getAllClass(teacherModel.getUsername());
-		model.addAttribute("classes", classes);
-		return "web/views/teacher-service/time-table";
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+			List<ClassModel> classes = teacherService.getAllClass(teacherModel.getUsername());
+			model.addAttribute("classes", classes);
+			return "web/views/teacher-service/time-table";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

@@ -18,37 +18,26 @@ public class ClassService implements IClassService {
     private final StudentDAO studentDAO;
     private final PointDAO pointDAO;
     private final ClassDAO classDAO;
+    private final TeacherDAO teacherDAO;
 
     @Autowired
-    public ClassService(CourseDAO courseDAO, StudentDAO studentDAO, PointDAO pointDAO, ClassDAO classDAO) {
+    public ClassService(CourseDAO courseDAO, StudentDAO studentDAO, PointDAO pointDAO, ClassDAO classDAO, TeacherDAO teacherDAO) {
         this.courseDAO = courseDAO;
         this.studentDAO = studentDAO;
         this.pointDAO = pointDAO;
         this.classDAO = classDAO;
+        this.teacherDAO = teacherDAO;
     }
-
     private IPointService pointService;
-    private IStudentService studentService;
     private IInfoService infoService;
-    private ISemesterService semesterService;
-
     @Autowired
     public void setPointService(IPointService pointService) {
         this.pointService = pointService;
     }
     @Autowired
-    public void setStudentService(IStudentService studentService) {
-        this.studentService = studentService;
-    }
-    @Autowired
     public void setInfoService(IInfoService infoService) {
         this.infoService = infoService;
     }
-    @Autowired
-    public void setSemesterService(ISemesterService semesterService) {
-        this.semesterService = semesterService;
-    }
-
     @Override
     public List<ClassModel> findAll() {
         return classDAO.findAll();
@@ -60,7 +49,7 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public ClassModel findById(String id) {
+    public ClassModel findById(String id) throws NotFoundException {
         return classDAO.findById(id);
     }
     @Override
@@ -86,7 +75,7 @@ public class ClassService implements IClassService {
 
     }
     @Override
-    public void delete(String id) {
+    public void delete(String id) throws NotFoundException {
         ClassModel classModel = findBy("firebaseId",id).getFirst();
         InfoClassModel infoClass = infoService.findById(classModel.getInfoId());
         infoService.delete(infoClass.getFirebaseId());
@@ -94,7 +83,7 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public ClassModel getClassInfo(String classId) {
+    public ClassModel getClassInfo(String classId) throws NotFoundException {
         return classDAO.getClassInfo(classId);
     }
     @Override
@@ -133,7 +122,7 @@ public class ClassService implements IClassService {
         return true;
     }
 
-    public boolean addTeacherToClass(String teacherId, String classId) {
+    public boolean addTeacherToClass(String teacherId, String classId) throws NotFoundException {
         ClassModel classModel = findById(classId);
         if(classModel.getTeacherId() != null)
             return false;
@@ -173,43 +162,43 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public InfoClassModel getClassDocs(String classId) {
+    public InfoClassModel getClassDocs(String classId) throws NotFoundException {
         ClassModel classModel = findById(classId);
         return infoService.getClassInfo(classModel.getInfoId());
     }
 
     @Override
-    public boolean updateTileOfDoc(String classId, Document docCurrent, String newTitle){
+    public boolean updateTileOfDoc(String classId, Document docCurrent, String newTitle) throws NotFoundException {
         ClassModel classModel = findById(classId);
         return infoService.updateTile(classModel.getInfoId(), docCurrent, newTitle);
     }
 
     @Override
-    public boolean addFileOfDoc(String classId, Document docCurrent, FileInfo file){
+    public boolean addFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException {
         ClassModel classModel = findById(classId);
         return infoService.addFile(classModel.getInfoId(), docCurrent, file);
     }
 
     @Override
-    public boolean deleteFileOfDoc(String classId, Document docCurrent, FileInfo file){
+    public boolean deleteFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException {
         ClassModel classModel = findById(classId);
         return infoService.deleteFile(classModel.getInfoId(), docCurrent, file);
     }
 
     @Override
-    public boolean addNewDoc(String classId) {
+    public boolean addNewDoc(String classId) throws NotFoundException {
         ClassModel classModel = findById(classId);
         return infoService.addNewDoc(classModel.getInfoId());
     }
 
     @Override
-    public boolean addDoc(String classId, Document doc) {
+    public boolean addDoc(String classId, Document doc) throws NotFoundException {
         ClassModel classModel = findById(classId);
         return infoService.addDoc(classModel.getInfoId(), doc);
     }
 
     @Override
-    public boolean deleteDoc(String classId, Document doc) {
+    public boolean deleteDoc(String classId, Document doc) throws NotFoundException {
         ClassModel classModel = findById(classId);
         return infoService.deleteDoc(classModel.getInfoId(), doc);
     }
