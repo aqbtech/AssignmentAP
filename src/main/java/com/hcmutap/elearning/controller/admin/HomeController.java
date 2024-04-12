@@ -2,6 +2,7 @@ package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.model.StudentModel;
+import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.model.UserModel;
 import com.hcmutap.elearning.service.IStudentService;
 
@@ -68,6 +69,30 @@ public class HomeController {
 		return "redirect:/admin-management/view-info?id=" + id + "&type=" + type;
 	}
 
+	@PostMapping("/admin-managemnt/view-info")
+	public String updateAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type,
+								@ModelAttribute("form") RegisterDTO form, ModelMap model) {
+		if(type.equals("teacher")) {
+			TeacherModel teacherModel = teacherService.findById(id);
+			teacherModel.setFullName(form.getFullName());
+			teacherModel.setAge(form.getAge());
+			teacherModel.setDegree(form.getDegree());
+			teacherService.update(teacherModel);
+			model.addAttribute("type", "teacher");
+			model.addAttribute("user", teacherService.findById(id));
+		} else {
+			StudentModel studentModel = studentService.findById(id);
+			studentModel.setFullName(form.getFullName());
+			studentModel.setAge(form.getAge());
+			studentService.update(studentModel);
+			model.addAttribute("user", studentService.findById(id));
+			model.addAttribute("type", "student");
+		}
+		model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
+		return "admin/views/update-account";
+	}
+
 	@GetMapping("/admin-management/view-info")
 	public String viewInfo(@RequestParam("id") String id,
 						   @RequestParam("type") String type,
@@ -80,6 +105,7 @@ public class HomeController {
 			model.addAttribute("type", "teacher");
 			model.addAttribute("user", teacherService.findById(id));
 		}
+		model.addAttribute("form", new RegisterDTO());
 		return "admin/views/update-account";
 	}
 

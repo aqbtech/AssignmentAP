@@ -12,7 +12,7 @@
         <h1 th:text="'Mã khóa học ' + ${course.courseId}"></h1>
         <hr>
 
-        <form name="data-form" th:action="@{/admin-management/update-course}" method="post" id="myForm" class="form-group">
+        <form name="data-form" th:action="@{|/admin-management/update-course?id=${course.courseId}|}" method="post" id="myForm" class="form-group">
             <div class="row float-right">
                 <div class="custom-control custom-switch float-right">
                     <input type="checkbox" class="custom-control-input" id="switch1" onclick="toggleInput()">

@@ -30,36 +30,48 @@
                             </div>
                             <div class="col-lg-8">
                                 <div class="card mb-4">
+                                    <form name="data-form" th:action="@{|/admin-management/view-info?id=${user.id}&type=${type}|}" th:object="${form}" method="post" id="myForm" class="form-group">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm-3">
-                                                <p class="mb-0">Họ tên</p>
+                                                <label for="fullName" class="mb-0">Họ tên</label>
                                             </div>
-                                            <div class="col-sm-9">
+                                            <div class="col-sm-5">
                                                 <p class="text-muted mb-0">
-                                                    <span th:text="${user.fullName}"></span>
+                                                    <input type="text" id="fullName" name="fullName" class="form-control"
+                                                           th:value="${user.fullName}" required disabled>
+                                                </p>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <p class="text-muted mb-0">
+                                                    <div class="custom-control custom-switch float-right">
+                                                        <input type="checkbox" class="custom-control-input" id="switch1" onclick="toggleInput()">
+                                                        <label class="custom-control-label" for="switch1">Chỉnh sửa</label>
+                                                    </div><br>
                                                 </p>
                                             </div>
                                         </div>
                                         <hr>
                                         <div class="row">
                                             <div class="col-sm-3">
-                                                <p class="mb-0">Email</p>
+                                                <label for="email" class="mb-0">Email</label>
                                             </div>
-                                            <div class="col-sm-9">
+                                            <div class="col-sm-5">
                                                 <p class="text-muted mb-0">
-                                                    <span th:text="${user.email}"></span>
+                                                    <input type="text" id="email" name="email" class="form-control"
+                                                           th:value="${user.email}" required disabled>
                                                 </p>
                                             </div>
                                         </div>
                                         <hr>
                                         <div class="row">
                                             <div class="col-sm-3">
-                                                <p class="mb-0">Tuổi</p>
+                                                <label for="age" class="mb-0">Tuổi</label>
                                             </div>
-                                            <div class="col-sm-9">
+                                            <div class="col-sm-5">
                                                 <p class="text-muted mb-0">
-                                                    <span th:text="${user.age}"></span>
+                                                    <input type="number" id="age" name="age" class="form-control" min="0" max="100"
+                                                           th:value="${user.age}" required disabled>
                                                 </p>
                                             </div>
                                         </div>
@@ -67,16 +79,23 @@
                                             <hr>
                                             <div class="row">
                                                 <div class="col-sm-3">
-                                                    <p class="mb-0">Trình độ</p>
+                                                    <label for="degree" class="mb-0">Trình độ</label>
                                                 </div>
-                                                <div class="col-sm-9">
+                                                <div class="col-sm-5">
                                                     <p class="text-muted mb-0">
-                                                        <span th:text="${user.degree}"></span>
+                                                        <input type="text" id="degree" name="degree" class="form-control"
+                                                               th:value="${user.degree}" required disabled>
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <input type="submit" value="Submit" class="btn btn-primary float-right" id="submitButton" disabled><br>
+                                            </div>
+                                        </div>
                                     </div>
+                                    </form>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
@@ -151,6 +170,42 @@
                     </div>
                 </section>
             </div><!-- /.container -->
+            <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function toggleInput() {
+                    document.getElementById('fullName').disabled = !document.getElementById('fullName').disabled;
+                    document.getElementById('age').disabled = !document.getElementById('age').disabled;
+                    document.getElementById('submitButton').disabled = !document.getElementById('submitButton').disabled;
+                    document.getElementById('degree').disabled = !document.getElementById('degree').disabled;
+                }
+
+                window.addEventListener("load", function(){
+                    var message = document.getElementById("message").getAttribute("message");
+                    if(message) {
+                        var modalBody = document.getElementById("modalBody");
+                        var modalExit = document.getElementById("modalExit");
+                        modalBody.innerText = message;
+                        modalExit.innerText = "Đóng";
+                        $('#modal').modal('show');
+                    }
+                });
+            </script>
         </div>
     </body>
 </html>

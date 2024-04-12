@@ -71,6 +71,7 @@ public class AdminCourseController {
 	@PostMapping("/admin-management/update-course")
 	public String updateCourse(@RequestParam("id") String id, @ModelAttribute("course") CourseModel courseModel, ModelMap model){
 		courseModel.setCourseId(id);
+		courseModel.setFirebaseId(courseService.findById(id).getFirebaseId());
 		model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được chỉnh sửa thành công!");
 		courseService.update(courseModel);
 		List<ClassModel> listClass = classService.getClassOfCourse(id);

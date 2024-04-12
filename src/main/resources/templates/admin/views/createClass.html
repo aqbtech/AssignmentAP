@@ -70,7 +70,7 @@
                 <option th:each="hk : ${semester}" th:value="${hk.semesterName}" th:selected="${class.semester == hk.semesterName}"
                         th:text="${hk.semesterName}"></option>
             </select><br>
-            <input type="submit" value="Submit" class="btn btn-primary">
+            <input type="submit" value="Submit" class="btn btn-primary float-right">
         </form>
     </div>
     <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
@@ -175,9 +175,9 @@
             return date;
         }
 
-        // new SlimSelect({
-        //     select: "#courseId"
-        // });
+        new SlimSelect({
+            select: "#courseId"
+        });
     </script>
 </div>
 </body>
