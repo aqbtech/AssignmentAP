@@ -10,7 +10,6 @@ import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.service.*;
 
 import com.hcmutap.elearning.service.impl.CourseFacade;
-import com.hcmutap.elearning.utils.ModelBuilderUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -55,87 +54,80 @@ public class HomeController {
 		return "web/views/about";
 	}
 	@GetMapping(value="/info")
-	public String info(Principal principal, ModelMap model){
-		InfoDTO infoDTO = null;
+	public String info(Principal principal, ModelMap model) {
 		try {
-			infoDTO = userService.getInfo(principal.getName());
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			if (infoDTO.getRole().equalsIgnoreCase("ADMIN")){
+				model.addAttribute("message", "You are not a student or teacher");
+				return "login/404_page";
+			}
+			model.addAttribute("user", infoDTO);
+			return "web/views/view_info";
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		if (infoDTO.getRole().equalsIgnoreCase("ADMIN")){
-			model.addAttribute("message", "You are not a student or teacher");
+			model.addAttribute("message","Cant find\n" + e.getMessage());
 			return "login/404_page";
 		}
-		model.addAttribute("user", infoDTO);
-		return "web/views/view_info";
 	}
 	@GetMapping(value="/course")
 	public String course(@RequestParam("id") String id,
 						 Principal principal, ModelMap model) {
-		InfoDTO infoDTO = null;
 		try {
-			infoDTO = userService.getInfo(principal.getName());
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			ClassModel classModel = null;
+			if (infoDTO.getRole().equalsIgnoreCase("student")){
+				classModel = CourseFacade.getInstance().getClassInfo(id);
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
+				classModel = CourseFacade.getInstance().getClassInfo(id);
+			} else {
+				model.addAttribute("message", "You are not a student or teacher");
+				return "login/404_page";
+			}
+			if (classModel == null) {
+				model.addAttribute("message", "Class not found");
+				return "login/404_page";
+			} else {
+				model.addAttribute("class", classModel);
+				return "web/views/view_course";
+			}
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		ClassModel classModel = null;
-		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			classModel = CourseFacade.getInstance().getClassInfo(id);
-		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")){
-			classModel = CourseFacade.getInstance().getClassInfo(id);
-		} else {
-			model.addAttribute("message", "You are not a student or teacher");
+			model.addAttribute("message", "Cant find\n" + e.getMessage());
 			return "login/404_page";
 		}
-		if (classModel == null) {
-			model.addAttribute("message", "Class not found");
-			return "login/404_page";
-		} else {
-			model.addAttribute("class", classModel);
-			return "web/views/view_course";
-		}
+
 	}
 	@GetMapping(value="/my-course")
 	public String myCourse(Principal principal, ModelMap model){
-		InfoDTO infoDTO = null;
-		try {
-			infoDTO = userService.getInfo(principal.getName());
-		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		List<CourseModel> courses = null;
 
-		if (infoDTO.getRole().equalsIgnoreCase("student")){
-			try {
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			List<CourseModel> courses = null;
+			if (infoDTO.getRole().equalsIgnoreCase("student")){
 				StudentModel studentModel = (StudentModel) studentService.findByUsername(principal.getName());
-			} catch (NotFoundException e) {
-				throw new RuntimeException(e);
-			}
-			// TODO: cap nhat lai theo ham moi
-//			courses = studentModel.getCourses();
-		} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
-			try {
+				//	courses = studentModel.getCourses();
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
 				TeacherModel teacherModel = (TeacherModel) teacherService.findByUsername(principal.getName());
-			} catch (NotFoundException e) {
-				throw new RuntimeException(e);
+				//courses = teacherModel.getCourses();
+			} else {
+				model.addAttribute("error", "You are not a student or teacher");
+				return "login/404_page";
 			}
-			//courses = teacherModel.getCourses();
-		} else {
-			model.addAttribute("error", "You are not a student or teacher");
+			model.addAttribute("courses", courses);
+
+			List<String> listOfImageLinks = Arrays.asList(
+					"https://i.imgur.com/ocueq8H.png",
+					"https://i.imgur.com/derGMH0.png",
+					"https://i.imgur.com/xz6aeKH.png",
+					"https://i.imgur.com/TDfhls4.png",
+					"https://i.imgur.com/EHXPUkU.png"
+			);
+			model.addAttribute("listOfImageLinks", listOfImageLinks);
+
+			return "web/views/my_course";
+		} catch (NotFoundException e) {
+			model.addAttribute("message", "Cant find\n" + e.getMessage());
 			return "login/404_page";
 		}
-		model.addAttribute("courses", courses);
 
-		List<String> listOfImageLinks = Arrays.asList(
-				"https://i.imgur.com/ocueq8H.png",
-				"https://i.imgur.com/derGMH0.png",
-				"https://i.imgur.com/xz6aeKH.png",
-				"https://i.imgur.com/TDfhls4.png",
-				"https://i.imgur.com/EHXPUkU.png"
-		);
-		model.addAttribute("listOfImageLinks", listOfImageLinks);
-
-		return "web/views/my_course";
   	}
 	@PostMapping("/upload")
 	public String uploadFile(@RequestParam(value = "file") MultipartFile file, @RequestParam("folder") String folder) {

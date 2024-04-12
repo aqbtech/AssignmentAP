@@ -59,21 +59,16 @@ public class AdminCourseController {
 	}
 	@GetMapping("/admin-management/update-course")
 	public String updateCourse(@RequestParam("id") String id, ModelMap model) {
-		CourseModel courseModel;
+
 		try{
-			courseModel = courseService.findById(id);
+			CourseModel courseModel = courseService.findById(id);
+			List<ClassModel> listClass = classService.getClassOfCourse(id);
+			model.addAttribute("course", courseModel);
+			model.addAttribute("classes", listClass);
+			return "admin/views/view-table-class";
 		} catch (Exception e) {
 			return"redirect:/admin-management-course?action=view&id=";
 		}
-		List<ClassModel> listClass = null;
-		try {
-			listClass = classService.getClassOfCourse(id);
-		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		model.addAttribute("course", courseModel);
-		model.addAttribute("classes", listClass);
-		return "admin/views/view-table-class";
 	}
 
 	@PostMapping("/admin-management/update-course")
@@ -102,7 +97,7 @@ public class AdminCourseController {
 		courseModel.setPercentBTL(Integer.parseInt(request.getParameter("percentBTL")));
 		courseModel.setPercentGK(Integer.parseInt(request.getParameter("percentGK")));
 		courseModel.setPercentCK(Integer.parseInt(request.getParameter("percentCK")));
-		try{
+		try {
 			courseService.findById(courseModel.getCourseId());
 			model.addAttribute("message", "Khóa học " + courseModel.getCourseId() +" đã tồn tại!");
 		} catch (Exception e) {
@@ -171,7 +166,7 @@ public class AdminCourseController {
 		model.addAttribute("class",classModel);
 		return "admin/views/createClass";
 	}
-
+	// TODO: hàm này nên để trong service
 	boolean conflictTime (ClassModel a, ClassModel b) {
 		if(a.getRoom().equals(b.getRoom()) && a.getDayOfWeek().equals(b.getDayOfWeek())) {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
