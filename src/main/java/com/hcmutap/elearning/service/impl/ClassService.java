@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.service.impl;
 
+import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.*;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.model.*;
@@ -117,9 +118,6 @@ public class ClassService implements IClassService {
                 return false;
             }
         }
-//        if(!studentService.add_class_to_student(studentId, classId)) {
-//            return false;
-//        }
         long timestamp = System.currentTimeMillis();
         String id = String.valueOf(timestamp);
         StudentModel studentModel = studentDAO.findById(studentId);

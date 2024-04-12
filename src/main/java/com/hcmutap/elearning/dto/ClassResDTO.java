@@ -17,5 +17,5 @@ public class ClassResDTO {
     private String timeStart;
     private int timeStudy;
     private String room;
-    private String semester;
+    private String semesterId;
 }

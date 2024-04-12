@@ -13,7 +13,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 @SuppressWarnings("unchecked")
@@ -50,7 +49,8 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		ID id = (ID) ReflectionUtils.getField(documentId, t);
 		assert id != null : String.format("DocumentId of %s must not be null", documentClass.getSimpleName());
 		DocumentReference docRef = db.collection(collectionPath).document(id.toString());
-		ApiFuture<WriteResult> apiFuture = docRef.update(Map.copyOf(MapperUtil.getInstance().toMap(t)));
+		Map<String, ?> test = MapperUtil.getInstance().toMap(t);
+		ApiFuture<WriteResult> apiFuture = docRef.update(Map.copyOf(test));
 		// TODO: need to return response model
 		return t;
 	}

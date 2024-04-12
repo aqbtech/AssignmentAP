@@ -1,11 +1,10 @@
 package com.hcmutap.elearning.service.impl;
 
-import com.hcmutap.elearning.dao.impl.StudentDAO;
+
 import com.hcmutap.elearning.dto.Class_CourseDTO;
 import com.hcmutap.elearning.dto.InfoDTO;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.IClass_CourseService;
-import com.hcmutap.elearning.service.ICourseService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +14,15 @@ import java.util.List;
 @Service
 public class Class_CourseService implements IClass_CourseService {
     @Resource
-    StudentService studentService;
+    private StudentService studentService;
     @Resource
-    TeacherService teacherService;
+    private TeacherService teacherService;
     @Resource
-    UserService userService;
+    private UserService userService;
     @Resource
-    CourseService courseService;
+    private CourseService courseService;
     @Resource
-    ClassService classService;
+    private ClassService classService;
 
     @Override
     public List<Class_CourseDTO> getClass_Course(String Username){

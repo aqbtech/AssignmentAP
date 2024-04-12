@@ -8,7 +8,6 @@ import com.hcmutap.elearning.service.ICourseService;
 
 import com.hcmutap.elearning.service.ISemesterService;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -116,7 +115,7 @@ public class AdminCourseController {
 		classModel.setTimeStart(classRes.getTimeStart());
 		classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
 		classModel.setRoom(classRes.getRoom());
-		classModel.setSemester(classRes.getSemester());
+		classModel.setSemesterId(classRes.getSemesterId());
 
 		boolean notSave = false;
 		List<ClassModel> listClass = classService.findAll();
@@ -159,7 +158,7 @@ public class AdminCourseController {
 		classRes.setRoom(classModel.getRoom());
 		classRes.setTimeStart(classModel.getTimeStart());
 		classRes.setTimeStudy(transferTime2(classModel.getTimeStart(),classModel.getTimeEnd()));
-		classRes.setSemester(classModel.getSemester());
+		classRes.setSemesterId(classModel.getSemesterId());
 		model.addAttribute("class", classRes);
 		model.addAttribute("semester", semesterService.findAll());
 		return "admin/views/updateClass";
@@ -174,7 +173,7 @@ public class AdminCourseController {
 		classModel.setTimeStart(classRes.getTimeStart());
 		classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
 		classModel.setRoom(classRes.getRoom());
-		classModel.setSemester(classRes.getSemester());
+		classModel.setSemesterId(classRes.getSemesterId());
 		List<ClassModel> listClass = classService.findAll();
 		for(ClassModel cls : listClass) {
 			if(!cls.getClassId().equals(classModel.getClassId()) && conflictTime(cls, classModel)) {

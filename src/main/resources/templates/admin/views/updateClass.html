@@ -54,9 +54,9 @@
                            th:value="${class.timeStudy}" required min="0" disabled><br>
                 </div>
             </div>
-            <label for="semester">Học kì:</label>
-            <select id="semester" name="semester" class="form-control" required disabled>
-                <option th:each="hk : ${semester}" th:value="${hk.semesterName}" th:selected="${class.semester == hk.semesterName}"
+            <label for="semesterId">Học kì:</label>
+            <select id="semesterId" name="semesterId" class="form-control" required disabled>
+                <option th:each="hk : ${semester}" th:value="${hk.semesterName}" th:selected="${class.getSemesterId == hk.semesterName}"
                         th:text="${hk.semesterName}"></option>
             </select><br>
             <input type="submit" value="Submit" id="submitButton" class="btn btn-primary float-right" disabled>
@@ -109,7 +109,7 @@
                 document.getElementById('room').disabled = !document.getElementById('room').disabled;
                 document.getElementById('timeStart').disabled = !document.getElementById('timeStart').disabled;
                 document.getElementById('timeStudy').disabled = !document.getElementById('timeStudy').disabled;
-                document.getElementById('semester').disabled = !document.getElementById('semester').disabled;
+                document.getElementById('semesterId').disabled = !document.getElementById('semesterId').disabled;
                 document.getElementById('submitButton').disabled = !document.getElementById('submitButton').disabled;
             }
             const selectDay = document.getElementById("dayOfWeek");
@@ -150,7 +150,7 @@
             document.getElementById('room').disabled = !document.getElementById('room').disabled;
             document.getElementById('timeStart').disabled = !document.getElementById('timeStart').disabled;
             document.getElementById('timeStudy').disabled = !document.getElementById('timeStudy').disabled;
-            document.getElementById('semester').disabled = !document.getElementById('semester').disabled;
+            document.getElementById('semesterId').disabled = !document.getElementById('semesterId').disabled;
             document.getElementById('submitButton').disabled = !document.getElementById('submitButton').disabled;
         }
         new SlimSelect({

@@ -24,7 +24,6 @@ public class ClassModel {
     private String timeStart;
     private String timeEnd;
     private String room;
-    private String semester;
     private String semesterId;
     private String infoId;
 }

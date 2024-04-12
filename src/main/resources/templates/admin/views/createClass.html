@@ -65,9 +65,9 @@
                            th:value="${class.timeStudy}" required min="0"><br>
                 </div>
             </div>
-            <label for="semester">Học kì:</label>
-            <select id="semester" name="semester" class="form-control" required>
-                <option th:each="hk : ${semester}" th:value="${hk.semesterName}" th:selected="${class.semester == hk.semesterName}"
+            <label for="semesterId">Học kì:</label>
+            <select id="semesterId" name="semesterId" class="form-control" required>
+                <option th:each="hk : ${semester}" th:value="${hk.semesterName}" th:selected="${class.getSemesterId == hk.semesterName}"
                         th:text="${hk.semesterName}"></option>
             </select><br>
             <input type="submit" value="Submit" class="btn btn-primary float-right">
@@ -163,7 +163,7 @@
                 document.getElementById("timeStart").value = "";
                 document.getElementById("timeStudy").value = "";
                 document.getElementById("room").value = "";
-                document.getElementById("semester").value = "";
+                document.getElementById("semesterId").value = "";
             }
         });
 
