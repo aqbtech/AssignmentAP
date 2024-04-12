@@ -2,15 +2,13 @@ package com.hcmutap.elearning.model;
 
 import com.hcmutap.elearning.dao.firebase.DocumentId;
 import com.hcmutap.elearning.dao.firebase.FirebaseCollection;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FirebaseCollection("points")
 public class PointModel {
    @DocumentId

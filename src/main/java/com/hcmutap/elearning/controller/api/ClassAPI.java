@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.controller.api;
 
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IClassService;
 import jakarta.annotation.Resource;
@@ -18,17 +19,29 @@ public class ClassAPI {
     }
     @GetMapping("/class/findById")
     public ClassModel findById(@RequestParam String id) {
-        return classService.findById(id);
-    }
+		try {
+			return classService.findById(id);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
     @PostMapping("/class")
     public String save(@RequestBody ClassModel classModel) { return classService.save(classModel);}
     @PutMapping("/class")
     public void update(@RequestBody ClassModel classModel) {
         // need to handler not found exception in dao -> service -> controller
-        classService.update(classModel);
-    }
+		try {
+			classService.update(classModel);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
     @DeleteMapping("/class")
     public void delete(@RequestBody List<String> ids) {
-        classService.delete(ids);
-    }
+		try {
+			classService.delete(ids);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

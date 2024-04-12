@@ -1,6 +1,8 @@
 package com.hcmutap.elearning.service;
 
 
+import com.hcmutap.elearning.exception.NotFoundException;
+
 import java.util.List;
 
 /**
@@ -13,13 +15,13 @@ public interface IGenericAdminService<T> {
 	 * @return list of objects
 	 */
 	List<T> findAll();
-	List<T> findBy(String key, String value);
+	List<T> findBy(String key, String value)  throws NotFoundException;
 	/**
 	 * Find object by id
 	 * @param id id of object
 	 * @return object
 	 */
-	T findById(String id);
+	T findById(String id) throws NotFoundException;
 
 	/**
 	 * Save object
@@ -32,13 +34,12 @@ public interface IGenericAdminService<T> {
 	 * Update object
 	 * @param object object model to update
 	 */
-	void update(T object);
+	void update(T object) throws NotFoundException;
 
 	/**
 	 * Delete object by id
 	 * @param ids list of id need to delete
 	 */
-	void delete(List<String> ids);
+	void delete(List<String> ids) throws NotFoundException;
 
-	Object findByUsername(String username);
 }

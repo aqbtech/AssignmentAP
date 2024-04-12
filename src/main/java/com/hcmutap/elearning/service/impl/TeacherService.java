@@ -1,15 +1,15 @@
 package com.hcmutap.elearning.service.impl;
 
-import com.hcmutap.elearning.dao.AdminDAO;
 import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.dao.impl.TeacherDAO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
-import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
@@ -19,30 +19,33 @@ import java.util.List;
 
 @Service("teacherService")
 public class TeacherService implements ITeacherService {
-	@Resource
-	private TeacherDAO teacherDAO;
-	@Resource
-	private ClassDAO classDAO;
-	@Resource
-	private ClassService classService;
-	@Resource
-	private CourseService courseService;
-	@Resource
-	private AdminDAO<TeacherModel> basicDAO;
+	private final TeacherDAO teacherDAO;
+	@Autowired
+	public TeacherService(TeacherDAO teacherDAO) {
+		this.teacherDAO = teacherDAO;
+	}
 	@Override
 	public List<TeacherModel> findAll() {
-//		basicDAO.findAll();
 		return teacherDAO.findAll();
 	}
-
 	@Override
-	public List<TeacherModel> findBy(String key, String value) {
-		return null;
+	public List<TeacherModel> findBy(String key, String value) throws NotFoundException {
+		List<TeacherModel> teacherModels = teacherDAO.findBy(key, value, Options.OptionBuilder.Builder().setEqual().build());
+		if (teacherModels != null && !teacherModels.isEmpty()){
+			return teacherModels;
+		} else {
+			throw new NotFoundException("Teacher not found");
+		}
 	}
 
 	@Override
-	public TeacherModel findById(String id) {
-		return teacherDAO.findById(id);
+	public TeacherModel findById(String id) throws NotFoundException {
+		TeacherModel teacherModel = teacherDAO.findById(id);
+		if (teacherModel != null){
+			return teacherModel;
+		} else {
+			throw new NotFoundException("Teacher not found");
+		}
 	}
 
 	@Override
@@ -51,20 +54,35 @@ public class TeacherService implements ITeacherService {
 	}
 
 	@Override
-	public void update(TeacherModel teacherModel) {
+	public void update(TeacherModel teacherModel) throws NotFoundException {
+		TeacherModel teacherModels = teacherDAO.findById(teacherModel.getId());
+		if (teacherModels == null){
+			throw new NotFoundException("Teacher not found");
+		}
 		teacherDAO.update(teacherModel);
 	}
-
+	private void delete(String id) throws NotFoundException {
+		TeacherModel teacherModel = teacherDAO.findById(id);
+		if (teacherModel == null){
+			throw new NotFoundException("Teacher not found id: " + id);
+		}
+		teacherDAO.delete(id);
+	}
 	@Override
-	public void delete(List<String> ids) {
-		for (String id : ids) {
-			teacherDAO.delete(id);
+	public void delete(List<String> ids) throws NotFoundException {
+		for(String id : ids){
+			delete(id);
 		}
 	}
 
 	@Override
-	public TeacherModel findByUsername(String username) {
-		return teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
+	public TeacherModel findByUsername(String username) throws NotFoundException {
+		List<TeacherModel> teacherModels = teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build());
+		if (teacherModels != null && !teacherModels.isEmpty()){
+			return teacherModels.getFirst();
+		} else {
+			throw new NotFoundException("Teacher with username " +username + "not found");
+		}
 	}
 
 	@Override
@@ -74,18 +92,22 @@ public class TeacherService implements ITeacherService {
 	}
 
 	@Override
-	public List<ClassModel> getAllClass(String username) {
+	public List<ClassModel> getAllClass(String username) throws NotFoundException {
 		List<ClassModel> classModels = new ArrayList<>();
-		TeacherModel teacherModel = teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
-		if (teacherModel.getClasses() == null || teacherModel.getClasses().isEmpty()){
-			return List.of();
-		} else {
-			for(String classId : teacherModel.getClasses()){
-				ClassModel classModel = CourseFacade.getINSTANCE().findClassById(classId);
-				classModels.add(classModel);
+		try {
+			TeacherModel teacherModel = teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
+			if (teacherModel.getClasses() == null || teacherModel.getClasses().isEmpty()){
+				throw new NotFoundException("Teacher not found");
+			} else {
+				for(String classId : teacherModel.getClasses()){
+					ClassModel classModel = CourseFacade.getInstance().findClassById(classId);
+					classModels.add(classModel);
+				}
 			}
+			return classModels;
+		} catch (Exception e){
+			throw new NotFoundException("Teacher not found");
 		}
-		return classModels;
 	}
 
 	@Override

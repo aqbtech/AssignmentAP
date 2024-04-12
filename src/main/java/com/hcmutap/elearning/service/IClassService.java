@@ -1,20 +1,21 @@
 package com.hcmutap.elearning.service;
 
 import com.hcmutap.elearning.dto.PointDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 
 import java.util.List;
 
-public interface IClassService extends IGenericAdminService<ClassModel>{
+public interface IClassService extends IGenericAdminService<ClassModel> {
     void delete(String id);
-    ClassModel getClassInfo(String classId);
-    List<ClassModel> getClassOfCourse(String courseId);
-    List<PointModel> getListStudentOfClass(String classId);
-    List<ClassModel> getTimeTableSV(String studentId);
-    List<ClassModel> getTimeTableGV(String teacherId);
-    boolean addStudentToClass(String studentId, String classId);
-    boolean NhapDiem(String studentId, String classId, PointDTO point);
-    void NhapDiemCaLop(String classId, List<PointDTO> listPoint);
+    ClassModel getClassInfo(String classId) throws NotFoundException;
+    List<ClassModel> getClassOfCourse(String courseId) throws NotFoundException;
+    List<PointModel> getListStudentOfClass(String classId) throws NotFoundException;
+    List<ClassModel> getTimeTableSV(String studentId) throws NotFoundException;
+    List<ClassModel> getTimeTableGV(String teacherId) throws NotFoundException;
+    boolean addStudentToClass(String studentId, String classId) throws NotFoundException;
+    boolean NhapDiem(String studentId, String classId, PointDTO point) throws NotFoundException;
+    void NhapDiemCaLop(String classId, List<PointDTO> listPoint) throws NotFoundException;
     InfoClassModel getClassDocs(String classId);
     boolean updateTileOfDoc(String classId, Document docCurrent, String newTitle);
     boolean addFileOfDoc(String classId, Document docCurrent, FileInfo file);

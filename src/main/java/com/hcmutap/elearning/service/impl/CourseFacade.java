@@ -1,28 +1,33 @@
 package com.hcmutap.elearning.service.impl;
 
+import com.hcmutap.elearning.dao.impl.ClassDAO;
+import com.hcmutap.elearning.dao.impl.CourseDAO;
+import com.hcmutap.elearning.dao.impl.PointDAO;
+import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dto.PointDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.ICourseFacade;
-import lombok.Getter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.List;
 
 public class CourseFacade implements ICourseFacade {
-	@Getter
-	private static final CourseFacade INSTANCE = new CourseFacade();
+	private static CourseFacade INSTANCE;
 	private CourseService courseService;
-	@Resource
 	private ClassService classService;
 	private PointService pointService;
+
+	public static CourseFacade getInstance() {
+		if (INSTANCE == null) {
+			INSTANCE = new CourseFacade();
+		}
+		return INSTANCE;
+	}
 	private CourseFacade() {
 		courseService = new CourseService();
-		classService = new ClassService();
+		classService = new ClassService(new CourseDAO(), new StudentDAO(), new PointDAO(), new ClassDAO());
 		pointService = new PointService();
 	}
 	//course service
@@ -31,11 +36,11 @@ public class CourseFacade implements ICourseFacade {
 		return  courseService.getCourseInfo(courseId);
 	}
 	@Override
-	public List<ClassModel> getLichTrinh(String courseId){
+	public List<ClassModel> getLichTrinh(String courseId) throws NotFoundException {
 		return  courseService.getLichTrinh(courseId);
 	}
 	@Override
-	public List<PointModel> getListPointOfStudent(String courseId){
+	public List<PointModel> getListPointOfStudent(String courseId) throws NotFoundException {
 		return  courseService.getListPointOfStudent(courseId);
 	}
 	//class service
@@ -48,7 +53,7 @@ public class CourseFacade implements ICourseFacade {
 		return classService.getClassOfCourse(courseId);
 	}
 	@Override
-	public List<PointModel> getListStudentOfClass(String classId){
+	public List<PointModel> getListStudentOfClass(String classId) throws NotFoundException {
 		return  classService.getListStudentOfClass(classId);
 	}
 	@Override
@@ -60,15 +65,15 @@ public class CourseFacade implements ICourseFacade {
 		return classService.getTimeTableGV(teacherId);
 	}
 	@Override
-	public boolean addStudentToClass(String studentId, String classId) {
+	public boolean addStudentToClass(String studentId, String classId) throws NotFoundException {
 		return classService.addStudentToClass(studentId, classId);
 	}
 	@Override
-	public boolean NhapDiem(String studentId, String classId, PointDTO point){
+	public boolean NhapDiem(String studentId, String classId, PointDTO point) throws NotFoundException {
 		 return classService.NhapDiem(studentId,classId,point);
 	}
 	@Override
-	public void NhapDiemCaLop(String classId, List<PointDTO> listPoint){
+	public void NhapDiemCaLop(String classId, List<PointDTO> listPoint) throws NotFoundException {
 		classService.NhapDiemCaLop(classId,listPoint);
 	}
 	//point service
@@ -81,12 +86,8 @@ public class CourseFacade implements ICourseFacade {
 		return pointService.getAveragePoint(studentID,courseID);
 	}
 	@Override
-	public  List<PointModel> getListClassOfStudent(String studentID){
-		return pointService.getListClassOfStudent(studentID);
-	}
-	@Override
-	public  List<PointModel> getListStudentOfCourse(String courseID){
-		return pointService.getListStudentOfCourse(courseID);
+	public  List<PointModel> getListStudentOfCourse(String courseID) throws NotFoundException {
+		return pointService.getListStudentByCourseId(courseID);
 	}//------------------------------------------------
 	@Override
 	public ClassModel findClassById(String classId) {

@@ -68,8 +68,4 @@ public class SemesterService implements ISemesterService {
 		}
 	}
 
-	@Override
-	public SemesterModel findByUsername(String username) throws NotFoundException {
-		throw new NotFoundException("Method not found");
-	}
 }

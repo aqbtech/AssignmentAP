@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.controller.api;
 
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.IPointService;
 import jakarta.annotation.Resource;
@@ -18,18 +19,30 @@ public class PointAPI {
     }
     @GetMapping("/points/findById")
     public PointModel findById(@RequestParam String id) {
-        return pointService.findById(id);
-    }
+		try {
+			return pointService.findById(id);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
     @PostMapping("/points")
     public void save(@RequestBody PointModel pointModel) {
         pointService.save(pointModel);
     }
     @PutMapping("/points")
     public void update(@RequestBody PointModel pointModel) {
-        pointService.update(pointModel);
-    }
+		try {
+			pointService.update(pointModel);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
     @DeleteMapping("/points")
     public void delete(@RequestBody List<String> ids) {
-        pointService.delete(ids);
-    }
+		try {
+			pointService.delete(ids);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
