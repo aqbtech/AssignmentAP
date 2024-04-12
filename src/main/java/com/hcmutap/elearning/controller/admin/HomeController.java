@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.RegisterDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
@@ -53,9 +54,15 @@ public class HomeController {
 	}
 	@GetMapping("/admin-home")
 	public String index(Principal principal, ModelMap model) {
-		UserModel userModel = userService.findByUsername(principal.getName()).getFirst();
-		model.addAttribute("user", userModel);
-		return "admin/views/home";
+		UserModel userModel = null;
+		try {
+			userModel = userService.findByUsername(principal.getName());
+			model.addAttribute("user", userModel);
+			return "admin/views/home";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 	}
 	@GetMapping("/admin-management")
 	public String viewAll(ModelMap model, @RequestParam("type") String type){
@@ -74,37 +81,41 @@ public class HomeController {
 	public String deleteAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type,
 								final RedirectAttributes redirectAttributes) {
-		if(type.equals("teacher")) {
-			TeacherModel teacher = teacherService.findById(id);
-			if(teacher.getClasses().isEmpty()) {
-				List<String> del = new ArrayList<>();
-				del.add(teacher.getFirebaseId());
-				teacherService.delete(del);
-				userService.delete(teacher.getUsername());
-				redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
-			} else {
-				String message = "Giáo viên vẫn còn dạy các lớp";
-				for(String classId : teacher.getClasses()) {
-					message += " " + classId;
+		try {
+			if (type.equals("teacher")) {
+				TeacherModel teacher = teacherService.findById(id);
+				if (teacher.getClasses().isEmpty()) {
+					List<String> del = new ArrayList<>();
+					del.add(teacher.getFirebaseId());
+					teacherService.delete(del);
+					userService.delete(teacher.getUsername());
+					redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
+				} else {
+					String message = "Giáo viên vẫn còn dạy các lớp";
+					for (String classId : teacher.getClasses()) {
+						message += " " + classId;
+					}
+					message += " nên chưa thể xóa!";
+					redirectAttributes.addFlashAttribute("message", message);
 				}
-				message += " nên chưa thể xóa!";
-				redirectAttributes.addFlashAttribute("message", message);
+			} else {
+				StudentModel student = studentService.findById(id);
+				List<String> del = new ArrayList<>();
+				del.add(student.getFirebaseId());
+				studentService.delete(del);
+				userService.delete(student.getUsername());
+				List<PointModel> points = pointService.getListPointByStudentId(student.getId());
+				List<String> delPoint = new ArrayList<>();
+				for (PointModel point : points) {
+					delPoint.add(point.getFirebaseId());
+				}
+				pointService.delete(delPoint);
+				redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + id + " thành công!");
 			}
-		} else {
-			StudentModel student = studentService.findById(id);
-			List<String> del = new ArrayList<>();
-			del.add(student.getFirebaseId());
-			studentService.delete(del);
-			userService.delete(student.getUsername());
-			List<PointModel> points = pointService.getListPointOfStudent(student.getId());
-			List<String> delPoint = new ArrayList<>();
-			for(PointModel point : points) {
-				delPoint.add(point.getFirebaseId());
-			}
-			pointService.delete(delPoint);
-			redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + id + " thành công!");
+			return "redirect:/admin-management?type=" + type;
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
 		}
-		return "redirect:/admin-management?type=" + type;
 	}
 
 	@GetMapping("/admin-management/update")
@@ -117,40 +128,47 @@ public class HomeController {
 	public String updateAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type,
 								@ModelAttribute("form") RegisterDTO form, ModelMap model) {
-		if(type.equals("teacher")) {
-			TeacherModel teacherModel = teacherService.findById(id);
-			teacherModel.setFullName(form.getFullName());
-			teacherModel.setAge(form.getAge());
-			teacherModel.setDegree(form.getDegree());
-			teacherService.update(teacherModel);
-			model.addAttribute("type", "teacher");
-			model.addAttribute("user", teacherModel);
-		} else {
-			StudentModel studentModel = studentService.findById(id);
-			studentModel.setFullName(form.getFullName());
-			studentModel.setAge(form.getAge());
-			studentService.update(studentModel);
-			model.addAttribute("user", studentService.findById(id));
-			model.addAttribute("type", studentModel);
+		try {
+			if (type.equals("teacher")) {
+				TeacherModel teacherModel = teacherService.findById(id);
+				teacherModel.setFullName(form.getFullName());
+				teacherModel.setAge(form.getAge());
+				teacherModel.setDegree(form.getDegree());
+				teacherService.update(teacherModel);
+				model.addAttribute("type", "teacher");
+				model.addAttribute("user", teacherModel);
+			} else {
+				StudentModel studentModel = studentService.findById(id);
+				studentModel.setFullName(form.getFullName());
+				studentModel.setAge(form.getAge());
+				studentService.update(studentModel);
+				model.addAttribute("user", studentService.findById(id));
+				model.addAttribute("type", studentModel);
+			}
+			model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
+			return "admin/views/update-account";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
 		}
-		model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
-		return "admin/views/update-account";
 	}
 
 	@GetMapping("/admin-management/view-info")
 	public String viewInfo(@RequestParam("id") String id,
 						   @RequestParam("type") String type,
 						   Model model) {
-		if (type.equals("student")){
-			model.addAttribute("user", studentService.findById(id));
-			model.addAttribute("type", "student");
+		try {
+			if (type.equals("student")) {
+				model.addAttribute("user", studentService.findById(id));
+				model.addAttribute("type", "student");
+			} else if (type.equals("teacher")) {
+				model.addAttribute("type", "teacher");
+				model.addAttribute("user", teacherService.findById(id));
+			}
+			model.addAttribute("form", new RegisterDTO());
+			return "admin/views/update-account";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
 		}
-		else if (type.equals("teacher")){
-			model.addAttribute("type", "teacher");
-			model.addAttribute("user", teacherService.findById(id));
-		}
-		model.addAttribute("form", new RegisterDTO());
-		return "admin/views/update-account";
 	}
 
 	@InitBinder("registerForm")
@@ -178,17 +196,21 @@ public class HomeController {
 							 @ModelAttribute("registerForm") @Validated RegisterDTO registerDTO,
 							 BindingResult result,
 							 final RedirectAttributes redirectAttributes) {
-		if (result.hasErrors()) {
-			model.addAttribute("message", "Failed to add account");
-			return "admin/views/createAccount";
-		}
-		ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
-		String message = registerService.register(modelMap);
-		if (message.equals("Success")){
-			return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
-		} else {
-			redirectAttributes.addFlashAttribute("message", message);
-			return "redirect:/admin-management/add-account";
+		try {
+			if (result.hasErrors()) {
+				model.addAttribute("message", "Failed to add account");
+				return "admin/views/createAccount";
+			}
+			ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
+			String message = registerService.register(modelMap);
+			if (message.equals("Success")) {
+				return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
+			} else {
+				redirectAttributes.addFlashAttribute("message", message);
+				return "redirect:/admin-management/add-account";
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

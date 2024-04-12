@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.ClassResDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.service.IClassService;
@@ -34,36 +35,44 @@ public class AdminCourseController {
 	}
 	@GetMapping("/admin-management/update-course")
 	public String updateCourse(@RequestParam("id") String id, ModelMap model) {
-		CourseModel courseModel;
-		try{
-			courseModel = courseService.findById(id);
+		try {
+			CourseModel courseModel = courseService.findById(id);
+			List<ClassModel> listClass = classService.getClassOfCourse(id);
+			model.addAttribute("course", courseModel);
+			model.addAttribute("classes", listClass);
+			return "admin/views/view-table-class";
 		} catch (Exception e) {
 			return"redirect:/admin-management-course";
 		}
-		List<ClassModel> listClass = classService.getClassOfCourse(id);
-		model.addAttribute("course", courseModel);
-		model.addAttribute("classes", listClass);
-		return "admin/views/view-table-class";
 	}
 
 	@PostMapping("/admin-management/update-course")
 	public String updateCourse(@RequestParam("id") String id, @ModelAttribute("course") CourseModel courseModel, ModelMap model){
 		courseModel.setCourseId(id);
-		courseModel.setFirebaseId(courseService.findById(id).getFirebaseId());
-		model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được chỉnh sửa thành công!");
-		courseService.update(courseModel);
-		List<ClassModel> listClass = classService.getClassOfCourse(id);
-		model.addAttribute("course", courseModel);
-		model.addAttribute("classes", listClass);
-		return "admin/views/view-table-class";
+		try {
+			courseModel.setFirebaseId(courseService.findById(id).getFirebaseId());
+			model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được chỉnh sửa thành công!");
+			courseService.update(courseModel);
+			List<ClassModel> listClass = classService.getClassOfCourse(id);
+			model.addAttribute("course", courseModel);
+			model.addAttribute("classes", listClass);
+			return "admin/views/view-table-class";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@GetMapping("/admin-management/deleteCourse")
 	public String deleteCourse(@RequestParam("id") String id, final RedirectAttributes redirectAttributes) {
-		CourseModel courseModel = courseService.findById(id);
-		courseService.delete(courseModel.getFirebaseId());
-		redirectAttributes.addFlashAttribute("message", "Xóa thành công khóa học " + courseModel.getCourseId());
-		return "redirect:/admin-management-course";
+
+		try {
+			CourseModel courseModel = courseService.findById(id);
+			courseService.delete(courseModel.getFirebaseId());
+			redirectAttributes.addFlashAttribute("message", "Xóa thành công khóa học " + courseModel.getCourseId());
+			return "redirect:/admin-management-course";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 
@@ -149,54 +158,69 @@ public class AdminCourseController {
 
 	@GetMapping("/admin-management/update-class")
 	public String updateClass (@RequestParam("id") String id, ModelMap model) {
-		ClassModel classModel = classService.findById(id);
-		ClassResDTO classRes = new ClassResDTO();
-		classRes.setClassId(classModel.getClassId());
-		classRes.setClassName(classModel.getClassName());
-		classRes.setCourseId(classModel.getCourseId());
-		classRes.setDayOfWeek(classModel.getDayOfWeek());
-		classRes.setRoom(classModel.getRoom());
-		classRes.setTimeStart(classModel.getTimeStart());
-		classRes.setTimeStudy(transferTime2(classModel.getTimeStart(),classModel.getTimeEnd()));
-		classRes.setSemesterId(classModel.getSemesterId());
-		model.addAttribute("class", classRes);
-		model.addAttribute("semester", semesterService.findAll());
-		return "admin/views/updateClass";
+		try {
+			ClassModel classModel = classService.findById(id);
+			ClassResDTO classRes = new ClassResDTO();
+			classRes.setClassId(classModel.getClassId());
+			classRes.setClassName(classModel.getClassName());
+			classRes.setCourseId(classModel.getCourseId());
+			classRes.setDayOfWeek(classModel.getDayOfWeek());
+			classRes.setRoom(classModel.getRoom());
+			classRes.setTimeStart(classModel.getTimeStart());
+			classRes.setTimeStudy(transferTime2(classModel.getTimeStart(),classModel.getTimeEnd()));
+			classRes.setSemesterId(classModel.getSemesterId());
+			model.addAttribute("class", classRes);
+			model.addAttribute("semester", semesterService.findAll());
+			return "admin/views/updateClass";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@PostMapping("/admin-management/update-class")
 	public String updateClass (@RequestParam("id") String id,
 							   @ModelAttribute("class") ClassResDTO classRes, ModelMap model,
 							   final RedirectAttributes redirectAttributes) {
-		ClassModel classModel = classService.findById(id);
-		classModel.setDayOfWeek(classRes.getDayOfWeek());
-		classModel.setTimeStart(classRes.getTimeStart());
-		classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
-		classModel.setRoom(classRes.getRoom());
-		classModel.setSemesterId(classRes.getSemesterId());
-		List<ClassModel> listClass = classService.findAll();
-		for(ClassModel cls : listClass) {
-			if(!cls.getClassId().equals(classModel.getClassId()) && conflictTime(cls, classModel)) {
-				model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
-						+" của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
-						+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
-				classRes.setClassId(classModel.getClassId());
-				model.addAttribute("class",classRes);
-				model.addAttribute("semester",semesterService.findAll());
-				return "admin/views/updateClass";
+
+
+		try {
+			ClassModel classModel = classService.findById(id);
+			classModel.setDayOfWeek(classRes.getDayOfWeek());
+			classModel.setTimeStart(classRes.getTimeStart());
+			classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
+			classModel.setRoom(classRes.getRoom());
+			classModel.setSemesterId(classRes.getSemesterId());
+			List<ClassModel> listClass = classService.findAll();
+			for(ClassModel cls : listClass) {
+				if(!cls.getClassId().equals(classModel.getClassId()) && conflictTime(cls, classModel)) {
+					model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
+							+" của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
+							+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
+					classRes.setClassId(classModel.getClassId());
+					model.addAttribute("class",classRes);
+					model.addAttribute("semester",semesterService.findAll());
+					return "admin/views/updateClass";
+				}
 			}
+			classService.update(classModel);
+			redirectAttributes.addFlashAttribute("message", "Chỉnh sửa thông tin lớp thành công!");
+			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
 		}
-		classService.update(classModel);
-		redirectAttributes.addFlashAttribute("message", "Chỉnh sửa thông tin lớp thành công!");
-		return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 	}
 
 	@GetMapping("/admin-management/deleteClass")
 	public String deleteClass (@RequestParam("id") String id, final RedirectAttributes redirectAttributes) {
-		ClassModel classModel = classService.findById(id);
-		classService.delete(classModel.getFirebaseId());
-		redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
-		return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
+
+		try {
+			ClassModel classModel = classService.findById(id);
+			classService.delete(classModel.getFirebaseId());
+			redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	boolean conflictTime (ClassModel a, ClassModel b) {

@@ -10,12 +10,13 @@ import java.util.List;
 
 public interface IStudentService extends IGenericAdminService<StudentModel>{
 	StudentModel findByUsername(String username) throws NotFoundException;
-	boolean DangkiMonhoc(String studentId, String classID) throws NotFoundException;
+	String DangkiMonhoc(String studentId, String classID) throws NotFoundException;
 	List<ClassModel> getTimetableById(String studentId) throws NotFoundException;
 	List<CourseModel> getCourseByIf(String studentId) throws NotFoundException;
 	List<PointModel> LearningProcess(String studentId) throws NotFoundException;
 	List<PointModel> getPointById(String studentId) throws NotFoundException;
 	List<ClassModel> getListClassByCourseId(String courseId);
-	boolean add_class_to_student(String studentId, String classId) throws NotFoundException;
+	String add_class_to_student(String studentId, String classId) throws NotFoundException;
 	List<ClassModel> getAllClass(String username) throws NotFoundException;
+	boolean isExist(String id);
 }

@@ -3,6 +3,7 @@ package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dto.Class_CourseDTO;
 import com.hcmutap.elearning.dto.InfoDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.IClass_CourseService;
 import jakarta.annotation.Resource;
@@ -25,7 +26,7 @@ public class Class_CourseService implements IClass_CourseService {
     private ClassService classService;
 
     @Override
-    public List<Class_CourseDTO> getClass_Course(String Username){
+    public List<Class_CourseDTO> getClass_Course(String Username) throws NotFoundException {
         InfoDTO infoDTO = userService.getInfo(Username);
         if(infoDTO.getRole().equals("teacher")){
             TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
@@ -43,7 +44,7 @@ public class Class_CourseService implements IClass_CourseService {
             StudentModel studentModel = studentService.findById(infoDTO.getId());
             List<Class_CourseDTO> result = new ArrayList<>();
             List<ClassModel> classes = studentService.getAllClass(studentModel.getUsername());
-            List<CourseModel> courses = studentService.get_course(studentModel.getId());
+            List<CourseModel> courses = studentService.getCourseByIf(studentModel.getId());
             if(classes.isEmpty()) return result;
             for(int i = 0; i < classes.size(); i ++){
                 Class_CourseDTO  e = new Class_CourseDTO(classes.get(i), courses.get(i));
