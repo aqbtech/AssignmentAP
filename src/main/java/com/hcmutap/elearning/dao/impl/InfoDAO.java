@@ -7,6 +7,8 @@ import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.model.InfoClassModel;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
@@ -26,7 +28,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
             return false;
         }
         for(Document doc : info.getListDocument()) {
-            if(docCurrent.equals(doc)) {
+            if(docCurrent.getTitle().equals(doc.getTitle())) {
                 doc.setTitle(newTitle);
                 update(info);
                 return true;
@@ -43,7 +45,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
             return false;
         }
         for(Document doc : info.getListDocument()) {
-            if(docCurrent.equals(doc)) {
+            if(docCurrent.getTitle().equals(doc.getTitle())) {
                 doc.getListFile().add(file);
                 update(info);
                 return true;
@@ -59,15 +61,15 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         } catch (Exception e){
             return false;
         }
-        for(Document doc : info.getListDocument()) {
-            if(docCurrent.equals(doc)) {
-                boolean check = doc.getListFile().remove(file);
-                if(check)
-                {
-                    update(info);
-                    return true;
-                } else
-                    return false;
+        List<Document> ListDoc = info.getListDocument();
+        for(Document doc : ListDoc) {
+            if(docCurrent.getTitle().equals(doc.getTitle())) {
+                List<FileInfo> ListFile = doc.getListFile();
+                ListFile.removeIf(fileInfo -> file.getFileName().equals(fileInfo.getFileName()));
+                doc.setListFile(ListFile);
+                info.setListDocument(ListDoc);
+                update(info);
+                return true;
             }
         }
         return false;
@@ -103,11 +105,11 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         } catch (Exception e){
             return false;
         }
-        boolean check = info.getListDocument().remove(doc);
-        if(check) {
-            update(info);
-            return true;
-        } else
-            return false;
+
+        List<Document> newListDoc = info.getListDocument();
+        newListDoc.removeIf(document -> doc.getTitle().equals(document.getTitle()));
+        info.setListDocument(newListDoc);
+        update(info);
+        return true;
     }
 }

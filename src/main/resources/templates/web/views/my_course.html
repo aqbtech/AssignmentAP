@@ -23,39 +23,35 @@
     }
 
     .card {
-      flex-basis: calc(33.3333% - 10px); /* Điều chỉnh flex-basis để tính toán khoảng cách */
-      margin: 10px 10px 5px 10px; /* Điều chỉnh margin */
+      flex-basis: calc(33.3333% - 10px);
+      margin: 10px 10px 5px 10px;
     }
 
-    /* Sử dụng media query để điều chỉnh số card trên mỗi hàng */
     @media screen and (max-width: 992px) {
       .card {
-        flex-basis: calc(50% - 10px); /* Điều chỉnh flex-basis */
+        flex-basis: calc(50% - 10px);
       }
     }
 
     @media screen and (max-width: 576px) {
       .card {
-        flex-basis: calc(100% - 10px); /* Điều chỉnh flex-basis */
+        flex-basis: calc(100% - 10px);
       }
     }
 
-    /* Chỉnh sửa phần tử h4 */
     h4.text-center.mb-4 {
-      margin-top: 20px; /* Thêm khoảng cách giữa phần tử trên nó */
-      font-size: 24px; /* Chữ bự hơn */
+      margin-top: 20px;
+      font-size: 24px;
     }
 
-    /* Chỉnh sửa phần 2 của card (ID) */
     .card-body h3 {
-      font-size: smaller; /* Chữ nhỏ hơn */
-      color: gray; /* Màu xám */
-      margin-bottom: 5px; /* Khoảng cách giữa phần 2 và phần 3 */
+      font-size: smaller;
+      color: gray;
+      margin-bottom: 5px;
     }
 
-    /* Chỉnh sửa phần 3 của card (Tên khoá học) */
     .card-body p {
-      color: #007bff; /* Màu xanh dương */
+      color: #007bff;
     }
   </style>
 </head>
@@ -77,14 +73,13 @@
 
         <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
           <div class="row">
-            <div class="col-md-4 mb-4" th:each="course, status : ${courses}">
+            <div class="col-md-4 mb-4" th:each="class, status : ${classes}">
               <div class="card">
-                <!-- Sử dụng biến status để truy cập chỉ số của vòng lặp -->
                 <img th:src="${listOfImageLinks[__${status.index % listOfImageLinks.size()}__]}" class="card-img-top max-height-100" alt="cover">
                 <div class="card-body">
-                  <h3 class="card-title single-line">CourseId: <span th:text="${course.courseId}"></span></h3>
-                  <a th:href="'#'"> <!-- Đường link '#' -->
-                    <p class="card-text max-lines-2" th:text="${course.courseName}"></p>
+                  <h3 class="card-title single-line" th:text="${class.classId + '_' + class.courseId}"></h3>
+                  <a th:href="'/course?id=' + ${class.classId}">
+                    <p class="card-text max-lines-2" th:text="${coursesName[__${status.index}__] + '_' + class.teacherName}"></p>
                   </a>
                 </div>
               </div>
