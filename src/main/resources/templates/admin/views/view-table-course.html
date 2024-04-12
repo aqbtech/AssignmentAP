@@ -35,26 +35,13 @@
                             </td>
                             <!-- Delete button -->
                             <td>
-                                <button class="btn btn-link delete-button" th:data-id="${model.courseId}">Delete</button>
+                                <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteCourse?id=${model.courseId}|}">Delete</a>
                             </td>
                         </tr>
                         </tbody>
-                        <script>
-                            document.querySelectorAll('.delete-button').forEach(function(button) {
-                                button.addEventListener('click', function() {
-                                    var id = this.getAttribute('data-id');
-                                    deleteElement(id);
-                                });
-                            });
-                            function deleteElement(id) {
-                                window.location.href = "/admin-management-course?action=delete&id=" + id;
-                                console.log('Delete button clicked for element with id:', id);
-                            }
-                        </script>
                     </table>
                 </div>
             </div>
-            <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
         </div>
     </div>
     <div th:id="message" style="display: none;" th:attr="message=${message}"></div>

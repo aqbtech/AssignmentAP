@@ -1,23 +1,21 @@
 package com.hcmutap.elearning.controller.admin;
 
+import com.hcmutap.elearning.dto.ClassResDTO;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
-import com.hcmutap.elearning.model.InfoClassModel;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 
-import com.hcmutap.elearning.service.IInfoService;
+import com.hcmutap.elearning.service.ISemesterService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -26,33 +24,12 @@ public class AdminCourseController {
 	private ICourseService courseService;
 	@Resource
 	private IClassService classService;
+
 	@Resource
-	private IInfoService infoService;
+	private ISemesterService semesterService;
 
 	@GetMapping("/admin-management-course")
-	public String viewCourse(ModelMap model,
-							 @RequestParam("action") String action,
-							 @RequestParam("id") String id) {
-		if(action.equals("delete")) {
-			CourseModel courseModel;
-			try{
-				courseModel = courseService.findById(id);
-			} catch(Exception e) {
-				return"redirect:/admin-management-course?action=view&id=";
-			}
-			List<ClassModel> listClass = courseService.getLichTrinh(id);
-			if(!listClass.isEmpty()) {
-				String message = "Cần xóa các lớp ";
-				for (ClassModel cls : listClass) {
-					message += cls.getClassName() + " ";
-				}
-				message += " của khóa học " + id + " trước khi xóa khóa học!";
-				model.addAttribute("message", message);
-			} else {
-				courseService.delete(courseModel.getFirebaseId());
-				model.addAttribute("message","Xóa thành công khóa học " + id +"!");
-			}
-		}
+	public String viewCourse(ModelMap model) {
 		model.addAttribute("models", courseService.findAll());
 		return "admin/views/view-table-course";
 	}
@@ -62,7 +39,7 @@ public class AdminCourseController {
 		try{
 			courseModel = courseService.findById(id);
 		} catch (Exception e) {
-			return"redirect:/admin-management-course?action=view&id=";
+			return"redirect:/admin-management-course";
 		}
 		List<ClassModel> listClass = classService.getClassOfCourse(id);
 		model.addAttribute("course", courseModel);
@@ -71,8 +48,23 @@ public class AdminCourseController {
 	}
 
 	@PostMapping("/admin-management/update-course")
-	public String updateCourse(HttpServletRequest request){
-		return "";
+	public String updateCourse(@RequestParam("id") String id, @ModelAttribute("course") CourseModel courseModel, ModelMap model){
+		courseModel.setCourseId(id);
+		courseModel.setFirebaseId(courseService.findById(id).getFirebaseId());
+		model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được chỉnh sửa thành công!");
+		courseService.update(courseModel);
+		List<ClassModel> listClass = classService.getClassOfCourse(id);
+		model.addAttribute("course", courseModel);
+		model.addAttribute("classes", listClass);
+		return "admin/views/view-table-class";
+	}
+
+	@GetMapping("/admin-management/deleteCourse")
+	public String deleteCourse(@RequestParam("id") String id, final RedirectAttributes redirectAttributes) {
+		CourseModel courseModel = courseService.findById(id);
+		courseService.delete(courseModel.getFirebaseId());
+		redirectAttributes.addFlashAttribute("message", "Xóa thành công khóa học " + courseModel.getCourseId());
+		return "redirect:/admin-management-course";
 	}
 
 
@@ -83,29 +75,24 @@ public class AdminCourseController {
 	@GetMapping("/admin-management/add-course")
 	public String addCourse(ModelMap model) {
 		if(!model.containsAttribute("course"))
-			model.addAttribute("course",new CourseModel());
+			model.addAttribute("course", new CourseModel());
 		return "admin/views/createCourse";
 	}
 	@PostMapping("/admin-management/add-course")
-	public String addCourse(HttpServletRequest request, ModelMap model) {
-		CourseModel courseModel = new CourseModel();
-		courseModel.setCourseId(request.getParameter("courseId"));
-		courseModel.setCourseName(request.getParameter("courseName"));
-		courseModel.setCredit(Integer.parseInt(request.getParameter("credit")));
-		courseModel.setPercentBT(Integer.parseInt(request.getParameter("percentBT")));
-		courseModel.setPercentBTL(Integer.parseInt(request.getParameter("percentBTL")));
-		courseModel.setPercentGK(Integer.parseInt(request.getParameter("percentGK")));
-		courseModel.setPercentCK(Integer.parseInt(request.getParameter("percentCK")));
+	public String addCourse(@ModelAttribute("course") CourseModel courseModel, ModelMap model) {
 		try{
 			courseService.findById(courseModel.getCourseId());
 			model.addAttribute("message", "Khóa học " + courseModel.getCourseId() +" đã tồn tại!");
+			model.addAttribute("course",courseModel);
+			model.addAttribute("error","error");
 		} catch (Exception e) {
 			model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được tạo thành công!");
 			courseService.save(courseModel);
+			model.addAttribute("course", new CourseModel());
 		}
-		model.addAttribute("course",courseModel);
 		return "admin/views/createCourse";
 	}
+
 
 
 	// TODO: addClasses để thêm một lớp học mới
@@ -113,23 +100,23 @@ public class AdminCourseController {
 	public String addClass(ModelMap model) {
 
 		model.addAttribute("courses", courseService.findAll());
+		model.addAttribute("semester", semesterService.findAll());
 		if(!model.containsAttribute("class"))
-			model.addAttribute("class",new ClassModel());
+			model.addAttribute("class",new ClassResDTO());
 		return "admin/views/createClass";
 	}
 
 	@PostMapping("/admin-management/add-class")
-	public String addClass(HttpServletRequest request, ModelMap model) {
-		CourseModel courseModel = courseService.findById(request.getParameter("courseId"));
+	public String addClass(@ModelAttribute("class") ClassResDTO classRes, ModelMap model) {
 		ClassModel classModel = new ClassModel();
-		classModel.setCourseId((request.getParameter("courseId")));
-		classModel.setClassName(request.getParameter("className"));
+		classModel.setCourseId(classRes.getCourseId());
+		classModel.setClassName(classRes.getClassName());
 		classModel.setClassId(classModel.getCourseId()+"-"+classModel.getClassName());
-		classModel.setDayOfWeek(request.getParameter("dayOfWeek"));
-		classModel.setTimeStart(request.getParameter("timeStart"));
-		classModel.setTimeEnd(request.getParameter("timeEnd"));
-		classModel.setRoom(request.getParameter("room"));
-		classModel.setSemester(request.getParameter("status"));
+		classModel.setDayOfWeek(classRes.getDayOfWeek());
+		classModel.setTimeStart(classRes.getTimeStart());
+		classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
+		classModel.setRoom(classRes.getRoom());
+		classModel.setSemester(classRes.getSemester());
 
 		boolean notSave = false;
 		List<ClassModel> listClass = classService.findAll();
@@ -138,28 +125,79 @@ public class AdminCourseController {
 				model.addAttribute("message", "Lớp " + classModel.getClassName()
 						+" của khóa học " + classModel.getCourseId() + " đã tồn tại!");
 				notSave = true;
+				model.addAttribute("class",classRes);
+				model.addAttribute("error","error");
 				break;
 			} else if(conflictTime(cls, classModel)) {
 				model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
 						+" của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
 						+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
 				notSave = true;
+				model.addAttribute("class",classRes);
+				model.addAttribute("error","error");
 				break;
 			}
 		}
 		if(!notSave) {
 			model.addAttribute("message", "Lớp học đã được tạo thành công!");
-			InfoClassModel info = new InfoClassModel();
-			info.setClassId(classModel.getClassId());
-			info.setClassName(classModel.getClassName());
-			info.setListDocument(new ArrayList<>());
-			classModel.setInfoId(info.getId());
-			infoService.save(info);
 			classService.save(classModel);
+			model.addAttribute("class",new ClassResDTO());
 		}
 		model.addAttribute("courses", courseService.findAll());
-		model.addAttribute("class",classModel);
+		model.addAttribute("semester", semesterService.findAll());
 		return "admin/views/createClass";
+	}
+
+	@GetMapping("/admin-management/update-class")
+	public String updateClass (@RequestParam("id") String id, ModelMap model) {
+		ClassModel classModel = classService.findById(id);
+		ClassResDTO classRes = new ClassResDTO();
+		classRes.setClassId(classModel.getClassId());
+		classRes.setClassName(classModel.getClassName());
+		classRes.setCourseId(classModel.getCourseId());
+		classRes.setDayOfWeek(classModel.getDayOfWeek());
+		classRes.setRoom(classModel.getRoom());
+		classRes.setTimeStart(classModel.getTimeStart());
+		classRes.setTimeStudy(transferTime2(classModel.getTimeStart(),classModel.getTimeEnd()));
+		classRes.setSemester(classModel.getSemester());
+		model.addAttribute("class", classRes);
+		model.addAttribute("semester", semesterService.findAll());
+		return "admin/views/updateClass";
+	}
+
+	@PostMapping("/admin-management/update-class")
+	public String updateClass (@RequestParam("id") String id,
+							   @ModelAttribute("class") ClassResDTO classRes, ModelMap model,
+							   final RedirectAttributes redirectAttributes) {
+		ClassModel classModel = classService.findById(id);
+		classModel.setDayOfWeek(classRes.getDayOfWeek());
+		classModel.setTimeStart(classRes.getTimeStart());
+		classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
+		classModel.setRoom(classRes.getRoom());
+		classModel.setSemester(classRes.getSemester());
+		List<ClassModel> listClass = classService.findAll();
+		for(ClassModel cls : listClass) {
+			if(!cls.getClassId().equals(classModel.getClassId()) && conflictTime(cls, classModel)) {
+				model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
+						+" của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
+						+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
+				classRes.setClassId(classModel.getClassId());
+				model.addAttribute("class",classRes);
+				model.addAttribute("semester",semesterService.findAll());
+				return "admin/views/updateClass";
+			}
+		}
+		classService.update(classModel);
+		redirectAttributes.addFlashAttribute("message", "Chỉnh sửa thông tin lớp thành công!");
+		return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
+	}
+
+	@GetMapping("/admin-management/deleteClass")
+	public String deleteClass (@RequestParam("id") String id, final RedirectAttributes redirectAttributes) {
+		ClassModel classModel = classService.findById(id);
+		classService.delete(classModel.getFirebaseId());
+		redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+		return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 	}
 
 	boolean conflictTime (ClassModel a, ClassModel b) {
@@ -172,5 +210,20 @@ public class AdminCourseController {
 			return (timeStartA.isBefore(timeEndB) && timeStartB.isBefore(timeEndA));
 		}
 		return false;
+	}
+	String transferTime (String timeStart, int timeStudy) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+		LocalTime time = LocalTime.parse(timeStart, formatter);
+		time = time.plusHours(timeStudy);
+		String hour = (time.getHour() < 10) ? "0" + time.getHour() : "" + time.getHour();
+		String minute = (time.getMinute() < 10) ? "0" + time.getMinute() : "" + time.getMinute();
+		return hour + ":" + minute;
+	}
+
+	int transferTime2 (String timeStart, String timeEnd) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+		LocalTime time1 = LocalTime.parse(timeStart, formatter);
+		LocalTime time2 = LocalTime.parse(timeEnd, formatter);
+		return time2.getHour() - time1.getHour();
 	}
 }

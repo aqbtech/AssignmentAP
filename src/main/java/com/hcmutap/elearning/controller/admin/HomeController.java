@@ -1,8 +1,11 @@
 package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.RegisterDTO;
+import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
+import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.model.UserModel;
+import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 
 import com.hcmutap.elearning.service.ITeacherService;
@@ -23,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller(value = "homeControllerOfAdmin")
 public class HomeController {
@@ -32,6 +37,8 @@ public class HomeController {
 	private ITeacherService teacherService;
 	@Resource
 	private IUserService userService;
+	@Resource
+	private IPointService pointService;
 	private RegisterService registerService;
 	@Autowired
 	private RegisterDTOValidator registerDTOValidator;
@@ -62,10 +69,72 @@ public class HomeController {
 		}
 		return "admin/views/view-all-table";
 	}
+
+	@GetMapping("/admin-management/deleteAccount")
+	public String deleteAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type,
+								final RedirectAttributes redirectAttributes) {
+		if(type.equals("teacher")) {
+			TeacherModel teacher = teacherService.findById(id);
+			if(teacher.getClasses().isEmpty()) {
+				List<String> del = new ArrayList<>();
+				del.add(teacher.getFirebaseId());
+				teacherService.delete(del);
+				userService.delete(teacher.getUsername());
+				redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
+			} else {
+				String message = "Giáo viên vẫn còn dạy các lớp";
+				for(String classId : teacher.getClasses()) {
+					message += " " + classId;
+				}
+				message += " nên chưa thể xóa!";
+				redirectAttributes.addFlashAttribute("message", message);
+			}
+		} else {
+			StudentModel student = studentService.findById(id);
+			List<String> del = new ArrayList<>();
+			del.add(student.getFirebaseId());
+			studentService.delete(del);
+			userService.delete(student.getUsername());
+			List<PointModel> points = pointService.getListPointOfStudent(student.getId());
+			List<String> delPoint = new ArrayList<>();
+			for(PointModel point : points) {
+				delPoint.add(point.getFirebaseId());
+			}
+			pointService.delete(delPoint);
+			redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + id + " thành công!");
+		}
+		return "redirect:/admin-management?type=" + type;
+	}
+
 	@GetMapping("/admin-management/update")
 	public String updateAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type) {
 		return "redirect:/admin-management/view-info?id=" + id + "&type=" + type;
+	}
+
+	@PostMapping("/admin-management/view-info")
+	public String updateAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type,
+								@ModelAttribute("form") RegisterDTO form, ModelMap model) {
+		if(type.equals("teacher")) {
+			TeacherModel teacherModel = teacherService.findById(id);
+			teacherModel.setFullName(form.getFullName());
+			teacherModel.setAge(form.getAge());
+			teacherModel.setDegree(form.getDegree());
+			teacherService.update(teacherModel);
+			model.addAttribute("type", "teacher");
+			model.addAttribute("user", teacherModel);
+		} else {
+			StudentModel studentModel = studentService.findById(id);
+			studentModel.setFullName(form.getFullName());
+			studentModel.setAge(form.getAge());
+			studentService.update(studentModel);
+			model.addAttribute("user", studentService.findById(id));
+			model.addAttribute("type", studentModel);
+		}
+		model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
+		return "admin/views/update-account";
 	}
 
 	@GetMapping("/admin-management/view-info")
@@ -80,6 +149,7 @@ public class HomeController {
 			model.addAttribute("type", "teacher");
 			model.addAttribute("user", teacherService.findById(id));
 		}
+		model.addAttribute("form", new RegisterDTO());
 		return "admin/views/update-account";
 	}
 

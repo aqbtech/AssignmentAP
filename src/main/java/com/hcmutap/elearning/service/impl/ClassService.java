@@ -1,9 +1,6 @@
 package com.hcmutap.elearning.service.impl;
 
-import com.hcmutap.elearning.dao.impl.ClassDAO;
-import com.hcmutap.elearning.dao.impl.CourseDAO;
-import com.hcmutap.elearning.dao.impl.PointDAO;
-import com.hcmutap.elearning.dao.impl.StudentDAO;
+import com.hcmutap.elearning.dao.impl.*;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
@@ -11,6 +8,7 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,6 +36,8 @@ public class ClassService implements IClassService {
     @Resource
     private StudentDAO studentDAO;
     @Resource
+    private TeacherDAO teacherDAO;
+    @Resource
     private PointDAO pointDAO;
 
     @Override
@@ -56,6 +56,15 @@ public class ClassService implements IClassService {
     }
     @Override
     public String save(ClassModel classModel) {
+        InfoClassModel info = new InfoClassModel();
+        long timestamp = System.currentTimeMillis();
+        String id = String.valueOf(timestamp);
+        info.setId(id);
+        info.setClassId(classModel.getClassId());
+        info.setClassName(classModel.getClassName());
+        info.setListDocument(new ArrayList<>());
+        classModel.setInfoId(info.getId());
+        infoService.save(info);
         return classDAO.save(classModel);
     }
     @Override
@@ -66,6 +75,13 @@ public class ClassService implements IClassService {
     @Override
     public void delete(List<String> ids) {
 
+    }
+    @Override
+    public void delete(String id) {
+        ClassModel classModel = findBy("firebaseId",id).getFirst();
+        InfoClassModel infoClass = infoService.findById(classModel.getInfoId());
+        infoService.delete(infoClass.getFirebaseId());
+        classDAO.delete(id);
     }
 
     @Override
@@ -113,6 +129,17 @@ public class ClassService implements IClassService {
         // state = true is learned
         PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(), courseModel.getCourseName(), classId,classModel.getClassName(),classModel.getSemesterId(),false, -1, -1, -1, -1);
         pointService.save(tmp);
+        return true;
+    }
+
+    public boolean addTeacherToClass(String teacherId, String classId) {
+        ClassModel classModel = findById(classId);
+        if(classModel.getTeacherId() != null)
+            return false;
+        TeacherModel teacher = teacherDAO.findById(teacherId);
+        classModel.setTeacherId(teacher.getId());
+        classModel.setTeacherName(teacher.getFullName());
+        update(classModel);
         return true;
     }
 

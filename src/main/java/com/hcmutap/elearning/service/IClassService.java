@@ -6,6 +6,7 @@ import com.hcmutap.elearning.model.*;
 import java.util.List;
 
 public interface IClassService extends IGenericAdminService<ClassModel>{
+    void delete(String id);
     ClassModel getClassInfo(String classId);
     List<ClassModel> getClassOfCourse(String courseId);
     List<PointModel> getListStudentOfClass(String classId);
