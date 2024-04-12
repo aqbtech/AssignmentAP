@@ -1,14 +1,14 @@
 package com.hcmutap.elearning.controller.web;
 
 
-import com.hcmutap.elearning.dao.impl.PointDAO;
+import com.hcmutap.elearning.dto.Class_CourseDTO;
 import com.hcmutap.elearning.dto.InfoDTO;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
+import com.hcmutap.elearning.service.impl.Class_CourseService;
 import com.hcmutap.elearning.service.impl.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,20 +33,22 @@ public class StudentController{
     private ICourseService courseService;
     @Resource
     private ISemesterService semesterServicel;
+    @Resource
+    private Class_CourseService class_courseService;
 
     @Resource
     private IPointService pointService;
 
-    @RequestMapping("/service")
-    public String service(Model model, Principal principal) {
-        InfoDTO infoDTO = userService.getInfo(principal.getName());
-        if (infoDTO.getRole().equalsIgnoreCase("ADMIN") || infoDTO.getRole().equalsIgnoreCase("TEACHER")) {
-            model.addAttribute("message", "You are not a student");
-            return "login/404_page";
-        }
-        model.addAttribute("type", "student");
-        return "web/views/student";
-    }
+//    @RequestMapping("/service")
+//    public String service(Model model, Principal principal) {
+//        InfoDTO infoDTO = userService.getInfo(principal.getName());
+//        if (infoDTO.getRole().equalsIgnoreCase("ADMIN") || infoDTO.getRole().equalsIgnoreCase("TEACHER")) {
+//            model.addAttribute("message", "You are not a student");
+//            return "login/404_page";
+//        }
+//        model.addAttribute("type", "student");
+//        return "web/views/student";
+//    }
 
 
 //    @GetMapping(value = "/registration")
@@ -61,11 +63,19 @@ public class StudentController{
     @GetMapping(value = "/registration")
     public String regis(@RequestParam("courseId") String id, Principal principal, ModelMap model){
         InfoDTO infoDTO = userService.getInfo(principal.getName());
-        List<ClassModel> classes = classService.getClassOfCourse(id);
         StudentModel studentModel = studentService.findById(infoDTO.getId());
-        List<CourseModel> courses = studentService.get_course(studentModel.getId());
-        model.addAttribute("courses", courses);
-        model.addAttribute("classes", classes);
+        List<Class_CourseDTO> class_course = new ArrayList<>();
+        List<Class_CourseDTO> class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
+        if(courseService.isExist(id)){
+            class_course = class_courseService.getByCourseId(id);
+            model.addAttribute("message", "Lop hoc hien dang mo");
+            model.addAttribute("class_course_of_student", class_course_of_student);
+            model.addAttribute("class_course", class_course);
+            return "web/views/student-service/registration";
+        }
+        model.addAttribute("message", "Lop hoc khong kha dung");
+        model.addAttribute("class_course_of_student", class_course_of_student);
+        model.addAttribute("class_course", class_course);
         return "web/views/student-service/registration";
     }
 
@@ -73,24 +83,16 @@ public class StudentController{
     public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap){
         InfoDTO infoDTO = userService.getInfo(principal.getName());
         StudentModel studentModel = studentService.findById(infoDTO.getId());
-        ClassModel classModel = classService.getClassInfo(classId);
+        String message = studentService.DangkiMonhoc(studentModel.getId(),classId);
 
-//        boolean con1 = studentService.DangkiMonhoc(studentModel.getId(), classModel.getClassId());
-//        if(con1){
-//            boolean con2 = studentService.add_class_to_student(studentModel.getId(), classModel.getClassId());
-//            if(!con2){
-//                modelMap.addAttribute("message", "This class is full");
-//            }
-//        }
-//        else{
-//            modelMap.addAttribute("message", "This course is exist");
-//        }
+        List<Class_CourseDTO> class_course = new ArrayList<>();
+        List<Class_CourseDTO> class_course_of_student = new ArrayList<>();
 
-        studentModel.getClasses().add(classModel.getClassId());
-        studentModel.getCourses().add(classModel.getCourseId());
-        studentService.update(studentModel);
-        List<CourseModel> courses = studentService.get_course(studentModel.getId());
-        modelMap.addAttribute("courses", courses);
+        class_course = class_courseService.getByCourseId(classId);
+        class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
+        modelMap.addAttribute("class_course_of_student", class_course_of_student);
+        modelMap.addAttribute("message", message);
+        modelMap.addAttribute("class_course", class_course);
         return "web/views/student-service/registration";
     }
     @GetMapping(value = "/timetable")

@@ -2,13 +2,18 @@ package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.AdminDAO;
 import com.hcmutap.elearning.dao.firebase.Options;
+import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.dao.impl.TeacherDAO;
 import com.hcmutap.elearning.model.ClassModel;
+import com.hcmutap.elearning.model.CourseModel;
+import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +21,12 @@ import java.util.List;
 public class TeacherService implements ITeacherService {
 	@Resource
 	private TeacherDAO teacherDAO;
+	@Resource
+	private ClassDAO classDAO;
+	@Resource
+	private ClassService classService;
+	@Resource
+	private CourseService courseService;
 	@Resource
 	private AdminDAO<TeacherModel> basicDAO;
 	@Override
@@ -67,7 +78,7 @@ public class TeacherService implements ITeacherService {
 		List<ClassModel> classModels = new ArrayList<>();
 		TeacherModel teacherModel = teacherDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
 		if (teacherModel.getClasses() == null || teacherModel.getClasses().isEmpty()){
-			return null;
+			return List.of();
 		} else {
 			for(String classId : teacherModel.getClasses()){
 				ClassModel classModel = CourseFacade.getINSTANCE().findClassById(classId);
@@ -76,5 +87,72 @@ public class TeacherService implements ITeacherService {
 		}
 		return classModels;
 	}
+
+	@Override
+	public List<CourseModel> get_course(String teacherId){
+		TeacherModel teacherModel = teacherDAO.findById(teacherId);
+		List<CourseModel> result = new ArrayList<>();
+		List<String> courses = teacherModel.getCourses();
+		for (String e : courses){
+			CourseModel c = CourseFacade.getINSTANCE().getCourseInfo(e);
+			result.add(c);
+		}
+		return result;
+	}
+
+	@Override
+	public String Dangkilophoc(String teacherId, String classId){
+		ClassModel classModel = classDAO.getClassInfo(classId);
+		TeacherModel teacherModel = teacherDAO.findById(teacherId);
+		List<ClassModel> timetable = classDAO.getTimeTableSV(teacherId);
+
+		if (classModel.getTeacherId() != null) return "Da co giang vien dang ki";
+
+
+		for (String e : teacherModel.getClasses()){
+			if(e.equals(classId)){
+				return "Dang day khoa hoc nay";
+			}
+		}
+
+		for(ClassModel e : timetable){
+			if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
+				continue;
+			}
+			else {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
+				LocalTime time_start = LocalTime.parse(e.getTimeStart(), formatter);
+				LocalTime time_end = LocalTime.parse(e.getTimeEnd(), formatter);
+				LocalTime time_start_new_class = LocalTime.parse(e.getTimeStart(), formatter);
+				LocalTime time_end_new_class = LocalTime.parse(e.getTimeEnd(), formatter);
+				if(time_end.isBefore(time_start_new_class)){
+					break;
+				} else if (time_end_new_class.isBefore(time_start)) {
+					break;
+				}
+				else {
+					return "Unsuccessful";
+				}
+			}
+		}
+		CourseModel courseModel = courseService.getCourseInfo(classModel.getCourseId());
+		teacherModel.getClasses().add(classId);
+		teacherModel.getCourses().add(courseModel.getCourseId());
+		classModel.setTeacherId(teacherModel.getId());
+		classModel.setTeacherName(teacherModel.getFullName());
+		classService.update(classModel);
+		update(teacherModel);
+		return "successful";
+	}
+
+//	@Override
+//	public List<CourseModel> getCoursesModel(String teacherId, List<ClassModel> classes){
+//		List<CourseModel> result = new ArrayList<>();
+//		for (ClassModel e : classes){
+//			CourseModel courseModel = courseService.getCourseInfo(e.getCourseId());
+//			result.add(courseModel);
+//		}
+//		return result;
+//	}
 }
 

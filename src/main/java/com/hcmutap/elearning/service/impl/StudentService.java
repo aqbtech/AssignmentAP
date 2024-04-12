@@ -71,7 +71,7 @@ public class StudentService implements IStudentService {
 		return studentDAO.findById(id);
 	}
 	@Override
-	public boolean DangkiMonhoc(String studentId, String classID) {
+	public String DangkiMonhoc(String studentId, String classID) {
 		ClassModel classModel = classDAO.getClassInfo(classID);
 		StudentModel studentModel = studentDAO.findById(studentId);
 		// TODO: send message to course service, validate if student can register this course
@@ -84,9 +84,14 @@ public class StudentService implements IStudentService {
 		// call class service to add student to class
 		List<String> finished_course = studentModel.getFinished_courses();
 		List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
+		for (String e : studentModel.getCourses()){
+			if (e.equals(classModel.getCourseId())){
+				return "Dang ki khong thanh cong vi ban da dang ky mon nay";
+			}
+		}
 		for(ClassModel e : timetable){
 			if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
-				break;
+				continue;
 			}
 			else {
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
@@ -100,13 +105,13 @@ public class StudentService implements IStudentService {
 					break;
 				}
 				else {
-					return false;
+					return "Dang ki khong thanh cong vi trung thoi gian";
 				}
 			}
 		}
 		for (String e : finished_course){
 			if (e.equals(classModel.getCourseId())){
-				return false;
+				return "Dang ki khong thanh cong vi ban da hoc qua mon nay";
 			}
 		}
 
@@ -116,7 +121,7 @@ public class StudentService implements IStudentService {
 //			return false;
 //		}
 
-		return true;
+		return add_class_to_student(studentId, classID);
 	}
 
 	public static Comparator<ClassModel> getDateTimeComparator() {
@@ -159,7 +164,7 @@ public class StudentService implements IStudentService {
 	public List<PointModel> Tientrinhhoctap(String studentId){
 		StudentModel studentModel = studentDAO.findById(studentId);
 		List<String> finished_courses = studentModel.getFinished_courses();
-		List<PointModel> result = null;
+		List<PointModel> result = new ArrayList<>();
 		for(String e : finished_courses){
 			CourseModel c = CourseFacade.getINSTANCE().getCourseInfo(e);
 			result.add(pointService.getPoint(studentId, c.getCourseId()));
@@ -169,7 +174,7 @@ public class StudentService implements IStudentService {
 	@Override
 	public List<PointModel> get_point(String studentId){
 		StudentModel studentModel = studentDAO.findById(studentId);
-		List<PointModel> point = null;
+		List<PointModel> point = new ArrayList<>();
 		point = pointDAO.findPoint(studentId);
 		return point;
 	}
@@ -188,33 +193,29 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public List<ClassModel> get_list_class_of_this_course(String courseId){
-
 		return classDAO.getClassOfCourse(courseId);
 	}
 
 	@Override
-	public boolean add_class_to_student(String studentId, String classId) {
-		if(this.DangkiMonhoc(studentId, classId)){
-			StudentModel studentModel = studentDAO.findById(studentId);
-			ClassModel classModel = classDAO.getClassInfo(classId);
-			CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
-			studentModel.getCourses().add(courseModel.getCourseId());
-			studentModel.getClasses().add(classModel.getClassId());
-			update(studentModel);
-			return true;
-		}
-		return false;
+	public String add_class_to_student(String studentId, String classId) {
+		StudentModel studentModel = studentDAO.findById(studentId);
+		ClassModel classModel = classDAO.getClassInfo(classId);
+		CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
+		studentModel.getCourses().add(courseModel.getCourseId());
+		studentModel.getClasses().add(classModel.getClassId());
+		update(studentModel);
+		return "Dang ki thanh cong";
 	}
 
 	@Override
 	public List<ClassModel> getAllClass(String username) {
 		List<String> classes = findByUsername(username).getClasses();
-		List<ClassModel> result = null;
+		List<ClassModel> result = new ArrayList<>();
 		for (String e : classes){
 			ClassModel c = CourseFacade.getINSTANCE().getClassInfo(e);
 			result.add(c);
 		}
-		return result == null ? List.of() : result;
+		return result;
 	}
 
 	public boolean isExist(String id) {
