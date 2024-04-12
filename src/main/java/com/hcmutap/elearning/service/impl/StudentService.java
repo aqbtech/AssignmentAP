@@ -209,7 +209,7 @@ public class StudentService implements IStudentService {
 	@Override
 	public List<ClassModel> getAllClass(String username) {
 		List<String> classes = findByUsername(username).getClasses();
-		List<ClassModel> result = null;
+		List<ClassModel> result = new ArrayList<>();
 		for (String e : classes){
 			ClassModel c = CourseFacade.getINSTANCE().getClassInfo(e);
 			result.add(c);
