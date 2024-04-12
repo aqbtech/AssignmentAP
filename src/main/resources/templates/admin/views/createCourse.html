@@ -58,6 +58,7 @@
         </form>
     </div>
     <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div th:id="error" style="display: none;" th:attr="message=${error}"></div>
     <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-content">
@@ -77,11 +78,11 @@
     <script>
         document.getElementById("myForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            var num1 = parseInt(document.getElementById("percentBT").value);
-            var num2 = parseInt(document.getElementById("percentBTL").value);
-            var num3 = parseInt(document.getElementById("percentGK").value);
-            var num4 = parseInt(document.getElementById("percentCK").value);
-            var sum = num1 + num2 + num3 + num4;
+            let num1 = parseInt(document.getElementById("percentBT").value);
+            let num2 = parseInt(document.getElementById("percentBTL").value);
+            let num3 = parseInt(document.getElementById("percentGK").value);
+            let num4 = parseInt(document.getElementById("percentCK").value);
+            let sum = num1 + num2 + num3 + num4;
             if(sum === 100) {
                 document.getElementById("errorMessage").style.display = "none";
                 this.submit();
@@ -91,14 +92,16 @@
         });
 
         window.addEventListener("load", function(){
-            var message = document.getElementById("message").getAttribute("message");
+            let message = document.getElementById("message").getAttribute("message");
             if(message) {
-                var modalBody = document.getElementById("modalBody");
-                var modalExit = document.getElementById("modalExit");
+                let modalBody = document.getElementById("modalBody");
+                let modalExit = document.getElementById("modalExit");
                 modalBody.innerText = message;
                 modalExit.innerText = "Đóng";
                 $('#modal').modal('show');
-            } else {
+            }
+            let error = document.getElementById("error").getAttribute("message");
+            if (!error){
                 document.getElementById("courseId").value = "";
                 document.getElementById("courseName").value = "";
                 document.getElementById("credit").value = "";

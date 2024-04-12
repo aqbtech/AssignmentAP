@@ -18,5 +18,4 @@ public class ClassResDTO {
     private int timeStudy;
     private String room;
     private String semester;
-    private String infoId;
 }
