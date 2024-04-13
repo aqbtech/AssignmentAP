@@ -4,14 +4,14 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{web/layout/web-layout.html}">
 <head>
-    <title th:text="${courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')'}"></title> <!-- kiểm tra và lấy thông tin của khóa học từ courseModel được gửi ra từ controller-->
+    <title th:text="${'Khoá: '+courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')_HK'+class.semesterId}"></title> <!-- kiểm tra và lấy thông tin của khóa học từ courseModel được gửi ra từ controller-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
 <div layout:fragment="content">
     <!-- Page Content -->
     <div class="container">
-        <h4 class="text-center mb-4" th:text="${courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')'}" style="margin-top: 20px;"></h4>
+        <h4 class="text-center mb-4" th:text="${courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')_HK'+class.semesterId}" style="margin-top: 20px;"></h4>
         <div class="form-check form-switch d-flex align-items-center" sec:authorize="hasAuthority('TEACHER')">
             <label class="form-check-label me-2 text-primary" for="editModeSwitch" style="margin-right: 10px;">Chỉnh sửa</label>
             <div class="custom-control custom-switch">
@@ -29,6 +29,13 @@
         </div>
 
         <div id="accordion">
+            <div th:if="${#lists.isEmpty(info.listDocument)}">
+                <div style="margin-top: 50px">
+                   <div>
+                        <p class="text-center text-muted">Chưa có tài liệu nào trong khoá học này</p>
+                    </div>
+                </div>
+            </div>
             <div th:each="infoItem, iterStat : ${info.listDocument}">
                 <div class="card m-2">
                     <div class="card-header" id="heading[[${iterStat.index}]]">
@@ -53,7 +60,6 @@
                             <div th:each="fileItem, iterStat2 : ${infoItem.listFile}">
                                 <div class="border rounded p-3" style="margin-bottom: 10px;">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <!-- Div cho biểu tượng và link tải -->
                                         <div>
                                             <i class="bi bi-file-pdf bi-4x"></i>
                                             <a th:href="@{'/download/' + ${fileItem.folder} + '/' + ${fileItem.fileName}}" class="ms-2" style="font-size: 1rem;" th:text="${fileItem.fileName}"></a>

@@ -19,4 +19,5 @@ public interface IStudentService extends IGenericAdminService<StudentModel>{
 	String add_class_to_student(String studentId, String classId) throws NotFoundException;
 	List<ClassModel> getAllClass(String username) throws NotFoundException;
 	boolean isExist(String id);
+	boolean isExistStudentInClass(String username, String classId) throws NotFoundException;
 }

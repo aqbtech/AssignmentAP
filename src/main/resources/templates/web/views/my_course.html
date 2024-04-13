@@ -20,6 +20,7 @@
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
+      min-height: 3em;
     }
 
     .card {
@@ -63,29 +64,40 @@
     <div id="accordion">
       <div class="card">
 
-        <div class="card-header" id="headingOne">
-          <h5 class="mb-0">
-            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-              Học kỳ (Semester) 2/2023-2024
-            </button>
-          </h5>
-        </div>
 
-        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
-          <div class="row">
-            <div class="col-md-4 mb-4" th:each="class, status : ${classes}">
-              <div class="card">
-                <img th:src="${listOfImageLinks[__${status.index % listOfImageLinks.size()}__]}" class="card-img-top max-height-100" alt="cover">
-                <div class="card-body">
-                  <h3 class="card-title single-line" th:text="${class.classId + '_' + class.courseId}"></h3>
-                  <a th:href="'/course?id=' + ${class.classId}">
-                    <p class="card-text max-lines-2" th:text="${coursesName[__${status.index}__] + '_' + class.teacherName}"></p>
-                  </a>
+
+          <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Tổng quan về khóa học
+              </button>
+            </h5>
+          </div>
+
+          <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
+
+            <div th:if="${#lists.isEmpty(classes)}">
+            <div style="margin-top: 50px; margin-bottom: 50px">
+              <div>
+                <p class="text-center text-muted">Bạn chưa đăng ký khoá học nào</p>
+              </div>
+            </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-4" th:each="class, status : ${classes}">
+                <div class="card">
+                  <img th:src="${listOfImageLinks[__${status.index % listOfImageLinks.size()}__]}" class="card-img-top max-height-100" alt="cover">
+                  <div class="card-body">
+                    <h3 class="card-title single-line" th:text="${class.classId + '_' + class.courseId}"></h3>
+                    <a th:href="'/course?id=' + ${class.classId}">
+                      <p class="card-text max-lines-2" th:text="${coursesName[__${status.index}__] + '_' + class.teacherName + '_HK' +class.semesterId}"></p>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
       </div>
     </div>
