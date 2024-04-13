@@ -123,13 +123,14 @@
                         <form th:action="@{/upload}" enctype="multipart/form-data" id="uploadForm" method="post">
                             <div class="form-group">
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="formFileMultiple" multiple name="file">
+                                    <input type="file" class="custom-file-input" id="formFileMultiple" name="file">
                                     <input type="hidden" id="folder" name="folder" value="" />
                                     <input type="hidden" id="classId" name="classId" th:value="${class.classId}">
                                     <input type="hidden" id="currentTitleForUpload" name="currentTitleForUpload">
                                     <input type="hidden" id="infoId" name="infoId" th:value="${class.infoId}">
                                     <label class="custom-file-label" for="formFileMultiple">Chọn file...</label>
                                 </div>
+                                <label for="formFileMultiple" class="form-label" id="selected-file" style="margin-top: 10px; margin-left: 10px; color: #007bff"></label>
                             </div>
                         </form>
                         <div id="upLoadAlert" class="alert alert-danger mt-2" style="display: none;">Vui lòng chọn file.</div>
@@ -221,6 +222,7 @@
                 let numberOfFiles = $(this)[0].files.length;
                 let fileLabel = numberOfFiles > 1 ? numberOfFiles + ' files selected' : $(this).val().split('\\').pop();
                 $(this).next('.custom-file-label').addClass("selected").html(fileLabel);
+                $('#selected-file').html(fileLabel);
             });
         });
 
