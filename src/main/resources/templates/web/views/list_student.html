@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Student Management System</title>
+    <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="header">
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3 th:text="'Lớp ' + ${class.classId}"></h3>
+                    <h4>Danh sách sinh viên</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 mt-3">
+                <table class="table table-bordered table-striped" style="overflow: auto">
+                    <thead>
+                    <tr style="text-align: center; color: white; background-color: black;">
+                        <th width = "15%">Mã sinh viên</th>
+                        <th width = "25%">Họ và tên</th>
+                        <th>Email</th>
+                        <th width = "10%" th:if="${type} == 'teacher'">Xóa</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="student : ${listStudent}">
+                        <td th:text="${student.id}"></td>
+                        <td th:text="${student.fullName}"></td>
+                        <td th:text="${student.email}"></td>
+                        <td th:if="${type} == 'teacher'">
+                            <a class="btn btn-link delete-button" th:href="@{|/del-student?classId=${class.classId}&id=${student.id}|}">Xóa</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener("load", function() {
+            const message = document.getElementById("message").getAttribute("message");
+            if (message) {
+                const modalBody = document.getElementById("modalBody");
+                const modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

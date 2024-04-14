@@ -2,6 +2,7 @@ package com.hcmutap.elearning.controller.web;
 
 import com.hcmutap.elearning.dto.InfoDTO;
 
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.model.ClassModel;
 
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -34,6 +36,10 @@ public class HomeController {
 	private ITeacherService teacherService;
 	@Resource
 	private ICourseService courseService;
+	@Resource
+	private IClassService classService;
+	@Resource
+	private IPointService pointService;
 	@Resource
 	private IInfoService infoService;
 	@Resource
@@ -287,4 +293,70 @@ public class HomeController {
 			return "redirect:/course?id=" + classId;
 		}
 	}
+
+	@GetMapping("/list-student")
+	public String viewStudents(@RequestParam String id, Principal principal, ModelMap model) {
+		try{
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			if(infoDTO.getRole().equalsIgnoreCase("student")){
+				if (studentService.isExistStudentInClass(principal.getName(), id)) {
+					model.addAttribute("type", "student");
+				} else {
+					model.addAttribute("message", "You are not in this class");
+					return "login/404_page";
+				}
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
+				if (teacherService.isExistTeacherInClass(principal.getName(), id)) {
+					model.addAttribute("type", "teacher");
+				} else {
+					model.addAttribute("message", "You are not in this class");
+					return "login/404_page";
+				}
+			} else {
+				model.addAttribute("message", "You are not a student or teacher");
+				return "login/404_page";
+			}
+			List<PointModel> listTemp = pointService.getListStudentByClassId(id) ;
+			List<StudentModel> listStudent = new ArrayList<>();
+			for(PointModel tmp : listTemp) {
+				listStudent.add(studentService.findById(tmp.getStudentId()));
+			}
+			ClassModel classModel = classService.findById(id);
+			model.addAttribute("class", classModel);
+			model.addAttribute("listStudent", listStudent);
+			return "web/views/list_student";
+		}catch(NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GetMapping("/del-student")
+	public String delStudent(@RequestParam String classId, @RequestParam String id,
+							 final RedirectAttributes redirectAttributes) {
+		try {
+			StudentModel student = studentService.findById(id);
+			int i = 0;
+			List<String> classes = student.getClasses();
+			while(i < classes.size()){
+				if(classes.get(i).equals(classId))
+					break;
+			}
+			if(i == classes.size()) {
+				redirectAttributes.addFlashAttribute("message", "Sinh viên này không học lớp đó!");
+				return "redirect:/list-student?id=" + classId;
+			}
+			PointModel point = pointService.getPoint(id, student.getCourses().get(i));
+			List<String> lst = new ArrayList<>();
+			lst.add(point.getFirebaseId());
+			pointService.delete(lst);
+			student.getClasses().remove(i);
+			student.getCourses().remove(i);
+			studentService.update(student);
+			redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + student.getId() + " ra khỏi lớp thành công!");
+			return "redirect:/list-student?id=" + classId;
+		} catch(NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }
