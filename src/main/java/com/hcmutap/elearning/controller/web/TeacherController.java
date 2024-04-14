@@ -1,11 +1,12 @@
 package com.hcmutap.elearning.controller.web;
 
+import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.dto.Class_CourseDTO;
 import com.hcmutap.elearning.dto.InfoDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
-import com.hcmutap.elearning.model.StudentModel;
+import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.Class_CourseService;
@@ -14,14 +15,13 @@ import com.hcmutap.elearning.service.impl.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/teacher")
@@ -36,14 +36,14 @@ public class TeacherController {
 	@Resource
 	private ITeacherService teacherService;
 	@Resource
+	private IPointService pointService;
+	@Resource
 	private Class_CourseService class_courseService;
 	@Resource
 	private CourseService courseService;
 	@Resource
 	private ISemesterService semesterServicel;
 
-	@Resource
-	private IPointService pointService;
 	@GetMapping(value = "/course")
 	public String teacher(@RequestParam("id") int id) {
 		return "web/views/view_course_teacher";
@@ -117,5 +117,50 @@ public class TeacherController {
 			throw new RuntimeException(e);
 		}
 	}
+
+	@GetMapping(value = "/inputscore")
+	public String inputscore(Principal principal,ModelMap model){
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+			List<ClassModel> classes = teacherService.getAllClass(teacherModel.getUsername());
+			model.addAttribute("classes", classes);
+			return "web/views/teacher-service/InputScore/inputscore";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	@GetMapping(value = "/liststudent")
+	public String listStudent(@RequestParam("classId") String classId, Principal principal, ModelMap model){
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+
+			List<PointModel> pointModels = pointService.getListStudentByClassId(classId);
+			model.addAttribute("points", pointModels);
+			model.addAttribute("name1",pointModels.getFirst().getClassName() +" - khóa học " +pointModels.getFirst().getCourseName());
+
+			return "web/views/teacher-service/InputScore/list_student";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	@PostMapping(value = "/liststudent")
+	public String listStuDenTed(@RequestParam("classId") String classId, Principal principal, ModelMap model){
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+
+			List<PointModel> pointModels = pointService.getListStudentByClassId(classId);
+			model.addAttribute("points", pointModels);
+			model.addAttribute("name1",pointModels.getFirst().getClassName() +" - khóa học " +pointModels.getFirst().getCourseName());
+
+			return "web/views/teacher-service/InputScore/list_student";
+
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 
 }

@@ -10,10 +10,7 @@ import com.hcmutap.elearning.service.impl.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -95,6 +92,8 @@ public class StudentController{
 
             class_course = class_courseService.getByCourseId(classId);
             class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
+
+
             modelMap.addAttribute("class_course_of_student", class_course_of_student);
             modelMap.addAttribute("message", message);
             modelMap.addAttribute("class_course", class_course);
