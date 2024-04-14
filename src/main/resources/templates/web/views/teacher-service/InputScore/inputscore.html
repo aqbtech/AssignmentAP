@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Student Management System</title>
+    <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="header">
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3>Input Score</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 mt-3">
+                <table class="table table-bordered table-striped" style="overflow: auto">
+                    <thead>
+                    <tr style="text-align: center; color: white; background-color: black;">
+                        <th width = "30%">Tên khóa học</th>
+                        <th width = "35%">Tên lớp học</th>
+                        <th width = "35%">Chọn lớp</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="class: ${classes}">
+                        <td th:if="${class.getCourseId() != ''}" th:text="${class.getCourseId()}"> Course </td>
+                        <td th:if="${class.getClassName() != ''}" th:text="${class.getClassName()}"> Name </td>
+                        <td >
+                            <a th:href="@{|/teacher/update_student?classId=${class.classId}&courseId=${class.courseId}|}">Chọn</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
