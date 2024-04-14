@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -58,21 +59,18 @@ public class TeacherController {
 			List<Class_CourseDTO> class_course = new ArrayList<>();
 			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
 
-			if(id == null){
-				model.addAttribute("message", null);
+			if(id.isEmpty()){
 				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 				model.addAttribute("class_course", class_course);
 				return "web/views/teacher-service/registration";
 			}
-
 			if(courseService.isExist(id)){
 				class_course = class_courseService.getByCourseId(id);
-				model.addAttribute("message", "Khoa hoc hien dang kha dung");
 				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 				model.addAttribute("class_course", class_course);
 				return "web/views/teacher-service/registration";
 			}
-			model.addAttribute("message", "Lop hoc khong kha dung");
+			model.addAttribute("message", "Khong co lop hoc ma ban tim kiem");
 			model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 			model.addAttribute("class_course", class_course);
 			return "web/views/teacher-service/registration";
@@ -83,7 +81,8 @@ public class TeacherController {
 	}
 
 	@PostMapping(value = "/registration")
-	public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap){
+	public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap,
+							final RedirectAttributes redirectAttributes){
 
 		try {
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
@@ -94,11 +93,10 @@ public class TeacherController {
 			List<Class_CourseDTO> class_course = new ArrayList<>();
 			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
 
-
-			modelMap.addAttribute("message", message);
+			redirectAttributes.addFlashAttribute("message", message);
 			modelMap.addAttribute("class_course_of_teacher", class_course_of_teacher);
 			modelMap.addAttribute("class_course", class_course);
-			return "web/views/teacher-service/registration";
+			return "redirect:/teacher/registration?courseId=";
 		} catch (NotFoundException e) {
 			throw new RuntimeException(e);
 		}

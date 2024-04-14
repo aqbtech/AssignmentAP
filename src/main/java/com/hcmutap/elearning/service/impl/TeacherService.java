@@ -159,7 +159,7 @@ public class TeacherService implements ITeacherService {
 					break;
 				}
 				else {
-					return "Unsuccessful";
+					return "Dang ki khong thanh cong v trung thoi gian";
 				}
 			}
 		}
@@ -170,7 +170,7 @@ public class TeacherService implements ITeacherService {
 		classModel.setTeacherName(teacherModel.getFullName());
 		classService.update(classModel);
 		update(teacherModel);
-		return "successful";
+		return "Dang ki thanh cong";
 	}
 
 //	@Override
