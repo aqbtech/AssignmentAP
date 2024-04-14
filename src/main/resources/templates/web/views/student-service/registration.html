@@ -49,7 +49,11 @@
                     </form>
                 </div>
 
-                <div th:if="${message}" class="alert alert-danger" th:text="${message}"></div>
+                <div th:switch="${message}">
+                    <div th:case="null" class="" th:text="${message}"></div>
+                    <div th:case="'Dang ky thanh cong'" class="alert alert-success" th:text="${message}"></div>
+                    <div th:case="*" class="alert alert-danger" th:text="${message}"></div>
+                </div>
 
                 <div class="box-search">
 
@@ -67,6 +71,9 @@
                                         <p th:text="${e.getLophoc().getClassId()}">Class Id</p>
                                     </div>
                                     <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getLophoc().getDayOfWeek()}">Time</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
                                         <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
                                     </div>
                                 </div>
@@ -75,7 +82,7 @@
                             <div class="col-sm-2 mt-4" style="overflow: auto">
                                 <form th:action="@{/student/registration?courseId=}" method="post" id="select-course">
                                     <input type="hidden" id="classId" name="classId" th:value="${e.getLophoc().getClassId()}">
-                                    <input type="submit" style="background-color: antiquewhite;border: none;color: white"  value="select">
+                                    <input type="submit" style="background-color: #212529;border: none;color: white"  value="select">
                                 </form>
                             </div>
                             <div th:id="message" style="display: none;" th:attr="message=${message}"></div>

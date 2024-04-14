@@ -118,7 +118,7 @@ public class StudentService implements IStudentService {
 					break;
 				}
 				else {
-					return "Dang ki khong thanh cong vi trung thoi gian";
+					return "Dang ki khong thanh cong vi trung thoi gian voi" + e.getClassName();
 				}
 			}
 		}
@@ -217,7 +217,7 @@ public class StudentService implements IStudentService {
 		studentModel.getCourses().add(courseModel.getCourseId());
 		studentModel.getClasses().add(classModel.getClassId());
 		update(studentModel);
-		return "Dang ki thanh cong";
+		return "Dang ky thanh cong";
 	}
 
 	@Override
