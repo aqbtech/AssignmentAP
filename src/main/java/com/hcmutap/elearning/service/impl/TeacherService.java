@@ -11,6 +11,7 @@ import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -132,12 +133,12 @@ public class TeacherService implements ITeacherService {
 
 	@Override
 	public Page<TeacherModel> getPage(String keyword, int page, int limit) {
-		return teacherDAO.search(keyword, Pageable.ofSize(limit).withPage(page));
+		return teacherDAO.search(keyword, PageRequest.of(page - 1, limit));
 	}
 
 	@Override
 	public Page<TeacherModel> getPage(int page, int limit) {
-		return teacherDAO.findAll(Pageable.ofSize(limit).withPage(page));
+		return teacherDAO.findAll(PageRequest.of(page - 1, limit));
 	}
 
 	@Override

@@ -76,7 +76,7 @@ public class HomeController {
 			model.addAttribute("currentPage", studentPage.getNumber() + 1);
 			model.addAttribute("totalItems", studentPage.getTotalElements());
 			model.addAttribute("totalPages", studentPage.getTotalPages());
-			model.addAttribute("size", studentPage.getSize());
+			model.addAttribute("pageSize", studentPage.getSize());
 //			model.addAttribute("models", studentService.findAll());
 			model.addAttribute("type", "student");
 		}
@@ -87,7 +87,7 @@ public class HomeController {
 			model.addAttribute("currentPage", teacherPage.getNumber() + 1);
 			model.addAttribute("totalItems", teacherPage.getTotalElements());
 			model.addAttribute("totalPages", teacherPage.getTotalPages());
-			model.addAttribute("size", teacherPage.getSize());
+			model.addAttribute("pageSize", teacherPage.getSize());
 //			model.addAttribute("models", teacherService.findAll());
 			model.addAttribute("type", "teacher");
 		}

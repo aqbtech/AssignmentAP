@@ -13,6 +13,7 @@ import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -243,11 +244,11 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public Page<StudentModel> getPage(String keyword, int page, int limit) {
-		return studentDAO.search(keyword, Pageable.ofSize(limit).withPage(page));
+		return studentDAO.search(keyword, PageRequest.of(page - 1, limit));
 	}
 
 	@Override
 	public Page<StudentModel> getPage(int page, int limit) {
-		return studentDAO.findAll(Pageable.ofSize(limit).withPage(page));
+		return studentDAO.findAll(PageRequest.of(page - 1, limit));
 	}
 }

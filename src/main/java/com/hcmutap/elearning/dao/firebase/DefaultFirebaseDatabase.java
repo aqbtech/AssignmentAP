@@ -105,15 +105,15 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 	@Override
 	public Page<T> search(String keyword, Pageable pageable) {
 		try {
-			int offset = (pageable.getPageNumber() - 1) * pageable.getPageSize();
-			Query query = db.collection(collectionPath).orderBy("someField").startAt(keyword).endAt(keyword + "\uf8ff");
+			int offset = (pageable.getPageNumber()) * pageable.getPageSize();
+			Query query = db.collection(collectionPath).orderBy("id").startAt(keyword).endAt(keyword + "\uf8ff");
 			if (offset > 0) {
 				DocumentSnapshot last = query.limit(offset).get().get().getDocuments().get(offset - 1);
 				query = query.startAfter(last);
 			}
 			List<QueryDocumentSnapshot> documents = query.limit(pageable.getPageSize()).get().get().getDocuments();
 			List<T> content = documents.stream().map(doc -> doc.toObject(documentClass)).collect(Collectors.toList());
-			return new PageImpl<>(content, pageable, documents.size());
+			return new PageImpl<>(content, pageable, this.size());
 		} catch (ExecutionException | InterruptedException e) {
 			e.printStackTrace();
 			logger.error("Error while searching documents with keyword: {}", keyword);
@@ -153,6 +153,20 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			logger.error("Error while getting documents by key and Options: {} and value: {}", key, value);
 		}
 		return List.of();
+	}
+
+	@Override
+	public Long size() {
+		try {
+			Firestore db = FirestoreClient.getFirestore();
+			ApiFuture<QuerySnapshot> querySnapshotApiFuture = db.collection(collectionPath).get();
+			List<QueryDocumentSnapshot> documents = querySnapshotApiFuture.get().getDocuments();
+			return (long) documents.size();
+		} catch (ExecutionException | InterruptedException e) {
+			e.printStackTrace();
+			logger.error("Error while getting size of collection: {}", collectionPath);
+		}
+		return 0L;
 	}
 
 }

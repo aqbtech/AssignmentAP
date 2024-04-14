@@ -55,4 +55,9 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 */
 	List<T> findBy(String key, String value); // need Filter class for more complex query
 	List<T> findBy(String key, String value, Options options);
+	/**
+	 * Get number of model in database
+	 * @return size of model
+	 */
+	Long size();
 }
