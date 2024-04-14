@@ -13,7 +13,7 @@
                     <div class="container py-5">
                         <div class="row">
                             <div class="col-lg-4">
-                                <div class="card mb-4">
+                                <div class="card mb-3">
                                     <div class="card-body text-center">
                                         <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
                                              class="rounded-circle img-fluid" style="width: 150px;">
@@ -25,6 +25,12 @@
                                                 <span th:text="${user.degree}"></span>
                                             </p>
                                         </div>
+                                        <div th:if="${type == 'student'}">
+                                            <p class="text-muted mb-1">
+                                                Ngành học:
+                                                <span th:text="${user.major}"></span>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -33,42 +39,42 @@
                                     <form name="data-form" th:action="@{|/admin-management/view-info?id=${user.id}&type=${type}|}" th:object="${form}" method="post" id="myForm" class="form-group">
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-sm-3">
-                                                <label for="fullName" class="mb-0">Họ tên</label>
+                                            <div class="col-sm-2">
+                                                <label for="fullName" class="mb-0 float-left">Họ tên</label>
                                             </div>
-                                            <div class="col-sm-5">
+                                            <div class="col-sm-4">
                                                 <p class="text-muted mb-0">
                                                     <input type="text" id="fullName" name="fullName" class="form-control"
                                                            th:value="${user.fullName}" required disabled>
                                                 </p>
                                             </div>
-                                            <div class="col-sm-4">
+                                            <div class="col-sm-2">
+                                                <label for="gender" class="mb-0">Giới tính</label>
+                                            </div>
+                                            <div class="col-sm-3">
                                                 <p class="text-muted mb-0">
-                                                    <div class="custom-control custom-switch float-right">
-                                                        <input type="checkbox" class="custom-control-input" id="switch1" onclick="toggleInput()">
-                                                        <label class="custom-control-label" for="switch1">Chỉnh sửa</label>
-                                                    </div><br>
+                                                    <select type="text" id="gender" name="gender" class="form-control" required disabled>
+                                                        <option value="Nam" th:selected="${user.gender} == 'Nam'">Nam</option>
+                                                        <option value="Nu" th:selected="${user.gender} == 'Nu'">Nữ</option>
+                                                    </select>
                                                 </p>
                                             </div>
                                         </div>
                                         <hr>
                                         <div class="row">
-                                            <div class="col-sm-3">
+                                            <div class="col-sm-2">
                                                 <label for="email" class="mb-0">Email</label>
                                             </div>
-                                            <div class="col-sm-5">
+                                            <div class="col-sm-4">
                                                 <p class="text-muted mb-0">
                                                     <input type="text" id="email" name="email" class="form-control"
                                                            th:value="${user.email}" required disabled>
                                                 </p>
                                             </div>
-                                        </div>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-sm-3">
+                                            <div class="col-sm-2">
                                                 <label for="age" class="mb-0">Tuổi</label>
                                             </div>
-                                            <div class="col-sm-5">
+                                            <div class="col-sm-3">
                                                 <p class="text-muted mb-0">
                                                     <input type="number" id="age" name="age" class="form-control" min="0" max="100"
                                                            th:value="${user.age}" required disabled>
@@ -87,12 +93,34 @@
                                                                th:value="${user.degree}" required disabled>
                                                     </p>
                                                 </div>
-                                            </div>
+                                            </div><br>
+                                        </div>
+                                        <div th:if="${type == 'student'}">
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <label for="major" class="mb-0">Ngành học </label>
+                                                </div>
+                                                <div class="col-sm-5">
+                                                    <p class="text-muted mb-0">
+                                                        <input type="text" id="major" name="major" class="form-control"
+                                                               th:value="${user.major}" required disabled>
+                                                    </p>
+                                                </div>
+                                            </div><br>
                                         </div>
                                         <div class="row">
-                                            <div class="col-sm-12">
-                                                <input type="submit" value="Submit" class="btn btn-primary float-right" id="submitButton" disabled><br>
+                                            <div class="col-sm-9">
+                                                <p class="text-muted mb-0">
+                                                    <div class="custom-control custom-switch float-right">
+                                                        <input type="checkbox" class="custom-control-input" id="switch1" onclick="toggleInput()">
+                                                        <label class="custom-control-label" for="switch1">Chỉnh sửa</label>
+                                                    </div>
+                                                </p>
                                             </div>
+                                            <div class="col-sm-3">
+                                                <input type="submit" value="Submit" class="btn btn-primary float-right" id="submitButton" disabled><br>
+                                            </div><br>
                                         </div>
                                     </div>
                                     </form>
@@ -189,17 +217,33 @@
             </div>
             <script>
                 function toggleInput() {
-                    document.getElementById('fullName').disabled = !document.getElementById('fullName').disabled;
-                    document.getElementById('age').disabled = !document.getElementById('age').disabled;
-                    document.getElementById('submitButton').disabled = !document.getElementById('submitButton').disabled;
-                    document.getElementById('degree').disabled = !document.getElementById('degree').disabled;
+                    let button = document.getElementById("switch1");
+                    if(button.checked === false) {
+                        document.getElementById('fullName').disabled = true;
+                        document.getElementById('gender').disabled = true;
+                        document.getElementById('age').disabled = true;
+                        document.getElementById('submitButton').disabled = true;
+                        if(document.getElementById('degree'))
+                            document.getElementById('degree').disabled = true;
+                        if(document.getElementById('major'))
+                            document.getElementById('major').disabled = true;
+                    } else {
+                        document.getElementById('fullName').disabled = false;
+                        document.getElementById('gender').disabled = false;
+                        document.getElementById('age').disabled = false;
+                        document.getElementById('submitButton').disabled = false;
+                        if(document.getElementById('degree'))
+                            document.getElementById('degree').disabled = false;
+                        if(document.getElementById('major'))
+                            document.getElementById('major').disabled = false;
+                    }
                 }
 
                 window.addEventListener("load", function(){
-                    var message = document.getElementById("message").getAttribute("message");
+                    let message = document.getElementById("message").getAttribute("message");
                     if(message) {
-                        var modalBody = document.getElementById("modalBody");
-                        var modalExit = document.getElementById("modalExit");
+                        let modalBody = document.getElementById("modalBody");
+                        let modalExit = document.getElementById("modalExit");
                         modalBody.innerText = message;
                         modalExit.innerText = "Đóng";
                         $('#modal').modal('show');

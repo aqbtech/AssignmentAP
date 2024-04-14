@@ -117,7 +117,20 @@ public class ClassService implements IClassService {
         ClassModel classModel = classDAO.getClassInfo(classId);
         CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
         // state = true is learned
-        PointModel tmp = new PointModel("", id, studentId, studentModel.getFullName(), classModel.getCourseId(), courseModel.getCourseName(), classId,classModel.getClassName(),classModel.getSemesterId(),false, -1, -1, -1, -1);
+        PointModel tmp = new PointModel();
+        tmp.setId(id);
+        tmp.setStudentId(studentId);
+        tmp.setStudentName(studentModel.getFullName());
+        tmp.setCourseId(classModel.getCourseId());
+        tmp.setCourseName(courseModel.getCourseName());
+        tmp.setClassId(classId);
+        tmp.setClassName(classModel.getClassName());
+        tmp.setSemesterId(classModel.getSemesterId());
+        tmp.setState(false);
+        tmp.setPointBT(-1);
+        tmp.setPointBTL(-1);
+        tmp.setPointGK(-1);
+        tmp.setPointCK(-1);
         pointService.save(tmp);
         return true;
     }

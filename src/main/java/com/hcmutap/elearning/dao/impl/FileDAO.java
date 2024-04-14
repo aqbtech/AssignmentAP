@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.net.URLEncoder;
+
 
 @Repository
 public class FileDAO {
@@ -33,8 +35,10 @@ public class FileDAO {
 			blob.downloadTo(dest);
 			InputStreamResource resource = new InputStreamResource(Files.newInputStream(dest));
 
+			String encodedFilename = URLEncoder.encode(fileInfo.getFileName(), "UTF-8").replaceAll("\\+", "%20");
+
 			return ResponseEntity.ok()
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileInfo.getFileName())
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFilename)
 					.contentLength(Files.size(dest))
 					.body(resource);
 		} catch (IOException e) {

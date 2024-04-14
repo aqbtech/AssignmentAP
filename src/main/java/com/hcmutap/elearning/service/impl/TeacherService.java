@@ -173,6 +173,19 @@ public class TeacherService implements ITeacherService {
 		return "Dang ki thanh cong";
 	}
 
+	@Override
+	public boolean isExistTeacherInClass(String username, String classId) throws NotFoundException {
+		List<ClassModel> cl = getAllClass(username);
+		boolean check = false;
+		for (ClassModel classModel1 : cl) {
+			if (classModel1.getClassId().equals(classId)) {
+				check = true;
+				break;
+			}
+		}
+		return check;
+	}
+
 //	@Override
 //	public List<CourseModel> getCoursesModel(String teacherId, List<ClassModel> classes){
 //		List<CourseModel> result = new ArrayList<>();

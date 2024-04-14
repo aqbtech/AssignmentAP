@@ -23,6 +23,8 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 @Controller(value = "homeControllerOfWeb")
 public class HomeController {
@@ -36,6 +38,8 @@ public class HomeController {
 	private IInfoService infoService;
 	@Resource
 	private IUserService userService;
+	@Resource
+	private ISemesterService semesterService;
 	private IFileService fileService;
 	private ICourseFacade courseFacade;
 	@Autowired
@@ -99,30 +103,14 @@ public class HomeController {
 			ClassModel classModel = null;
 			InfoClassModel info = infoService.getClassInfo(id);
 			if (infoDTO.getRole().equalsIgnoreCase("student")) {
-				List<ClassModel> cl = studentService.getAllClass(principal.getName());
-				boolean check = false;
-				for (ClassModel classModel1 : cl) {
-					if (classModel1.getClassId().equals(id)) {
-						check = true;
-						break;
-					}
-				}
-				if (check)
+				if (studentService.isExistStudentInClass(principal.getName(), id))
 					classModel = CourseFacade.getInstance().getClassInfo(id);
 				else {
 					model.addAttribute("message", "You are not in this class");
 					return "login/404_page";
 				}
 			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
-				List<ClassModel> cl = teacherService.getAllClass(principal.getName());
-				boolean check = false;
-				for (ClassModel classModel1 : cl) {
-					if (classModel1.getClassId().equals(id)) {
-						check = true;
-						break;
-					}
-				}
-				if (check)
+				if (teacherService.isExistTeacherInClass(principal.getName(), id))
 					classModel = CourseFacade.getInstance().getClassInfo(id);
 				else {
 					model.addAttribute("message", "You are not in this class");
@@ -162,6 +150,9 @@ public class HomeController {
 				model.addAttribute("error", "You are not a student or teacher");
 				return "login/404_page";
 			}
+			List<SemesterModel> semesterList = semesterService.findAll();
+			model.addAttribute("semesterList", semesterList);
+
 			model.addAttribute("classes", classes);
 
 			for (ClassModel classModel : classes) {
@@ -239,7 +230,16 @@ public class HomeController {
 					break;
 				}
 			}
-			infoService.deleteDoc(infoId, matchedDocument);
+            if(matchedDocument != null) {
+				List<FileInfo> listFile = matchedDocument.getListFile();
+				if (listFile != null) {
+					for (FileInfo fileInfo : listFile) {
+						infoService.deleteFile(infoId, matchedDocument, fileInfo);
+						fileService.deleteFile(fileInfo);
+					}
+				}
+				infoService.deleteDoc(infoId, matchedDocument);
+			}
 			return "redirect:/course?id=" + classId;
 		} catch (Exception e) {
 			return "redirect:/course?id=" + classId;

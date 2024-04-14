@@ -10,6 +10,7 @@ import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.ClassModel;
+import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
@@ -35,6 +36,8 @@ public class StudentService implements IStudentService {
 	private  PointDAO pointDAO;
 	@Resource
 	private IPointService pointService;
+	@Resource
+	private IClassService classService;
 	@Override
 	public List<StudentModel> findAll() {
 		return studentDAO.findAll();
@@ -217,6 +220,23 @@ public class StudentService implements IStudentService {
 		studentModel.getCourses().add(courseModel.getCourseId());
 		studentModel.getClasses().add(classModel.getClassId());
 		update(studentModel);
+		// state = true is learned
+//		PointModel tmp = new PointModel();
+//		tmp.setId("PT_"+courseModel.getCourseId());
+//		tmp.setStudentId(studentId);
+//		tmp.setStudentName(studentModel.getFullName());
+//		tmp.setCourseId(classModel.getCourseId());
+//		tmp.setCourseName(courseModel.getCourseName());
+//		tmp.setClassId(classId);
+//		tmp.setClassName(classModel.getClassName());
+//		tmp.setSemesterId(classModel.getSemesterId());
+//		tmp.setState(false);
+//		tmp.setPointBT(-1);
+//		tmp.setPointBTL(-1);
+//		tmp.setPointGK(-1);
+//		tmp.setPointCK(-1);
+//		pointDAO.save(tmp);
+		classService.addStudentToClass(studentId,classId);
 		return "Dang ki thanh cong";
 	}
 
@@ -237,5 +257,17 @@ public class StudentService implements IStudentService {
 		} catch (NotFoundException e) {
 			return false;
 		}
+	}
+	@Override
+	public boolean isExistStudentInClass(String username, String classId) throws NotFoundException {
+		List<ClassModel> cl = getAllClass(username);
+		boolean check = false;
+		for (ClassModel classModel1 : cl) {
+			if (classModel1.getClassId().equals(classId)) {
+				check = true;
+				break;
+			}
+		}
+		return check;
 	}
 }
