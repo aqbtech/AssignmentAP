@@ -102,7 +102,7 @@ public class StudentService implements IStudentService {
 		List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
 		for (String e : studentModel.getCourses()){
 			if (e.equals(classModel.getCourseId())){
-				return "Dang ki khong thanh cong vi ban da dang ky mon nay";
+				return "Dang ky khong thanh cong vi ban da dang ky mon nay";
 			}
 		}
 		for(ClassModel e : timetable){
@@ -121,13 +121,13 @@ public class StudentService implements IStudentService {
 					break;
 				}
 				else {
-					return "Dang ki khong thanh cong vi trung thoi gian";
+					return "Dang ki khong thanh cong vi trung thoi gian voi " + e.getClassName();
 				}
 			}
 		}
 		for (String e : finished_course){
 			if (e.equals(classModel.getCourseId())){
-				return "Dang ki khong thanh cong vi ban da hoc qua mon nay";
+				return "Dang ky khong thanh cong vi ban da hoc qua mon nay";
 			}
 		}
 
@@ -237,7 +237,7 @@ public class StudentService implements IStudentService {
 //		tmp.setPointCK(-1);
 //		pointDAO.save(tmp);
 		classService.addStudentToClass(studentId,classId);
-		return "Dang ki thanh cong";
+		return "Dang ky thanh cong";
 	}
 
 	@Override
