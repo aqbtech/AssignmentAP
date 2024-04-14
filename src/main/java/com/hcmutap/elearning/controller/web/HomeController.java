@@ -360,6 +360,7 @@ public class HomeController {
 			while(i < classes.size()){
 				if(classes.get(i).equals(classId))
 					break;
+				++i;
 			}
 			if(i == classes.size()) {
 				redirectAttributes.addFlashAttribute("message", "Sinh viên này không học lớp đó!");

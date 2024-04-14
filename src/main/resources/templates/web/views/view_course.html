@@ -12,6 +12,11 @@
     <!-- Page Content -->
     <div class="container">
         <h4 class="text-center mb-4" th:text="${courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')_HK'+class.semesterId}" style="margin-top: 20px;"></h4>
+        <div class="card-body">
+            <button type="button" class="btn btn-outline-primary mr-2" th:attr="classId=${class.classId}" id="svButton">
+                Danh sách sinh viên
+            </button>
+        </div>
         <div class="form-check form-switch d-flex align-items-center" sec:authorize="hasAuthority('TEACHER')">
             <label class="form-check-label me-2 text-primary" for="editModeSwitch" style="margin-right: 10px;">Chỉnh sửa</label>
             <div class="custom-control custom-switch">
@@ -359,6 +364,10 @@
                 toggleDisplay(deleteDocumentButtons, 'none');
             }
         }
+
+        document.getElementById("svButton").addEventListener("click", function() {
+            window.location.href = "/list-student?id=" + this.getAttribute("classId");
+        });
     </script>
 </div>
 </html>
