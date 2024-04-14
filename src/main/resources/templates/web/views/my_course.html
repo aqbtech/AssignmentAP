@@ -73,8 +73,8 @@
             </button>
           </h5>
           <div>
-            <form th:action="@{/SelectSemester}" id="SelectSemesterForm" method="post" class="form-group" style="width: 100px; margin-top: 15px;">
-              <select id="semesterSelect" name="semesterSelect" class="form-control" onchange="SelectSemester()">
+            <form th:action="@{/my-course}" id="SelectSemesterForm" method="get" class="form-group" style="width: 100px; margin-top: 15px;">
+              <select id="semester" name="semester" class="form-control" onchange="SelectSemester()">
                 <option value="all" th:selected="${hk eq 'all'}">Tất cả</option>
                 <option th:each="sem : ${semesterList}" th:value="${sem.semesterName}" th:text="'HK' + ${sem.semesterName}" th:selected="${hk eq sem.semesterName}"></option>
               </select>
@@ -117,7 +117,7 @@
 <div layout:fragment="custom-scripts">
   <script>
     function SelectSemester() {
-      var selectedValue = document.getElementById("semesterSelect").value;
+      var selectedValue = document.getElementById("semester").value;
       document.getElementById("SelectSemesterForm").submit();
     }
   </script>

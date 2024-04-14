@@ -307,12 +307,4 @@ public class HomeController {
 			return "redirect:/course?id=" + classId;
 		}
 	}
-	@PostMapping("/SelectSemester")
-	public String SelectSemester(@RequestParam("semesterSelect") String semester){
-		try {
-			return "redirect:/my-course?semester=" + semester;
-		} catch (Exception e) {
-			return "redirect:/my-course";
-		}
-	}
 }
