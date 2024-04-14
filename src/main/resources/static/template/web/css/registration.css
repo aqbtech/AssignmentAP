@@ -69,3 +69,7 @@
 .coursename{
     height: 35px;
 }
+
+button:focus{
+    outline: none;
+}

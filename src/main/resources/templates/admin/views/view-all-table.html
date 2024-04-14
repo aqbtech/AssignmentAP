@@ -1,52 +1,79 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/layout/admin-layout.html}">
+      layout:decorate="~{admin/layout/admin-layout.html}"
+      lang="en">
     <head>
         <title>Trang quản trị</title>
+        <link rel="stylesheet" th:href="@{/template/admin/css/custom-for-view-all-table.css}"/>
     </head>
     <body>
+    <!-- Page Content -->
         <div layout:fragment="content">
-            <!-- Page Content -->
             <div class="container">
+                <div th:unless="${models.size() > 0}">
+                    <span>No account found!</span>
+                </div>
                 <div class="card mb-3">
                     <div class="card-header">
                         <i class="fas fa-table"></i>
                         <span th:switch="${type}">
                             <span th:case="'teacher'">Bảng giáo viên</span>
                             <span th:case="'student'">Bảng sinh viên</span>
-                            <span th:case="'course'">Bảng khóa học</span>
                         </span>
                     </div>
                     <div class="card-body">
+                        <div class="my-3">
+                            <form th:action="@{/admin-management}" id="searchForm">
+                                <input type="hidden" name="type" th:value="${type}">
+                                <div class="row d-flex">
+                                    <div class="col-md-6 mt-2">
+                                        <div class="search">
+                                            <i class="fa fa-search"></i>
+                                            <input id="keyword" type="search" name="keyword" th:value="${keyword}" class="form-control"
+                                                   placeholder="Enter keyword">
+                                            <button type="submit" class="btn btn-secondary">Search</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 input-group mt-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="pageSize">Items per page:</label>
+                                        </div>
+                                        <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSize()" class="size-select"
+                                                id="pageSize">
+                                            <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-1 mt-2">
+                                        <button id="btnClear" class="btn btn-info" onclick="clearFunc()">Clear</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Update</th>
-                                    <th>Delete</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Age</th>
+                                    <th scope="col">Major</th>
+                                    <th scope="col">Action</th>
                                 </tr>
                                 </thead>
-<!--                                <tfoot>-->
-<!--                                <tr>-->
-<!--                                    <th>ID</th>-->
-<!--                                    <th>Name</th>-->
-<!--                                </tr>-->
-<!--                                </tfoot>-->
                                 <tbody>
                                     <tr th:each="model : ${models}">
-                                        <td th:text="${model.id}"></td>
+                                        <th scope="row" th:text="${model.id}"></th>
                                         <td th:text="${model.fullName}"></td>
-                                        <!--check type of models and present model attribute-->
-                                        <!-- Add more data cells as needed -->
+                                        <td th:text="${model.age}"></td>
+                                        <td th:if="${type} == 'student'" th:text="${model.major}"></td>
+                                        <td th:if="${type} == 'teacher'" th:text="${model.degree}"></td>
                                         <td>
-                                            <a class="btn btn-link update-button" th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}">Update</a>
-                                        </td>
-                                        <!-- Delete button -->
-                                        <td>
-                                            <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteAccount?id=${model.id}&type=${type}|}">Delete</a>
+                                            <a th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}" title="Edit this tutorial"
+                                               class="fas fa-edit"></a>
+                                            &nbsp;
+                                            <a th:href="@{|/admin-management/deleteAccount?id=${model.id}&type=${type}|}" th:tutorialTitle="${model.fullName}" id="btnDelete"
+                                               title="Delete this tutorial" class="fas fa-trash icon-delete btn-delete"></a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -54,7 +81,33 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <nav aria-label="Pagination" th:if="${totalPages > 0}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging :: paging(1, '<<', 'First Page')}"></a>
+                        </li>
+                        <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging.html::paging(${currentPage -1}, 'Prev', 'Previos Page')}"></a>
+                        </li>
+                        <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                            th:each="page : ${#numbers.sequence((currentPage > 2) ? (currentPage - 2) : 1,(currentPage + 2 < totalPages) ? (currentPage + 2) : totalPages)}">
+                            <a th:replace="~{admin/fragments/paging.html::paging(${page}, ${page}, 'Page ' + ${page})}"></a>
+                        </li>
+                        <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                        <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging::paging(${currentPage + 1},'Next', 'Next Page')}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging.html::paging(${totalPages}, '>>', 'Last Page')}"></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div><!-- /.container -->
             <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
             <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
                  aria-hidden="true">
@@ -83,9 +136,15 @@
                         $('#modal').modal('show');
                     }
                 });
+                function clearFunc() {
+                    document.getElementById("keyword").value = "";
+                    $("#searchForm").submit();
+                }
+                function changePageSize() {
+                    $("#searchForm").submit();
+                }
             </script>
-            <!-- /.container -->
-        </div>
+        </div><!-- /.content -->
     </body>
     <!-- Demo scripts for this page-->
     <script th:src="@{/template/admin/js/demo/datatables-demo.js}"></script>

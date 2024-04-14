@@ -14,7 +14,10 @@ import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -102,7 +105,7 @@ public class StudentService implements IStudentService {
 		List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
 		for (String e : studentModel.getCourses()){
 			if (e.equals(classModel.getCourseId())){
-				return "Dang ki khong thanh cong vi ban da dang ky mon nay";
+				return "Dang ky khong thanh cong vi ban da dang ky mon nay";
 			}
 		}
 		for(ClassModel e : timetable){
@@ -121,13 +124,13 @@ public class StudentService implements IStudentService {
 					break;
 				}
 				else {
-					return "Dang ki khong thanh cong vi trung thoi gian";
+					return "Dang ki khong thanh cong vi trung thoi gian voi " + e.getClassName();
 				}
 			}
 		}
 		for (String e : finished_course){
 			if (e.equals(classModel.getCourseId())){
-				return "Dang ki khong thanh cong vi ban da hoc qua mon nay";
+				return "Dang ky khong thanh cong vi ban da hoc qua mon nay";
 			}
 		}
 
@@ -221,23 +224,23 @@ public class StudentService implements IStudentService {
 		studentModel.getClasses().add(classModel.getClassId());
 		update(studentModel);
 		// state = true is learned
-		PointModel tmp = new PointModel();
-		tmp.setId("PT_"+courseModel.getCourseId());
-		tmp.setStudentId(studentId);
-		tmp.setStudentName(studentModel.getFullName());
-		tmp.setCourseId(classModel.getCourseId());
-		tmp.setCourseName(courseModel.getCourseName());
-		tmp.setClassId(classId);
-		tmp.setClassName(classModel.getClassName());
-		tmp.setSemesterId(classModel.getSemesterId());
-		tmp.setState(false);
-		tmp.setPointBT(-1);
-		tmp.setPointBTL(-1);
-		tmp.setPointGK(-1);
-		tmp.setPointCK(-1);
-		pointDAO.save(tmp);
-//		classService.addStudentToClass(studentId,classId);
-		return "Dang ki thanh cong";
+//		PointModel tmp = new PointModel();
+//		tmp.setId("PT_"+courseModel.getCourseId());
+//		tmp.setStudentId(studentId);
+//		tmp.setStudentName(studentModel.getFullName());
+//		tmp.setCourseId(classModel.getCourseId());
+//		tmp.setCourseName(courseModel.getCourseName());
+//		tmp.setClassId(classId);
+//		tmp.setClassName(classModel.getClassName());
+//		tmp.setSemesterId(classModel.getSemesterId());
+//		tmp.setState(false);
+//		tmp.setPointBT(-1);
+//		tmp.setPointBTL(-1);
+//		tmp.setPointGK(-1);
+//		tmp.setPointCK(-1);
+//		pointDAO.save(tmp);
+		classService.addStudentToClass(studentId,classId);
+		return "Dang ky thanh cong";
 	}
 
 	@Override
@@ -250,12 +253,34 @@ public class StudentService implements IStudentService {
 		}
 		return result;
 	}
-
+	@Override
 	public boolean isExist(String id) {
 		try {
 			return studentDAO.findById(id) != null;
 		} catch (NotFoundException e) {
 			return false;
 		}
+	}
+	@Override
+	public boolean isExistStudentInClass(String username, String classId) throws NotFoundException {
+		List<ClassModel> cl = getAllClass(username);
+		boolean check = false;
+		for (ClassModel classModel1 : cl) {
+			if (classModel1.getClassId().equals(classId)) {
+				check = true;
+				break;
+			}
+		}
+		return check;
+	}
+
+	@Override
+	public Page<StudentModel> getPage(String keyword, int page, int limit) {
+		return studentDAO.search(keyword, PageRequest.of(page - 1, limit));
+	}
+
+	@Override
+	public Page<StudentModel> getPage(int page, int limit) {
+		return studentDAO.findAll(PageRequest.of(page - 1, limit));
 	}
 }

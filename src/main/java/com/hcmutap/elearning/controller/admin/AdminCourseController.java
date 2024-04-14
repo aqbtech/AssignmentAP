@@ -4,6 +4,7 @@ import com.hcmutap.elearning.dto.ClassResDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
+import com.hcmutap.elearning.model.SemesterModel;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 
@@ -14,8 +15,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -24,7 +27,6 @@ public class AdminCourseController {
 	private ICourseService courseService;
 	@Resource
 	private IClassService classService;
-
 	@Resource
 	private ISemesterService semesterService;
 
@@ -75,11 +77,6 @@ public class AdminCourseController {
 		}
 	}
 
-
-	// TODO: viết hàm addCourse để thêm một khóa học mới
-	// tham khảo hàm addAccount trong HomeController.java(GetMapping và PostMapping)
-	// yêu cầu nhận vào 1 html form (tên form là createCourse đã có trong resourses/templates/admin/views/createCourse.html)
-	// va sau do goi service de them vao database
 	@GetMapping("/admin-management/add-course")
 	public String addCourse(ModelMap model) {
 		if(!model.containsAttribute("course"))
@@ -101,12 +98,8 @@ public class AdminCourseController {
 		return "admin/views/createCourse";
 	}
 
-
-
-	// TODO: addClasses để thêm một lớp học mới
 	@GetMapping("/admin-management/add-class")
 	public String addClass(ModelMap model) {
-
 		model.addAttribute("courses", courseService.findAll());
 		model.addAttribute("semester", semesterService.findAll());
 		if(!model.containsAttribute("class"))
@@ -136,7 +129,7 @@ public class AdminCourseController {
 				model.addAttribute("class",classRes);
 				model.addAttribute("error","error");
 				break;
-			} else if(conflictTime(cls, classModel)) {
+			} else if(cls.getSemesterId().equals(classModel.getSemesterId()) && conflictTime(cls, classModel)) {
 				model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
 						+" của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
 						+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
@@ -192,7 +185,9 @@ public class AdminCourseController {
 			classModel.setSemesterId(classRes.getSemesterId());
 			List<ClassModel> listClass = classService.findAll();
 			for(ClassModel cls : listClass) {
-				if(!cls.getClassId().equals(classModel.getClassId()) && conflictTime(cls, classModel)) {
+				if(!cls.getClassId().equals(classModel.getClassId())
+						&& cls.getSemesterId().equals(classModel.getSemesterId())
+						&& conflictTime(cls, classModel)) {
 					model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
 							+" của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
 							+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
@@ -248,5 +243,125 @@ public class AdminCourseController {
 		LocalTime time1 = LocalTime.parse(timeStart, formatter);
 		LocalTime time2 = LocalTime.parse(timeEnd, formatter);
 		return time2.getHour() - time1.getHour();
+	}
+
+	@GetMapping("/admin-management-semester")
+	public String viewSemester (ModelMap model) {
+		List<SemesterModel> semesterList = semesterService.findAll();
+		semesterList = sortSemester(semesterList);
+		model.addAttribute("semesters", semesterList);
+		LocalDate currentDate = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		String date = currentDate.format(formatter);
+		model.addAttribute("currentDate", date);
+		return "admin/views/viewSemester";
+	}
+
+	@PostMapping("/admin-management/add-semester")
+	public String addSemester(@ModelAttribute SemesterModel semesterModel, final RedirectAttributes redirectAttributes) {
+		try{
+			semesterService.findById(semesterModel.getSemesterName());
+			redirectAttributes.addFlashAttribute("message","Không thành công! Học kì đã được tạo trước đó!");
+		} catch (Exception e){
+			semesterModel.setId(semesterModel.getSemesterName());
+			semesterService.save(semesterModel);
+			redirectAttributes.addFlashAttribute("message", "Học kì đã tạo thành công!");
+			return "redirect:/admin-management-semester";
+		}
+		semesterModel.setId(semesterModel.getSemesterName());
+		semesterService.save(semesterModel);
+		return "redirect:/admin-management-semester";
+	}
+
+	@GetMapping("/admin-management/update-semester")
+	public String updateSemester(@RequestParam("id") String id,
+								 ModelMap model) {
+		try {
+			model.addAttribute("semester", semesterService.findById(id));
+			return "admin/views/updateSemester";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	@PostMapping("/admin-management/update-semester")
+	public String updateSemester(@RequestParam("id") String id,
+								 @ModelAttribute SemesterModel semesterModel,
+								 final RedirectAttributes redirectAttributes) {
+		try {
+			SemesterModel semester = semesterService.findById(id);
+			semester.setStartDate(semesterModel.getStartDate());
+			semester.setEndDate(semesterModel.getEndDate());
+			semesterService.update(semester);
+			redirectAttributes.addFlashAttribute("message", "Chỉnh sửa thành công");
+			return "redirect:/admin-management-semester";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	@GetMapping("/admin-management/change-semester")
+	public String changeSemester(@RequestParam("id") String id,
+								 final RedirectAttributes redirectAttributes) {
+		try {
+			SemesterModel semester = semesterService.findById(id);
+			List<SemesterModel> semesterList = semesterService.findAll();
+			semesterList = sortSemester(semesterList);
+			if(semester.getId().equals(semesterList.getLast().getId())) {
+				redirectAttributes.addFlashAttribute("message", "Cần tạo học kì tiếp theo trước khi kết thúc học kì hiện tại");
+				return "redirect:/admin-management-semester";
+			} else {
+				for(int i = 0; i < semesterList.size(); ++i) {
+					if(semester.getSemesterName().equals(semesterList.get(i).getSemesterName())) {
+						LocalDate currentDate = LocalDate.now();
+						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+						String date = currentDate.format(formatter);
+						semester.setEndDate(date);
+						semesterList.get(i + 1).setStartDate(date);
+						semesterService.update(semester);
+						semesterService.update(semesterList.get(i + 1));
+						redirectAttributes.addFlashAttribute("message", "Kết thúc học kì thành công");
+						return "redirect:/admin-management-semester";
+					}
+				}
+			}
+			redirectAttributes.addFlashAttribute("message", "Có lỗi vui lòng thử lại");
+			return "redirect:/admin-management-semester";
+
+		} catch(NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GetMapping("/admin-management/delete-semester")
+	public String deleteSemester (@RequestParam("id") String id,
+								  final RedirectAttributes redirectAttributes) {
+		try {
+			SemesterModel semesterModel = semesterService.findById(id);
+			List<String> lst = new ArrayList<>();
+			lst.add(semesterModel.getFirebaseId());
+			semesterService.delete(lst);
+			redirectAttributes.addFlashAttribute("message", "Xóa học kì thành công");
+			return "redirect:/admin-management-semester";
+		} catch(NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	List<SemesterModel> sortSemester (List<SemesterModel> semesters) {
+		List<SemesterModel> list = new ArrayList<>();
+		list.addAll(semesters);
+		for(int j = 0; j < list.size() - 1; ++j){
+			int minIndex = j;
+			for(int i = j + 1; i < list.size(); ++i) {
+				if (Integer.parseInt(list.get(i).getSemesterName()) < Integer.parseInt(list.get(minIndex).getSemesterName())) {
+					minIndex = i;
+				}
+			}
+			if(minIndex != j) {
+				SemesterModel semester = list.get(minIndex);
+				list.set(minIndex, list.get(j));
+				list.set(j, semester);
+			}
+		}
+		return list;
 	}
 }

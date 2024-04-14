@@ -10,6 +10,9 @@ import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
@@ -129,19 +132,29 @@ public class TeacherService implements ITeacherService {
 	}
 
 	@Override
+	public Page<TeacherModel> getPage(String keyword, int page, int limit) {
+		return teacherDAO.search(keyword, PageRequest.of(page - 1, limit));
+	}
+
+	@Override
+	public Page<TeacherModel> getPage(int page, int limit) {
+		return teacherDAO.findAll(PageRequest.of(page - 1, limit));
+	}
+
+	@Override
 	public String Dangkilophoc(String teacherId, String classId) throws NotFoundException {
 		ClassModel classModel = classDAO.getClassInfo(classId);
 		TeacherModel teacherModel = teacherDAO.findById(teacherId);
 		List<ClassModel> timetable = classDAO.getTimeTableGV(teacherId);
-
-		if (classModel.getTeacherId() != null) return "Da co giang vien dang ki";
-
 
 		for (String e : teacherModel.getClasses()){
 			if(e.equals(classId)){
 				return "Dang day khoa hoc nay";
 			}
 		}
+
+		if (classModel.getTeacherId() != null) return "Da co giang vien dang ki";
+
 
 		for(ClassModel e : timetable){
 			if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
@@ -159,7 +172,7 @@ public class TeacherService implements ITeacherService {
 					break;
 				}
 				else {
-					return "Unsuccessful";
+					return "Dang ky khong thanh cong vi trung thoi gian voi " + e.getClassName();
 				}
 			}
 		}
@@ -170,7 +183,20 @@ public class TeacherService implements ITeacherService {
 		classModel.setTeacherName(teacherModel.getFullName());
 		classService.update(classModel);
 		update(teacherModel);
-		return "successful";
+		return "Dang ky thanh cong";
+	}
+
+	@Override
+	public boolean isExistTeacherInClass(String username, String classId) throws NotFoundException {
+		List<ClassModel> cl = getAllClass(username);
+		boolean check = false;
+		for (ClassModel classModel1 : cl) {
+			if (classModel1.getClassId().equals(classId)) {
+				check = true;
+				break;
+			}
+		}
+		return check;
 	}
 
 //	@Override

@@ -7,6 +7,7 @@
     <title>Registration</title>
     <link th:href="@{/template/web/css/registration.css}" rel="stylesheet">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 <!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
 </head>
 <body>
@@ -36,19 +37,31 @@
                     <div class="coursename">
                         <p th:text="${e.getCourse().getCourseName()}">Name</p>
                     </div>
+                    <div class="coursename">
+                        <p th:text="${e.getLophoc().getClassName()}">Name</p>
+                    </div>
                     <div class="time">
-                        <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeStart()}">Time</p>
+                        <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-6 col-sm-6 m-4 ">
 
-                <div class="box p-3 mb-4">
-                    <form method="get" id="my-search" >
-                        <input type="text" class="text" placeholder="Search here..." id="courseId" name="courseId">
+                <div class="box p-3 mb-4 d-flex align-items-center" >
+                    <form style="width:100%" method="get" id="my-search">
+                        <input style="width: 90%" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId">
+                        <button type="submit" style="background: none; border: none"><span class="material-symbols-outlined">search</span></button>
                     </form>
+
                 </div>
+
+                <div th:switch="${message}">
+                    <div th:case="null" class="" th:text="${message}"></div>
+                    <div th:case="'Dang ky thanh cong'" class="alert alert-success" th:text="${message}"></div>
+                    <div th:case="*" class="alert alert-danger" th:text="${message}"></div>
+                </div>
+
                 <div class="box-search">
 
                     <div class="ele" th:each="e : ${class_course}" id = "my_search">
@@ -66,6 +79,9 @@
                                     </div>
                                     <div class="col-sm-6" style="overflow: auto">
                                         <p th:text="${e.getLophoc().getClassName()}">Class Name</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getLophoc().getDayOfWeek()}">Time</p>
                                     </div>
                                     <div class="col-sm-6" style="overflow: auto">
                                         <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
@@ -99,19 +115,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <script>
-                        window.addEventListener("load", function(){
-                            var message = document.getElementById("message").getAttribute("message");
-                            if(message != null) {
-                                var modalBody = document.getElementById("modalBody");
-                                var modalExit = document.getElementById("modalExit");
-                                modalBody.innerText = message;
-                                modalExit.innerText = "Đóng";
-                                $('#modal').modal('show');
-                            }
-                        });
-                    </script>
                 </div>
             </div>
         </div>

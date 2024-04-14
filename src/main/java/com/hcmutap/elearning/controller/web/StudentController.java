@@ -11,6 +11,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
@@ -63,14 +64,19 @@ public class StudentController{
             StudentModel studentModel = studentService.findById(infoDTO.getId());
             List<Class_CourseDTO> class_course = new ArrayList<>();
             List<Class_CourseDTO> class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
-            if (courseService.isExist(id)) {
-                class_course = class_courseService.getByCourseId(id);
-                model.addAttribute("message", "Lop hoc hien dang mo");
+
+            if(id.isEmpty()){
                 model.addAttribute("class_course_of_student", class_course_of_student);
                 model.addAttribute("class_course", class_course);
                 return "web/views/student-service/registration";
             }
-            model.addAttribute("message", "Lop hoc khong kha dung");
+            if (courseService.isExist(id)) {
+                class_course = class_courseService.getByCourseId(id);
+                model.addAttribute("class_course_of_student", class_course_of_student);
+                model.addAttribute("class_course", class_course);
+                return "web/views/student-service/registration";
+            }
+            model.addAttribute("message", "Khong co lop hoc ma ban tim kiem");
             model.addAttribute("class_course_of_student", class_course_of_student);
             model.addAttribute("class_course", class_course);
             return "web/views/student-service/registration";
@@ -81,7 +87,8 @@ public class StudentController{
     }
 
     @PostMapping(value = "/registration")
-    public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap){
+    public String registed(@RequestParam("classId") String classId,Principal principal, ModelMap modelMap,
+                           final RedirectAttributes redirectAttributes){
         try {
             InfoDTO infoDTO = userService.getInfo(principal.getName());
             StudentModel studentModel = studentService.findById(infoDTO.getId());
@@ -95,9 +102,9 @@ public class StudentController{
 
 
             modelMap.addAttribute("class_course_of_student", class_course_of_student);
-            modelMap.addAttribute("message", message);
+            redirectAttributes.addFlashAttribute("message", message);
             modelMap.addAttribute("class_course", class_course);
-            return "web/views/student-service/registration";
+            return "redirect:/student/registration?courseId=";
         } catch (Exception e) {
             modelMap.addAttribute("message", "User not found");
             return "login/404_page";
