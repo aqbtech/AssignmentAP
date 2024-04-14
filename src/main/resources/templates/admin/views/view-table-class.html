@@ -68,10 +68,10 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Update</th>
-                            <th>Delete</th>
+                            <th>Mã lớp</th>
+                            <th>Lớp</th>
+                            <th>Chỉnh sửa</th>
+                            <th>Xóa</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -80,23 +80,34 @@
                             <td th:text="${class.className}"></td>
                             <!-- Update button -->
                             <td>
-                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-class?id=${class.classId}|}">Update</a>
+                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-class?id=${class.classId}|}">Chỉnh sửa</a>
                             </td>
                             <!-- Delete button -->
                             <td>
-                                <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteClass?id=${class.classId}|}">Delete</a>
+                                <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteClass?id=${class.classId}|}">Xóa</a>
                             </td>
                         </tr>
                         </tbody>
                         <script>
                             function toggleInput() {
-                                document.getElementById('courseName').disabled = !document.getElementById('courseName').disabled;
-                                document.getElementById('credit').disabled = !document.getElementById('credit').disabled;
-                                document.getElementById('percentBT').disabled = !document.getElementById('percentBT').disabled;
-                                document.getElementById('percentBTL').disabled = !document.getElementById('percentBTL').disabled;
-                                document.getElementById('percentGK').disabled = !document.getElementById('percentGK').disabled;
-                                document.getElementById('percentCK').disabled = !document.getElementById('percentCK').disabled;
-                                document.getElementById('submitButton').disabled = !document.getElementById('submitButton').disabled;
+                                let button = document.getElementById("switch1");
+                                if(button.checked === false) {
+                                    document.getElementById('courseName').disabled = true;
+                                    document.getElementById('credit').disabled = true;
+                                    document.getElementById('percentBT').disabled = true;
+                                    document.getElementById('percentBTL').disabled = true;
+                                    document.getElementById('percentGK').disabled = true;
+                                    document.getElementById('percentCK').disabled = true;
+                                    document.getElementById('submitButton').disabled = true;
+                                } else {
+                                    document.getElementById('courseName').disabled = false;
+                                    document.getElementById('credit').disabled = false;
+                                    document.getElementById('percentBT').disabled = false;
+                                    document.getElementById('percentBTL').disabled = false;
+                                    document.getElementById('percentGK').disabled = false;
+                                    document.getElementById('percentCK').disabled = false;
+                                    document.getElementById('submitButton').disabled = false;
+                                }
                             }
                         </script>
                     </table>
@@ -124,11 +135,11 @@
     <script>
         document.getElementById("myForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            var num1 = parseInt(document.getElementById("percentBT").value);
-            var num2 = parseInt(document.getElementById("percentBTL").value);
-            var num3 = parseInt(document.getElementById("percentGK").value);
-            var num4 = parseInt(document.getElementById("percentCK").value);
-            var sum = num1 + num2 + num3 + num4;
+            let num1 = parseInt(document.getElementById("percentBT").value);
+            let num2 = parseInt(document.getElementById("percentBTL").value);
+            let num3 = parseInt(document.getElementById("percentGK").value);
+            let num4 = parseInt(document.getElementById("percentCK").value);
+            let sum = num1 + num2 + num3 + num4;
             if(sum === 100) {
                 document.getElementById("errorMessage").style.display = "none";
                 this.submit();
@@ -138,17 +149,16 @@
         });
 
         window.addEventListener("load", function() {
-            var message = document.getElementById("message").getAttribute("message");
+            let message = document.getElementById("message").getAttribute("message");
             if (message) {
-                var modalBody = document.getElementById("modalBody");
-                var modalExit = document.getElementById("modalExit");
+                let modalBody = document.getElementById("modalBody");
+                let modalExit = document.getElementById("modalExit");
                 modalBody.innerText = message;
                 modalExit.innerText = "Đóng";
                 $('#modal').modal('show');
             }
         });
     </script>
-     /.container
 </div>
 </body>
 <!-- Demo scripts for this page-->

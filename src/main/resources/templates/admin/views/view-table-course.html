@@ -19,10 +19,10 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Update</th>
-                            <th>Delete</th>
+                            <th>Mã khóa học</th>
+                            <th>Khóa học</th>
+                            <th>Chỉnh sửa</th>
+                            <th>Xóa</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -31,11 +31,11 @@
                             <td th:text="${model.courseName}"></td>
                             <!-- Update button -->
                             <td>
-                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-course?id=${model.courseId}|}">Update</a>
+                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-course?id=${model.courseId}|}">Chỉnh sửa</a>
                             </td>
                             <!-- Delete button -->
                             <td>
-                                <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteCourse?id=${model.courseId}|}">Delete</a>
+                                <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteCourse?id=${model.courseId}|}">Xóa</a>
                             </td>
                         </tr>
                         </tbody>
@@ -63,10 +63,10 @@
     </div>
     <script>
         window.addEventListener("load", function() {
-            var message = document.getElementById("message").getAttribute("message");
+            let message = document.getElementById("message").getAttribute("message");
             if (message) {
-                var modalBody = document.getElementById("modalBody");
-                var modalExit = document.getElementById("modalExit");
+                let modalBody = document.getElementById("modalBody");
+                let modalExit = document.getElementById("modalExit");
                 modalBody.innerText = message;
                 modalExit.innerText = "Đóng";
                 $('#modal').modal('show');

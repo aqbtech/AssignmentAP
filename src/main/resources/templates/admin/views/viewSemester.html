@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <title>Trang quản trị</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Content -->
+    <div class="container">
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fas fa-table"></i>
+                <span>Học kì</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Học kì</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                            <th>Chỉnh sửa</th>
+                            <th>Xóa</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="semester : ${semesters}">
+                            <td th:text="${semester.semesterName}"></td>
+                            <td th:text="${semester.startDate}"></td>
+                            <td th:text="${semester.endDate}"></td>
+                            <td>
+                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-semester?id=${semester.id}|}">Chỉnh sửa</a>
+                            </td>
+                            <td>
+                                <a class="btn btn-link delete-button" th:href="@{|/admin-management/delete-semester?id=${semester.id}|}">Xóa</a>
+                            </td>
+                            <td>
+                                <div th:if="${currentDate >= semester.startDate && currentDate < semester.endDate}">
+                                    <a class="btn btn-link change-button" th:href="@{|/admin-management/change-semester?id=${semester.id}|}">Kết thúc học kì</a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-body">
+                <button type="button" class="btn btn-outline-primary mr-2" id="addButton">
+                    Thêm học kì
+                </button>
+            </div>
+        </div>
+        <form name="data-form" th:action="@{/admin-management/add-semester}" method="post" id="myForm1" class="form-group" style="display: none">
+            <label for="semesterName">Học kì</label>
+            <input type="text" id="semesterName" name="semesterName" class="form-control" value="" required><br>
+            <div class="row">
+                <div class="col">
+                    <label for="startDate">Ngày bắt đầu</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control" value="" required><br>
+                </div>
+                <div class="col">
+                    <label for="endDate">Ngày kết thúc</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" value="" required><br>
+                </div>
+            </div>
+            <input type="submit" value="Submit" class="btn btn-primary float-right">
+        </form>
+    </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer" id="modalExit">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" >Đóng</button><br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener("load", function() {
+            let message = document.getElementById("message").getAttribute("message");
+            if (message) {
+                let modalLabel = document.getElementById("modalLabel");
+                let modalBody = document.getElementById("modalBody");
+                modalLabel.innerText = "Thông báo"
+                modalBody.innerText = message;
+                $('#modal').modal('show');
+            }
+        });
+
+        document.getElementById("addButton").addEventListener('click', function(){
+            document.getElementById("myForm1").style.display = "block";
+        });
+
+    </script>
+    <!-- /.container -->
+</div>
+</body>
+<!-- Demo scripts for this page-->
+<script th:src="@{/template/admin/js/demo/datatables-demo.js}"></script>
+</html>

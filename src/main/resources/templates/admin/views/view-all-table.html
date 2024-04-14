@@ -24,9 +24,9 @@
                                 <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Update</th>
-                                    <th>Delete</th>
+                                    <th>Họ tên</th>
+                                    <th>Chỉnh sửa</th>
+                                    <th>Xóa</th>
                                 </tr>
                                 </thead>
 <!--                                <tfoot>-->
@@ -42,11 +42,11 @@
                                         <!--check type of models and present model attribute-->
                                         <!-- Add more data cells as needed -->
                                         <td>
-                                            <a class="btn btn-link update-button" th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}">Update</a>
+                                            <a class="btn btn-link update-button" th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}">Chỉnh sửa</a>
                                         </td>
                                         <!-- Delete button -->
                                         <td>
-                                            <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteAccount?id=${model.id}&type=${type}|}">Delete</a>
+                                            <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteAccount?id=${model.id}&type=${type}|}">Xóa</a>
                                         </td>
                                     </tr>
                                 </tbody>
