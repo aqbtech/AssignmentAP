@@ -133,6 +133,7 @@ public class HomeController {
 				TeacherModel teacherModel = teacherService.findById(id);
 				teacherModel.setFullName(form.getFullName());
 				teacherModel.setAge(form.getAge());
+				teacherModel.setAge(form.getAge());
 				teacherModel.setDegree(form.getDegree());
 				teacherService.update(teacherModel);
 				model.addAttribute("type", "teacher");
@@ -141,9 +142,11 @@ public class HomeController {
 				StudentModel studentModel = studentService.findById(id);
 				studentModel.setFullName(form.getFullName());
 				studentModel.setAge(form.getAge());
+				studentModel.setAge(form.getAge());
+				studentModel.setMajor(form.getMajor());
 				studentService.update(studentModel);
-				model.addAttribute("user", studentService.findById(id));
-				model.addAttribute("type", studentModel);
+				model.addAttribute("type", "student");
+				model.addAttribute("user", studentModel);
 			}
 			model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
 			return "admin/views/update-account";
