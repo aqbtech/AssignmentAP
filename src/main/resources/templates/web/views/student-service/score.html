@@ -22,115 +22,77 @@
     </div>
     <hr>
 
-    <script>
-        function listSelect(point){
-            var x = document.getElementById("semesters");
-            var val = x.options[x.selectedIndex].text;
-            var disp = document.getElementById("titlesemester");
-            disp.innerText='Học kỳ ' + val;
-
-            let element = document.querySelector("#table")
-            let hidden = element.getAttribute("hidden");
-
-            if (val==element) {
-                element.removeAttribute("hidden");
-            } else {
-                element.setAttribute("hidden", "hidden");
-            }
+    <style>
+        .table-container {
+            display: block; /* Ẩn tất cả các bảng ban đầu */
         }
-    </script>
+    </style>
 
     <div class="container">
         <div class="row">
             <div class="col-sm-12 mt-3">
-
                 <div>
-                   <label for="semesters">Chọn học kỳ: </label>
-                   <select name="semesters" id="semesters" onchange="listSelect(null)">
-                       <option th:each="semester:${semesters}" th:value="${semester.getSemesterName()}" th:selected="${semester.getSemesterName()}" th:text="${semester.getSemesterName()}"></option>
+                   <label for="selectTable">Chọn học kỳ: </label>
+                   <select name="semesters" id="selectTable" onchange="displayTable()">
                        <option value="all">All</option>
+                       <option th:each="semester:${semesters}" th:value="${semester.getSemesterName()}" th:text="${semester.getSemesterName()}"></option>
                    </select>
 
-                       <p style="color: #b21f2d;font-weight: bold" id="titlesemester"></p>
-
-                    <div id="table" th:each="semester:${semesters}">
-                        <p style="color: #b21f2d;font-weight: bold" th:text="${'Học kỳ '+semester.getSemesterName()}"></p>
-                        <table th:id="${semester.getId()}" class="table table-bordered table-striped" style="overflow: auto" hidden="hidden">
-                            <thead>
-                            <tr style="text-align: center; color: white; background-color: black;">
-                                <th width = "100px">Mã khóa học</th>
-                                <th width = "200px">Tên khóa học</th>
-                                <th width = "200px">Điểm thành phần</th>
-                                <th width = "100px">Điểm thi</th>
-                                <th width = "100px">Điểm tổng kết</th>
-                            </tr>
-                            </thead>
-                            <tbody style="text-align: center">
-                            <tr th:if="${point.getSemesterId() == semester.getSemesterName()}" th:each="point, iterp: ${points}">
-                                <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"></td>
-                                <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"></td>
-                                <td th:if="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'BT: '+point.getPointBT()+'  BTL: '+point.getPointBTL()+'  GK: '+point.getPointGK()}"></td>
-                                <td th:unless="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'15'}"></td>
-                                <td th:if="${point.getPointCK() >= 0}" th:text="${point.getPointCK()}"></td>
-                                <td th:unless="${point.getPointCK() >= 0}" th:text="${'15'}"></td>
-                                <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
-                                    <td th:if="${point.getPointCK() >= 0}" th:text="${result}"></td>
+                    <div th:each="semester:${semesters}" th:id="table">
+                            <div th:id="${semester.getSemesterName()}" class="table-container">
+                                <p style="color: #b21f2d;font-weight: bold" th:text="'Học kỳ '+${semester.getSemesterName()}"></p>
+                            <table class="table table-bordered table-striped" style="overflow: auto">
+                                <thead>
+                                <tr style="text-align: center; color: white; background-color: black;">
+                                    <th width = "100px">Mã khóa học</th>
+                                    <th width = "200px">Tên khóa học</th>
+                                    <th width = "200px">Điểm thành phần</th>
+                                    <th width = "100px">Điểm thi</th>
+                                    <th width = "100px">Điểm tổng kết</th>
+                                </tr>
+                                </thead>
+                                <tbody style="text-align: center">
+                                <tr th:if="${point.getSemesterId() == semester.getSemesterName()}" th:each="point, iterp: ${points}">
+                                    <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"></td>
+                                    <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"></td>
+                                    <td th:if="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'BT: '+point.getPointBT()+'  BTL: '+point.getPointBTL()+'  GK: '+point.getPointGK()}"></td>
+                                    <td th:unless="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'15'}"></td>
+                                    <td th:if="${point.getPointCK() >= 0}" th:text="${point.getPointCK()}"></td>
                                     <td th:unless="${point.getPointCK() >= 0}" th:text="${'15'}"></td>
-                                </div>
-                            </tr>
-                            </tbody>
-                        </table>
+                                    <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
+                                        <td th:if="${point.getPointCK() >= 0}" th:text="${result}"></td>
+                                        <td th:unless="${point.getPointCK() >= 0}" th:text="${'15'}"></td>
+                                    </div>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                    </div>
+
+                    <script>
+                        function displayTable() {
+                            var selectBox = document.getElementById("selectTable");
+                            var selectedValue = selectBox.value;
+
+                            var tables = document.querySelectorAll(".table-container");
+                            tables.forEach(function(table) {
+                                table.style.display = "none";
+                            });
+
+                            // Hiển thị bảng tương ứng với lựa chọn của người dùng
+                            var selectedTable = document.getElementById(selectedValue);
+                            if(selectedValue === "all"){
+                                var tables = document.querySelectorAll(".table-container");
+                                tables.forEach(function(table) {
+                                    table.style.display = "block";
+                                });
+                            }
+                            else if (selectedTable) {
+                                selectedTable.style.display= "block";
+                            }
+                        }
+                    </script>
                 </div>
-
-
-                <div th:each="semester:${semesters}">
-                    <p style="color: #b21f2d;font-weight: bold" th:text="${'Học kỳ '+semester.getSemesterName()}"></p>
-                    <table class="table-bordered table-striped" style="overflow: auto">
-                        <thead>
-                        <tr style="text-align: center; color: white; background-color: black;">
-                            <th width = "100px">Mã khóa học</th>
-                            <th width = "200px">Tên khóa học</th>
-                            <th width = "200px">Điểm thành phần</th>
-                            <th width = "100px">Điểm thi</th>
-                            <th width = "100px">Điểm tổng kết</th>
-                        </tr>
-                        </thead>
-                        <tbody style="text-align: center">
-                        <tr th:if="${point.getSemesterId() == semester.getSemesterName()}" th:each="point, iterp: ${points}">
-                            <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"></td>
-                            <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"></td>
-                            <td th:if="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'BT: '+point.getPointBT()+'  BTL: '+point.getPointBTL()+'  GK: '+point.getPointGK()}"></td>
-                            <td th:unless="${point.getPointBT() >= 0 && point.getPointBTL() >= 0 && point.getPointGK() >= 0}" th:text="${'15'}"></td>
-                            <td th:if="${point.getPointCK() >= 0}" th:text="${point.getPointCK()}"></td>
-                            <td th:unless="${point.getPointCK() >= 0}" th:text="${'15'}"></td>
-                            <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
-                                <td th:if="${point.getPointCK() >= 0}" th:text="${result}"></td>
-                                <td th:unless="${point.getPointCK() >= 0}" th:text="${'15'}"></td>
-                            </div>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-<!--                <script>-->
-<!--                    document.querySelector("#semesters").addEventListener("change", filterTable);-->
-
-<!--                    function filterTable(){-->
-<!--                        const  selectedOption = document.querySelector("#semesters").value;-->
-<!--                        const  tableRows = document.querySelectorAll("#table tr");-->
-
-<!--                        tableRows.forEach((row, index) => {-->
-<!--                            if(index === 0 ) return;-->
-<!--                            if(row.children[2].textContent.toLowerCase() === selectedOption.toLowerCase() || selectedOption === "all"){-->
-<!--                                row.style.display = "";-->
-<!--                            }-->
-<!--                            else{-->
-<!--                                row.style.display = "none";-->
-<!--                            }-->
-<!--                        });-->
-<!--                    }-->
-<!--                </script>-->
 
 
 
