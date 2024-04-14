@@ -221,22 +221,22 @@ public class StudentService implements IStudentService {
 		studentModel.getClasses().add(classModel.getClassId());
 		update(studentModel);
 		// state = true is learned
-//		PointModel tmp = new PointModel();
-//		tmp.setId("PT_"+courseModel.getCourseId());
-//		tmp.setStudentId(studentId);
-//		tmp.setStudentName(studentModel.getFullName());
-//		tmp.setCourseId(classModel.getCourseId());
-//		tmp.setCourseName(courseModel.getCourseName());
-//		tmp.setClassId(classId);
-//		tmp.setClassName(classModel.getClassName());
-//		tmp.setSemesterId(classModel.getSemesterId());
-//		tmp.setState(false);
-//		tmp.setPointBT(-1);
-//		tmp.setPointBTL(-1);
-//		tmp.setPointGK(-1);
-//		tmp.setPointCK(-1);
-//		pointDAO.save(tmp);
-		classService.addStudentToClass(studentId,classId);
+		PointModel tmp = new PointModel();
+		tmp.setId("PT_"+courseModel.getCourseId());
+		tmp.setStudentId(studentId);
+		tmp.setStudentName(studentModel.getFullName());
+		tmp.setCourseId(classModel.getCourseId());
+		tmp.setCourseName(courseModel.getCourseName());
+		tmp.setClassId(classId);
+		tmp.setClassName(classModel.getClassName());
+		tmp.setSemesterId(classModel.getSemesterId());
+		tmp.setState(false);
+		tmp.setPointBT(-1);
+		tmp.setPointBTL(-1);
+		tmp.setPointGK(-1);
+		tmp.setPointCK(-1);
+		pointDAO.save(tmp);
+//		classService.addStudentToClass(studentId,classId);
 		return "Dang ki thanh cong";
 	}
 
