@@ -11,6 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PointDTO {
 	private String studentId;
+	private String CourseId;
+	private String ClassId;
 	private double pointBT;
 	private double pointBTL;
 	private double pointGK;
