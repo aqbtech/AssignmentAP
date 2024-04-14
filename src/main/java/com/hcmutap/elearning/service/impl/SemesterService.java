@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+
 @Service
 public class SemesterService implements ISemesterService {
 	private final SemesterDAO semesterDAO;
@@ -66,6 +68,17 @@ public class SemesterService implements ISemesterService {
 				semesterDAO.delete(id);
 			}
 		}
+	}
+
+	@Override
+    public SemesterModel getSemeter(String semesterId){
+		List<SemesterModel> semesterModels = semesterDAO.findAll();
+		for(SemesterModel semesterModel1 : semesterModels){
+			if(Objects.equals(semesterId, semesterModel1.getSemesterName())){
+				return  semesterModel1;
+			}
+		}
+		return null;
 	}
 
 }
