@@ -147,14 +147,14 @@ public class TeacherService implements ITeacherService {
 		TeacherModel teacherModel = teacherDAO.findById(teacherId);
 		List<ClassModel> timetable = classDAO.getTimeTableGV(teacherId);
 
-		if (classModel.getTeacherId() != null) return "Da co giang vien dang ki";
-
-
 		for (String e : teacherModel.getClasses()){
 			if(e.equals(classId)){
 				return "Dang day khoa hoc nay";
 			}
 		}
+
+		if (classModel.getTeacherId() != null) return "Da co giang vien dang ki";
+
 
 		for(ClassModel e : timetable){
 			if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
@@ -172,7 +172,7 @@ public class TeacherService implements ITeacherService {
 					break;
 				}
 				else {
-					return "Dang ki khong thanh cong v trung thoi gian";
+					return "Dang ky khong thanh cong vi trung thoi gian voi " + e.getClassName();
 				}
 			}
 		}
@@ -183,7 +183,7 @@ public class TeacherService implements ITeacherService {
 		classModel.setTeacherName(teacherModel.getFullName());
 		classService.update(classModel);
 		update(teacherModel);
-		return "Dang ki thanh cong";
+		return "Dang ky thanh cong";
 	}
 
 	@Override
