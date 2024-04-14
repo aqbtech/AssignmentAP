@@ -66,15 +66,24 @@
 
 
 
-          <div class="card-header" id="headingOne">
-            <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                Tổng quan về khóa học
-              </button>
-            </h5>
+        <div class="card-header d-flex justify-content-between align-items-center" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              <span style="font-size: 20px;">Tổng quan về khóa học</span>
+            </button>
+          </h5>
+          <div>
+            <form th:action="@{/SelectSemester}" id="SelectSemesterForm" method="post" class="form-group" style="width: 100px; margin-top: 15px;">
+              <select id="semesterSelect" name="semesterSelect" class="form-control" onchange="SelectSemester()">
+                <option value="all" th:selected="${hk eq 'all'}">Tất cả</option>
+                <option th:each="sem : ${semesterList}" th:value="${sem.semesterName}" th:text="'HK' + ${sem.semesterName}" th:selected="${hk eq sem.semesterName}"></option>
+              </select>
+            </form>
           </div>
+        </div>
 
-          <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
+
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne">
 
             <div th:if="${#lists.isEmpty(classes)}">
             <div style="margin-top: 50px; margin-bottom: 50px">
@@ -105,4 +114,12 @@
   <!-- /.container -->
 </div>
 </body>
+<div layout:fragment="custom-scripts">
+  <script>
+    function SelectSemester() {
+      var selectedValue = document.getElementById("semesterSelect").value;
+      document.getElementById("SelectSemesterForm").submit();
+    }
+  </script>
+</div>
 </html>
