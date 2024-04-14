@@ -99,7 +99,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 
 	@Override
 	public Page<T> findAll(Pageable pageable) {
-		return new PageImpl<>(findAll());
+		return new PageImpl<>(findAll(), pageable, this.size());
 	}
 
 	@Override
@@ -111,9 +111,10 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 				DocumentSnapshot last = query.limit(offset).get().get().getDocuments().get(offset - 1);
 				query = query.startAfter(last);
 			}
+			int size = query.get().get().size();
 			List<QueryDocumentSnapshot> documents = query.limit(pageable.getPageSize()).get().get().getDocuments();
 			List<T> content = documents.stream().map(doc -> doc.toObject(documentClass)).collect(Collectors.toList());
-			return new PageImpl<>(content, pageable, this.size());
+			return new PageImpl<>(content, pageable, size);
 		} catch (ExecutionException | InterruptedException e) {
 			e.printStackTrace();
 			logger.error("Error while searching documents with keyword: {}", keyword);

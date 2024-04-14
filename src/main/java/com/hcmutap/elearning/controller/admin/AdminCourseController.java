@@ -75,11 +75,6 @@ public class AdminCourseController {
 		}
 	}
 
-
-	// TODO: viết hàm addCourse để thêm một khóa học mới
-	// tham khảo hàm addAccount trong HomeController.java(GetMapping và PostMapping)
-	// yêu cầu nhận vào 1 html form (tên form là createCourse đã có trong resourses/templates/admin/views/createCourse.html)
-	// va sau do goi service de them vao database
 	@GetMapping("/admin-management/add-course")
 	public String addCourse(ModelMap model) {
 		if(!model.containsAttribute("course"))
@@ -101,9 +96,6 @@ public class AdminCourseController {
 		return "admin/views/createCourse";
 	}
 
-
-
-	// TODO: addClasses để thêm một lớp học mới
 	@GetMapping("/admin-management/add-class")
 	public String addClass(ModelMap model) {
 
