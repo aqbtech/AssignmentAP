@@ -142,8 +142,14 @@ public class HomeController {
 		}
 	}
 	@GetMapping(value="/my-course")
-	public String myCourse(Principal principal, ModelMap model){
+	public String myCourse(@RequestParam(name = "semester", required = false) String hk,
+						   Principal principal, ModelMap model){
 		try {
+			if (hk==null) {
+				hk = "all";
+			}
+			model.addAttribute("hk", hk);
+
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			List<ClassModel> classes = null;
 			List<String> coursesName = new ArrayList<>();
@@ -156,10 +162,24 @@ public class HomeController {
 				model.addAttribute("error", "You are not a student or teacher");
 				return "login/404_page";
 			}
+
+			List<ClassModel> filteredClasses = new ArrayList<>();
+			if (hk.equals("all")) {
+				filteredClasses = classes;
+			}
+			else {
+				for (ClassModel classModel : classes) {
+					if (classModel.getSemesterId().equals(hk)) {
+						filteredClasses.add(classModel);
+					}
+				}
+			}
+			model.addAttribute("classes", filteredClasses);
+
+
 			List<SemesterModel> semesterList = semesterService.findAll();
 			model.addAttribute("semesterList", semesterList);
 
-			model.addAttribute("classes", classes);
 
 			for (ClassModel classModel : classes) {
 				CourseModel courseModel = courseService.findById(classModel.getCourseId());
