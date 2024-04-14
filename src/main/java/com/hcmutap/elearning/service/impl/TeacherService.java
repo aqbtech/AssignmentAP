@@ -10,6 +10,8 @@ import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
@@ -126,6 +128,16 @@ public class TeacherService implements ITeacherService {
 			result.add(c);
 		}
 		return result;
+	}
+
+	@Override
+	public Page<TeacherModel> getPage(String keyword, int page, int limit) {
+		return teacherDAO.search(keyword, Pageable.ofSize(limit).withPage(page));
+	}
+
+	@Override
+	public Page<TeacherModel> getPage(int page, int limit) {
+		return teacherDAO.findAll(Pageable.ofSize(limit).withPage(page));
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import com.hcmutap.elearning.validator.RegisterDTOValidator;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.BindResult;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -65,13 +66,29 @@ public class HomeController {
 
 	}
 	@GetMapping("/admin-management")
-	public String viewAll(ModelMap model, @RequestParam("type") String type){
+	public String viewAll(ModelMap model, @RequestParam("type") String type,
+						  @RequestParam(required = false) String keyword,
+						  @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "3") int size) {
 		if (type.equals("student")) {
-			model.addAttribute("models", studentService.findAll());
+			Page<StudentModel> studentPage = studentService.getPage(keyword, page, size);
+			List<StudentModel> studentModels = studentPage.getContent();
+			model.addAttribute("models", studentModels);
+			model.addAttribute("currentPage", studentPage.getNumber() + 1);
+			model.addAttribute("totalItems", studentPage.getTotalElements());
+			model.addAttribute("totalPages", studentPage.getTotalPages());
+			model.addAttribute("size", studentPage.getSize());
+//			model.addAttribute("models", studentService.findAll());
 			model.addAttribute("type", "student");
 		}
 		else if (type.equals("teacher")) {
-			model.addAttribute("models", teacherService.findAll());
+			Page<TeacherModel> teacherPage = teacherService.getPage(keyword, page, size);
+			List<TeacherModel> teacherModels = teacherPage.getContent();
+			model.addAttribute("models", teacherModels);
+			model.addAttribute("currentPage", teacherPage.getNumber() + 1);
+			model.addAttribute("totalItems", teacherPage.getTotalElements());
+			model.addAttribute("totalPages", teacherPage.getTotalPages());
+			model.addAttribute("size", teacherPage.getSize());
+//			model.addAttribute("models", teacherService.findAll());
 			model.addAttribute("type", "teacher");
 		}
 		return "admin/views/view-all-table";
@@ -148,6 +165,7 @@ public class HomeController {
 			model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
 			return "admin/views/update-account";
 		} catch (NotFoundException e) {
+			// TODO: redirect to error page
 			throw new RuntimeException(e);
 		}
 	}

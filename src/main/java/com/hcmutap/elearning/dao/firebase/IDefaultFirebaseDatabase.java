@@ -1,5 +1,8 @@
 package com.hcmutap.elearning.dao.firebase;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 /**
  * Interface for default Firebase database operations
@@ -29,6 +32,21 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 * @return List of model
 	 */
 	List<T> findAll();
+	/**
+	 * find model for pagination
+	 * @param pageable Pageable object
+	 *                 @see org.springframework.data.domain.Pageable
+	 * @return Page of model
+	 */
+	Page<T> findAll(Pageable pageable);
+	/**
+	 * search model by keyword to pagination
+	 * @param keyword keyword to search
+	 * @param pageable Pageable object
+	 *                 @see org.springframework.data.domain.Pageable
+	 * @return Page of model
+	 */
+	Page<T> search(String keyword, Pageable pageable);
 	/**
 	 * Find model by key and value
 	 * @param key attribute name of model

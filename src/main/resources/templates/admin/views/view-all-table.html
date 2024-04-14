@@ -23,24 +23,23 @@
                             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Update</th>
-                                    <th>Delete</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Age</th>
+                                    <th scope="col">Major</th>
+                                    <th scope="col">Action</th>
+                                    <th scope="col">Update</th>
+                                    <th scope="col">Delete</th>
                                 </tr>
                                 </thead>
-<!--                                <tfoot>-->
-<!--                                <tr>-->
-<!--                                    <th>ID</th>-->
-<!--                                    <th>Name</th>-->
-<!--                                </tr>-->
-<!--                                </tfoot>-->
                                 <tbody>
                                     <tr th:each="model : ${models}">
-                                        <td th:text="${model.id}"></td>
+                                        <th scope="row" th:text="${model.id}"></th>
                                         <td th:text="${model.fullName}"></td>
-                                        <!--check type of models and present model attribute-->
-                                        <!-- Add more data cells as needed -->
+                                        <td th:text="${model.age}"></td>
+                                        <td th:if="${type} == 'student'" th:text="${model.major}"></td>
+                                        <td th:if="${type} == 'teacher'" th:text="${model.degree}"></td>
+
                                         <td>
                                             <a class="btn btn-link update-button" th:href="@{|/admin-management/update?id=${model.id}&type=${type}|}">Update</a>
                                         </td>
