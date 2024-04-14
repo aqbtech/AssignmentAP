@@ -13,5 +13,7 @@ public interface ITeacherService extends IGenericAdminService<TeacherModel> {
 	List<ClassModel> getAllClass(String name) throws NotFoundException;
 	String Dangkilophoc(String teacherId, String classId) throws NotFoundException;
 	List<CourseModel> get_course(String teacherId);
+	boolean isExistTeacherInClass(String username, String classId) throws NotFoundException;
+
 //	List<CourseModel> getCoursesModel(String teacherId, List<ClassModel> classes);
 }
