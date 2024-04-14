@@ -14,7 +14,10 @@ import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -250,7 +253,7 @@ public class StudentService implements IStudentService {
 		}
 		return result;
 	}
-
+	@Override
 	public boolean isExist(String id) {
 		try {
 			return studentDAO.findById(id) != null;
@@ -269,5 +272,15 @@ public class StudentService implements IStudentService {
 			}
 		}
 		return check;
+	}
+
+	@Override
+	public Page<StudentModel> getPage(String keyword, int page, int limit) {
+		return studentDAO.search(keyword, PageRequest.of(page - 1, limit));
+	}
+
+	@Override
+	public Page<StudentModel> getPage(int page, int limit) {
+		return studentDAO.findAll(PageRequest.of(page - 1, limit));
 	}
 }
