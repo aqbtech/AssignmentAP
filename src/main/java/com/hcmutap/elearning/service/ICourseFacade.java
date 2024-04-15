@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ICourseFacade {
 	//course service
-	CourseModel getCourseInfo(String courseId);
+	CourseModel getCourseInfo(String courseId) throws NotFoundException;
 	List<ClassModel> getLichTrinh(String courseId) throws NotFoundException;
 	List<PointModel> getListPointOfStudent(String courseId) throws NotFoundException;
 	//class service

@@ -1,0 +1,30 @@
+<!-- Thymeleaf fragment for generating a search form -->
+<div th:fragment="searchForm(type, keyword, pageSize, action)">
+    <div class="my-3">
+        <form th:action="${action}" id="searchForm">
+            <input type="hidden" name="type" th:value="${type}">
+            <div class="row d-flex">
+                <div class="col-md-6 mt-2">
+                    <div class="search">
+                        <i class="fa fa-search"></i>
+                        <input id="keyword" type="search" name="keyword" th:value="${keyword}" class="form-control"
+                               placeholder="Enter keyword">
+                        <button type="submit" class="btn btn-secondary">Search</button>
+                    </div>
+                </div>
+                <div class="col-md-3 input-group mt-2">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="pageSize">Items per page:</label>
+                    </div>
+                    <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSizeAll()" class="size-select"
+                            id="pageSize">
+                        <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                    </select>
+                </div>
+                <div class="col-md-1 mt-2">
+                    <button id="btnClear" class="btn btn-info" onclick="clearFuncAll()">Clear</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

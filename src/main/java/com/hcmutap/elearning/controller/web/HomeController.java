@@ -68,6 +68,10 @@ public class HomeController {
 	public String about(){
 		return "web/views/about";
 	}
+	@RequestMapping(value = "/contact")
+	public String contact(){
+		return "web/views/contact";
+	}
 	@GetMapping(value="/info")
 	public String info(Principal principal, ModelMap model){
 		try {

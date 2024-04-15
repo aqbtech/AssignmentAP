@@ -12,10 +12,6 @@ import java.util.List;
 
 @Repository
 public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
-    public InfoClassModel findById(String id) {
-        return findBy("id", id, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
-    }
-
     public InfoClassModel getClassInfo(String classId) {
         return findBy("classId", classId, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
     }

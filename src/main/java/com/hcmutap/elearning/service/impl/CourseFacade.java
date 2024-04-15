@@ -29,7 +29,7 @@ public class CourseFacade implements ICourseFacade {
 	}
 	//course service
 	@Override
-	public CourseModel getCourseInfo(String courseId){
+	public CourseModel getCourseInfo(String courseId) throws NotFoundException {
 		return  courseService.getCourseInfo(courseId);
 	}
 	@Override

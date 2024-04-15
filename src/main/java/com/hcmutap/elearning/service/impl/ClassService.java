@@ -4,6 +4,7 @@ import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.*;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.NotFoundInDB;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +51,12 @@ public class ClassService implements IClassService {
 
     @Override
     public ClassModel findById(String id) throws NotFoundException {
-        return classDAO.findById(id);
-    }
+		try {
+			return classDAO.findById(id);
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
+		}
+	}
     @Override
     public String save(ClassModel classModel) {
         InfoClassModel info = new InfoClassModel();
@@ -87,8 +92,12 @@ public class ClassService implements IClassService {
 
     @Override
     public ClassModel getClassInfo(String classId) throws NotFoundException {
-        return classDAO.getClassInfo(classId);
-    }
+		try {
+			return classDAO.getClassInfo(classId);
+		} catch (NotFoundInDB e) {
+			throw new NotFoundException(e.toString());
+		}
+	}
     @Override
     public List<ClassModel> getClassOfCourse(String courseId) {
         return classDAO.getClassOfCourse(courseId);
@@ -108,42 +117,51 @@ public class ClassService implements IClassService {
 
     @Override
     public boolean addStudentToClass(String studentId, String classId) throws NotFoundException {
-        List<String> listClass = studentDAO.findBy("studentId", studentId).getFirst().getClasses();
-        for (String item : listClass) {
-            if (item.equals(classId)) {
-                return false;
+        try {
+            List<String> listClass = studentDAO.findBy("studentId", studentId).getFirst().getClasses();
+            for (String item : listClass) {
+                if (item.equals(classId)) {
+                    return false;
+                }
             }
+            long timestamp = System.currentTimeMillis();
+            String id = String.valueOf(timestamp);
+            StudentModel studentModel = studentDAO.findById(studentId);
+            ClassModel classModel = classDAO.getClassInfo(classId);
+            CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
+            // state = true is learned
+            PointModel tmp = new PointModel();
+            tmp.setId(id);
+            tmp.setStudentId(studentId);
+            tmp.setStudentName(studentModel.getFullName());
+            tmp.setCourseId(classModel.getCourseId());
+            tmp.setCourseName(courseModel.getCourseName());
+            tmp.setClassId(classId);
+            tmp.setClassName(classModel.getClassName());
+            tmp.setSemesterId(classModel.getSemesterId());
+            tmp.setState(false);
+            tmp.setPointBT(-1);
+            tmp.setPointBTL(-1);
+            tmp.setPointGK(-1);
+            tmp.setPointCK(-1);
+            pointService.save(tmp);
+            return true;
+        } catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+            throw new NotFoundException(notFoundInDB.getMessage());
         }
-        long timestamp = System.currentTimeMillis();
-        String id = String.valueOf(timestamp);
-        StudentModel studentModel = studentDAO.findById(studentId);
-        ClassModel classModel = classDAO.getClassInfo(classId);
-        CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
-        // state = true is learned
-        PointModel tmp = new PointModel();
-        tmp.setId(id);
-        tmp.setStudentId(studentId);
-        tmp.setStudentName(studentModel.getFullName());
-        tmp.setCourseId(classModel.getCourseId());
-        tmp.setCourseName(courseModel.getCourseName());
-        tmp.setClassId(classId);
-        tmp.setClassName(classModel.getClassName());
-        tmp.setSemesterId(classModel.getSemesterId());
-        tmp.setState(false);
-        tmp.setPointBT(-1);
-        tmp.setPointBTL(-1);
-        tmp.setPointGK(-1);
-        tmp.setPointCK(-1);
-        pointService.save(tmp);
-        return true;
     }
 
     public boolean addTeacherToClass(String teacherId, String classId) throws NotFoundException {
         ClassModel classModel = findById(classId);
         if(classModel.getTeacherId() != null)
             return false;
-        TeacherModel teacher = teacherDAO.findById(teacherId);
-        classModel.setTeacherId(teacher.getId());
+		TeacherModel teacher = null;
+		try {
+			teacher = teacherDAO.findById(teacherId);
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
+		}
+		classModel.setTeacherId(teacher.getId());
         classModel.setTeacherName(teacher.getFullName());
         update(classModel);
         return true;

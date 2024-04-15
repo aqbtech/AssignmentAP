@@ -1,45 +1,49 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
-    <body>
-        <div th:fragment="table_format">
-            <div class="card mb-3">
-                <div class="card-header">
-                    <i class="fas fa-table"></i>
-                    Data Table Example</div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Office</th>
-                                <th>Age</th>
-                                <th>Start date</th>
-                                <th>Salary</th>
-                            </tr>
-                            </thead>
-                            <tfoot>
-                            <tr>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Office</th>
-                                <th>Age</th>
-                                <th>Start date</th>
-                                <th>Salary</th>
-                            </tr>
-                            </tfoot>
-                            <tbody>
-                                <tr layout:fragment="tablebody">
-
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
-            </div>
-        </div>
-    </body>
-</html>
+<!-- Thymeleaf fragment for generating a table -->
+<div th:fragment="dynamicTable(type, models, cols, currentPage, totalItems, totalPages, pageSize, updateLink, deleteLink, href)">
+    <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col" th:if="${type} == 'student'">Họ tên</th>
+                    <th scope="col" th:if="${type} == 'teacher'">Họ tên</th>
+                    <th scope="col" th:if="${type} == 'course'">CourseName</th>
+                    <th scope="col" th:if="${type} == 'semester'">Tên học kì</th>
+                    <th scope="col" th:if="${type} == 'student' or ${type} == 'teacher'">Tuổi</th>
+                    <th scope="col" th:if="${type} == 'student'">Ngành học</th>
+                    <th scope="col" th:if="${type} == 'teacher'">Trình độ</th>
+                    <th scope="col" th:if="${type} == 'semester'">Ngày bắt đầu</th>
+                    <th scope="col" th:if="${type} == 'semester'">Ngày kết thúc</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr th:each="model : ${models}">
+                <!-- Render id-->
+                <th th:if="${type} == 'student' or ${type} == 'teacher' or ${type} == 'semester'" scope="row" th:text="${model.id}"></th>
+                <td th:if="${type} == 'course'" th:text="${model.courseId}"></td>
+                <!-- Render Object name -->
+                <td th:if="${type} == 'student' or ${type} == 'teacher'" th:text="${model.fullName}"></td>
+                <td th:if="${type} == 'course'" th:text="${model.courseName}"></td>
+                <td th:if="${type} == 'semester'" th:text="${model.semesterName}"></td>
+                <!-- Render for special field -->
+                <td th:if="${type} == 'student' or ${type} == 'teacher'" th:text="${model.age}"></td>
+                <td th:if="${type} == 'student'" th:text="${model.major}"></td>
+                <td th:if="${type} == 'teacher'" th:text="${model.degree}"></td>
+                <td th:if="${type} == 'semester'" th:text="${model.startDate}"></td>
+                <td th:if="${type} == 'semester'" th:text="${model.endDate}"></td>
+                <!-- Render action -->
+                <td>
+                    <a th:href="@{|/${updateLink}?id=${model.firebaseId}&type=${type}|}" title="Edit this tutorial"
+                       class="fas fa-edit"></a>
+                    &nbsp;
+                    <a th:href="@{|/${deleteLink}?id=${model.firebaseId}&type=${type}|}" id="btnDeleteAcc"
+                       title="Delete this tutorial" class="fas fa-trash icon-delete btn-delete"></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Include the paginationNav fragment here -->
+    <nav th:replace="~{admin/fragments/pagination::paginationNav(${currentPage}, ${totalItems}, ${totalPages}, ${pageSize}, ${href})}"></nav>
+</div>

@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.security.Principal;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/student")
@@ -29,7 +30,7 @@ public class StudentController{
     @Resource
     private ICourseService courseService;
     @Resource
-    private ISemesterService semesterServicel;
+    private ISemesterService semesterService;
     @Resource
     private Class_CourseService class_courseService;
 
@@ -133,7 +134,22 @@ public class StudentController{
             for (PointModel pointModel : points) {
                 resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(), pointModel.getCourseId()));
             }
-            List<SemesterModel> semesterModels = semesterServicel.findAll();
+            List<SemesterModel> semesterModels = new ArrayList<>();
+            List<String> classIdlist = studentModel.getClasses();
+            for(String s : classIdlist){
+                ClassModel classModel = classService.getClassInfo(s);
+                SemesterModel semesterModell = semesterService.getSemeter(classModel.getSemesterId());
+                boolean condition = true;
+                for (SemesterModel semesterModel : semesterModels) {
+                    if (Objects.equals(semesterModell.getSemesterName(), semesterModel.getSemesterName())) {
+                        condition = false;
+                    }
+                }
+                if(condition){
+                    semesterModels.add(semesterModell);
+                }
+            }
+
             model.addAttribute("semesters", semesterModels);
             model.addAttribute("results", resultAverageList);
             model.addAttribute("points", points);
@@ -151,7 +167,7 @@ public class StudentController{
             StudentModel studentModel = studentService.findById(infoDTO.getId());
             List<CourseModel> courseModels = studentService.getCourseByIf(studentModel.getId());
             List<PointModel> courseModels1 = studentService.LearningProcess(studentModel.getId());
-            List<SemesterModel> semesterModels = semesterServicel.findAll();
+            List<SemesterModel> semesterModels = semesterService.findAll();
             model.addAttribute("semesters", semesterModels);
             model.addAttribute("courses", courseModels);
             model.addAttribute("courses1", courseModels1);
