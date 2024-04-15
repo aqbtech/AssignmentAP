@@ -2,6 +2,7 @@ package com.hcmutap.elearning.model;
 
 import com.hcmutap.elearning.dao.firebase.DocumentId;
 import com.hcmutap.elearning.dao.firebase.FirebaseCollection;
+import com.hcmutap.elearning.dao.firebase.SecondaryId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class StudentModel {
 	@DocumentId
 	private String firebaseId;
 	private String username;
+	@SecondaryId
 	private String id;
 	private String fullName;
 	private String email;

@@ -1,6 +1,8 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.impl.InfoDAO;
+import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.NotFoundInDB;
 import com.hcmutap.elearning.model.Document;
 import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.model.InfoClassModel;
@@ -30,9 +32,13 @@ public class InfoService implements IInfoService {
     }
 
     @Override
-    public InfoClassModel findById(String id) {
-        return infoDAO.findById(id);
-    }
+    public InfoClassModel findById(String id) throws NotFoundException {
+		try {
+			return infoDAO.findById(id);
+		} catch (NotFoundInDB e) {
+			throw new NotFoundException(e.getMessage());
+		}
+	}
 
     @Override
     public String save(InfoClassModel infoClass) {

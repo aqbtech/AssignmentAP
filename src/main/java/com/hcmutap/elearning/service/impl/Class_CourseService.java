@@ -60,13 +60,17 @@ public class Class_CourseService implements IClass_CourseService {
         if(!courseService.isExist(courseId) || courseId.isEmpty()){
             return null;
         }
-        CourseModel course = courseService.getCourseInfo(courseId);
-        List<ClassModel> classes = classService.getClassOfCourse(courseId);
-        List<Class_CourseDTO> result = new ArrayList<>();
-        for(int i = 0; i < classes.size(); i ++){
-            Class_CourseDTO  e = new Class_CourseDTO(classes.get(i), course);
-            result.add(e);
+        try {
+            CourseModel course = courseService.getCourseInfo(courseId);
+            List<ClassModel> classes = classService.getClassOfCourse(courseId);
+            List<Class_CourseDTO> result = new ArrayList<>();
+            for (int i = 0; i < classes.size(); i++) {
+                Class_CourseDTO e = new Class_CourseDTO(classes.get(i), course);
+                result.add(e);
+            }
+            return result;
+        } catch (NotFoundException e) {
+            throw new RuntimeException(e);
         }
-        return result;
     }
 }

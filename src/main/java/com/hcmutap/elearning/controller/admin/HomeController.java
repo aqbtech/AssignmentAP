@@ -2,21 +2,17 @@ package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
-import com.hcmutap.elearning.model.PointModel;
-import com.hcmutap.elearning.model.StudentModel;
-import com.hcmutap.elearning.model.TeacherModel;
-import com.hcmutap.elearning.model.UserModel;
-import com.hcmutap.elearning.service.IPointService;
-import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.model.*;
+import com.hcmutap.elearning.service.*;
 
-import com.hcmutap.elearning.service.ITeacherService;
-import com.hcmutap.elearning.service.IUserService;
 import com.hcmutap.elearning.service.impl.RegisterService;
+import com.hcmutap.elearning.service.impl.SemesterService;
 import com.hcmutap.elearning.utils.MapperUtil;
 import com.hcmutap.elearning.validator.RegisterDTOValidator;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,10 +25,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller(value = "homeControllerOfAdmin")
 public class HomeController {
+	// logger
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	@Resource
 	private IStudentService studentService;
 	@Resource
@@ -44,7 +44,14 @@ public class HomeController {
 	private RegisterService registerService;
 	@Autowired
 	private RegisterDTOValidator registerDTOValidator;
+	private ICourseService courseService;
+	@Autowired
+	private SemesterService semesterService;
 
+	@Autowired
+	public void setCourseService(ICourseService courseService) {
+		this.courseService = courseService;
+	}
 //	@Autowired
 //	public void setRegisterDTOValidator(RegisterDTOValidator registerDTOValidator) {
 //		this.registerDTOValidator = registerDTOValidator;
@@ -61,37 +68,60 @@ public class HomeController {
 			model.addAttribute("user", userModel);
 			return "admin/views/home";
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			logger.error("User not found");
+			return "redirect:/login";
 		}
 
 	}
 	@GetMapping("/admin-management")
-	public String viewAll(ModelMap model, @RequestParam("type") String type,
+	public String viewAll(Model model, @RequestParam("type") String type,
 						  @RequestParam(required = false) String keyword,
-						  @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "3") int size) {
-		if (type.equals("student")) {
-			Page<StudentModel> studentPage = studentService.getPage(keyword, page, size);
-			List<StudentModel> studentModels = studentPage.getContent();
-			model.addAttribute("models", studentModels);
-			model.addAttribute("currentPage", studentPage.getNumber() + 1);
-			model.addAttribute("totalItems", studentPage.getTotalElements());
-			model.addAttribute("totalPages", studentPage.getTotalPages());
-			model.addAttribute("pageSize", studentPage.getSize());
-//			model.addAttribute("models", studentService.findAll());
-			model.addAttribute("type", "student");
+						  @RequestParam(defaultValue = "1") int page,
+						  @RequestParam(defaultValue = "3") int size) {
+		Page<?> pageResult = null;
+		switch (type) {
+			case "student":
+				pageResult = studentService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update");
+				model.addAttribute("deleteLink", "admin-management/deleteAccount");
+				model.addAttribute("href", "/admin-management?type=student");
+				model.addAttribute("type", "student");
+				break;
+			case "teacher":
+				pageResult = teacherService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update");
+				model.addAttribute("deleteLink", "admin-management/deleteAccount");
+				model.addAttribute("href", "/admin-management?type=teacher");
+				model.addAttribute("type", "teacher");
+				break;
+			case "course":
+				pageResult = courseService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update-course");
+				model.addAttribute("deleteLink", "admin-management/deleteCourse");
+				model.addAttribute("href", "/admin-management?type=course");
+				model.addAttribute("type", "course");
+				break;
+			case "semester":
+				pageResult = semesterService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update-semester");
+				model.addAttribute("deleteLink", "admin-management/delete-semester");
+				model.addAttribute("href", "/admin-management?type=semester");
+				model.addAttribute("type", "semester");
+				break;
+			default:
+				logger.error("Type not found");
+				return "redirect:/admin-home"; // TODO: redirect to error page
 		}
-		else if (type.equals("teacher")) {
-			Page<TeacherModel> teacherPage = teacherService.getPage(keyword, page, size);
-			List<TeacherModel> teacherModels = teacherPage.getContent();
-			model.addAttribute("models", teacherModels);
-			model.addAttribute("currentPage", teacherPage.getNumber() + 1);
-			model.addAttribute("totalItems", teacherPage.getTotalElements());
-			model.addAttribute("totalPages", teacherPage.getTotalPages());
-			model.addAttribute("pageSize", teacherPage.getSize());
-//			model.addAttribute("models", teacherService.findAll());
-			model.addAttribute("type", "teacher");
-		}
+		genePage(model, pageResult);
 		return "admin/views/view-all-table";
+	}
+
+	private void genePage(Model model, Page<?> page) {
+		model.addAttribute("models", page.getContent());
+		model.addAttribute("currentPage", page.getNumber() + 1);
+		model.addAttribute("totalItems", page.getTotalElements());
+		model.addAttribute("totalPages", page.getTotalPages());
+		model.addAttribute("pageSize", page.getSize());
 	}
 
 	@GetMapping("/admin-management/deleteAccount")
@@ -127,11 +157,12 @@ public class HomeController {
 					delPoint.add(point.getFirebaseId());
 				}
 				pointService.delete(delPoint);
-				redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + id + " thành công!");
+				redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + student.getFullName() + " thành công!");
 			}
 			return "redirect:/admin-management?type=" + type;
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			logger.error("Can't delete account because not found");
+			return "redirect:/404";
 		}
 	}
 

@@ -4,6 +4,7 @@ import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.NotFoundInDB;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.IPointService;
@@ -44,8 +45,12 @@ public class PointService implements IPointService {
             throw new NotFoundException("Not found point with id: " + id);
         }
         else {
-            return pointDAO.findById(id);
-        }
+			try {
+				return pointDAO.findById(id);
+			} catch (NotFoundInDB e) {
+				throw new NotFoundException(e.getMessage());
+			}
+		}
 	}
 
     @Override
@@ -55,21 +60,26 @@ public class PointService implements IPointService {
 
     @Override
     public void update(PointModel pointModel) throws NotFoundException {
-        Optional<PointModel> optionalPointModel = Optional.ofNullable(pointDAO.findById(pointModel.getId()));
-        if (optionalPointModel.isEmpty()) {
-            throw new NotFoundException("Not found point with id: " + pointModel.getId());
-        }
-        pointDAO.update(pointModel);
+		try {
+			pointDAO.findById(pointModel.getFirebaseId());
+            pointDAO.update(pointModel);
+		} catch (NotFoundInDB e) {
+			throw new NotFoundException(e.getMessage());
+		}
     }
 
     @Override
     public void delete(List<String> ids) throws NotFoundException {
         for (String id : ids) {
-            Optional<PointModel> optionalPointModel = Optional.ofNullable(pointDAO.findById(id));
-            if (optionalPointModel.isEmpty()) {
-                throw new NotFoundException("Not found point with id: " + id);
+            try {
+                Optional<PointModel> optionalPointModel = Optional.ofNullable(pointDAO.findById(id));
+                if (optionalPointModel.isEmpty()) {
+                    throw new NotFoundException("Not found point with id: " + id);
+                }
+                pointDAO.delete(id);
+            } catch (NotFoundInDB e) {
+                throw new NotFoundException(e.getMessage());
             }
-            pointDAO.delete(id);
         }
     }
 
@@ -85,21 +95,25 @@ public class PointService implements IPointService {
 
     @Override
     public double getAveragePoint(String studentId, String courseId) {
-        Optional<PointModel> optionalPointModel = Optional.ofNullable(getPoint(studentId, courseId));
-        if (optionalPointModel.isEmpty()) {
-            return 0;
+        try {
+            Optional<PointModel> optionalPointModel = Optional.ofNullable(getPoint(studentId, courseId));
+            if (optionalPointModel.isEmpty()) {
+                return 0;
+            }
+            PointModel pointModel = optionalPointModel.get();
+            Optional<CourseModel> optionalCourseModel = Optional.ofNullable(courseDAO.findById(pointModel.getCourseId()));
+            if (optionalCourseModel.isEmpty()) {
+                return 0;
+            }
+            CourseModel courseModel = optionalCourseModel.get();
+            double averagePoint = pointModel.getPointBT() * courseModel.getPercentBT()
+                    + pointModel.getPointBTL() * courseModel.getPercentBTL()
+                    + pointModel.getPointGK() * courseModel.getPercentGK()
+                    + pointModel.getPointCK() * courseModel.getPercentCK();
+            return (averagePoint / 100);
+        } catch (NotFoundInDB e) {
+            throw new RuntimeException(e);
         }
-        PointModel pointModel = optionalPointModel.get();
-        Optional<CourseModel> optionalCourseModel = Optional.ofNullable(courseDAO.findById(pointModel.getCourseId()));
-        if (optionalCourseModel.isEmpty()) {
-            return 0;
-        }
-        CourseModel courseModel = optionalCourseModel.get();
-        double averagePoint = pointModel.getPointBT() * courseModel.getPercentBT()
-                + pointModel.getPointBTL() * courseModel.getPercentBTL()
-                + pointModel.getPointGK() * courseModel.getPercentGK()
-                + pointModel.getPointCK() * courseModel.getPercentCK();
-        return (averagePoint / 100);
     }
 
     @Override
@@ -111,13 +125,6 @@ public class PointService implements IPointService {
         else {
             return pointModelList;
         }
-//        List<PointModel> pointModelList = pointDAO.findAll();
-//        List<PointModel> pointModelList1= new ArrayList<>();
-//        for(PointModel pointModel : pointModelList) {
-//            if (Objects.equals(pointModel.getStudentId(), studentId))
-//                pointModelList1.add(pointModel);
-//        }
-//        return  pointModelList1;
     }
 
     @Override
