@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/web-layout.html}">
 <head>
     <title>About Us</title>
     <link href="/template/login/bootstrap/__maxcdn.bootstrapcdn.com_bootstrap_4.1.1_css_bootstrap.css" rel="stylesheet" id="bootstrap-css">
@@ -10,7 +12,7 @@
     <link th:href="@{template/web/css/contact.css}" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
-<body>
+<body layout:fragment="content">
 <div class="page-title p-0">
     <div class="heading" style="background-color: gray; color:white">
         <div class="container">
@@ -22,17 +24,9 @@
             </div>
         </div>
     </div>
-    <nav class="breadcrumb" style="background-color: #212529; color: white; border-radius: 0">
-        <div class="container">
-            <ol>
-                <li><a th:href="@{/trang-chu}">Home</a></li>
-                <li>Contact</li>
-            </ol>
-        </div>
-    </nav>
 </div>
 
-<div class="container d-flex justify-content-center align-items-center">
+<div class="container d-flex justify-content-center align-items-center mt-5">
     <div class="row d-flex justify-content-center align-items-center">
         <div class="col-lg-12 d-flex justify-content-center align-items-center">
             <div class="row">

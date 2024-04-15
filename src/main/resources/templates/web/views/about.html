@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/web-layout.html}">
 <head>
     <title>About Us</title>
     <link href="/template/login/bootstrap/__maxcdn.bootstrapcdn.com_bootstrap_4.1.1_css_bootstrap.css" rel="stylesheet" id="bootstrap-css">
@@ -9,7 +11,7 @@
     <script src="/template/login/jquery/__cdnjs.cloudflare.com_ajax_libs_jquery_3.2.1_jquery.js"></script>
     <link th:href="@{template/web/css/about_us.css}" rel="stylesheet">
 </head>
-<body>
+<body layout:fragment="content">
 <div class="page-title">
     <div class="heading" style="background-color: gray; color:white">
         <div class="container">
@@ -21,14 +23,6 @@
             </div>
         </div>
     </div>
-    <nav class="breadcrumb" style="background-color: #212529; color: white; border-radius: 0">
-        <div class="container">
-            <ol>
-                <li><a th:href="@{/trang-chu}">Home</a></li>
-                <li>About Us</li>
-            </ol>
-        </div>
-    </nav>
 </div>
 
 <div >
@@ -158,7 +152,7 @@
         </div>
     </div>
 </div>
-
+</div>
 <script>
     // JavaScript code goes here
     document.addEventListener('DOMContentLoaded', function() {
