@@ -4,6 +4,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.hcmutap.elearning.constant.SystemConstant;
+import com.hcmutap.elearning.exception.NotFoundInDB;
 import com.hcmutap.elearning.utils.MapperUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings(value = "unchecked")
 public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<T, ID> {
 	// logger
 	private static final Logger logger = LoggerFactory.getLogger(DefaultFirebaseDatabase.class);
@@ -78,7 +79,6 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			assert ids != null : String.format("%s Not found!", documentClass.getSimpleName());
 			db.collection(collectionPath).document(ids.getFirst()).delete();
 		} catch (ExecutionException | InterruptedException e) {
-			e.printStackTrace();
 			logger.error("Error while deleting document with id: {}", id);
 		}
 	}
@@ -91,7 +91,6 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			List<QueryDocumentSnapshot> list = querySnapshotApiFuture.get().getDocuments();
 			return list.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(documentClass)).toList();
 		} catch (ExecutionException | InterruptedException e) {
-			e.printStackTrace();
 			logger.error("Error while getting all documents");
 		}
 		return List.of();
@@ -101,12 +100,23 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 	public Page<T> findAll(Pageable pageable) {
 		return new PageImpl<>(findAll(), pageable, this.size());
 	}
-
+	private Field findField(Class<?> clazz, String... fieldNames) throws Throwable {
+		for (String fieldName : fieldNames) {
+			try {
+				return clazz.getDeclaredField(fieldName);
+			} catch (NoSuchFieldException e) {
+				// Ignore and try next field name
+			}
+		}
+		throw new Throwable("Can not find such field"); // or throw an exception if no field found
+	}
 	@Override
 	public Page<T> search(String keyword, Pageable pageable) {
 		try {
+			Field field = findField(documentClass, "classId", "courseId", "id", "semesterId");
 			int offset = (pageable.getPageNumber()) * pageable.getPageSize();
-			Query query = db.collection(collectionPath).orderBy("id").startAt(keyword).endAt(keyword + "\uf8ff");
+			String orderBy = field.getName();
+			Query query = db.collection(collectionPath).orderBy(orderBy).startAt(keyword).endAt(keyword + "\uf8ff");
 			if (offset > 0) {
 				DocumentSnapshot last = query.limit(offset).get().get().getDocuments().get(offset - 1);
 				query = query.startAfter(last);
@@ -115,8 +125,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			List<QueryDocumentSnapshot> documents = query.limit(pageable.getPageSize()).get().get().getDocuments();
 			List<T> content = documents.stream().map(doc -> doc.toObject(documentClass)).collect(Collectors.toList());
 			return new PageImpl<>(content, pageable, size);
-		} catch (ExecutionException | InterruptedException e) {
-			e.printStackTrace();
+		} catch (Throwable e) {
 			logger.error("Error while searching documents with keyword: {}", keyword);
 		}
 		return Page.empty();
@@ -133,7 +142,6 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			List<QueryDocumentSnapshot> list = querySnapshotApiFuture.get().getDocuments();
 			return list.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(documentClass)).toList();
 		} catch (ExecutionException | InterruptedException e) {
-			e.printStackTrace();
 			logger.error("Error while getting documents by key: {} and value: {}", key, value);
 		}
 		return List.of();
@@ -150,7 +158,6 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 				return list.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(documentClass)).toList();
 			} else return findBy(key, value);
 		} catch (ExecutionException | InterruptedException e) {
-			e.printStackTrace();
 			logger.error("Error while getting documents by key and Options: {} and value: {}", key, value);
 		}
 		return List.of();
@@ -164,10 +171,36 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			List<QueryDocumentSnapshot> documents = querySnapshotApiFuture.get().getDocuments();
 			return (long) documents.size();
 		} catch (ExecutionException | InterruptedException e) {
-			e.printStackTrace();
 			logger.error("Error while getting size of collection: {}", collectionPath);
 		}
 		return 0L;
 	}
 
+	@Override
+	public T findByFirebaseId(String firebaseId) throws NotFoundInDB {
+		try {
+			return db.collection(collectionPath).document(firebaseId).get().get().toObject(documentClass);
+		} catch (ExecutionException | InterruptedException e) {
+			logger.error("Error while getting document by firebaseId: {}", firebaseId);
+			throw new NotFoundInDB(String.format("Document with firebaseId: %s not found", firebaseId));
+		}
+	}
+
+	@Override
+	public T findById(ID id) throws NotFoundInDB {
+		try {
+			Field field = findField(documentClass, "classId", "courseId", "id", "semesterId");
+			String key = field.getName();
+			List<T> res = findBy(key, id.toString());
+			if (res.isEmpty()) {
+				throw new NotFoundInDB(String.format("Document with id: %s not found", id));
+			} else {
+				return res.getFirst();
+			}
+		} catch (NotFoundInDB e) {
+			return findByFirebaseId(id.toString());
+		} catch (Throwable e) {
+			throw new NotFoundInDB(e.getMessage());
+		}
+	}
 }

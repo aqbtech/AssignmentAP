@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.dao.firebase;
 
+import com.hcmutap.elearning.exception.NotFoundInDB;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -60,4 +61,16 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 * @return size of model
 	 */
 	Long size();
+	/**
+	 * Find model by firebaseId
+	 * @param firebaseId ID of model
+	 * @return Model
+	 */
+	T findByFirebaseId(String firebaseId) throws NotFoundInDB;
+	/**
+	 * Find model by ID
+	 * @param id ID of model
+	 * @return Model
+	 */
+	T findById(ID id) throws NotFoundInDB;
 }

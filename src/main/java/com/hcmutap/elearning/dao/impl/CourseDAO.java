@@ -8,7 +8,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class CourseDAO extends DefaultFirebaseDatabase<CourseModel, String>{
-    public CourseModel findById(String courseId) {
-        return findBy("courseId", courseId, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
-    }
 }

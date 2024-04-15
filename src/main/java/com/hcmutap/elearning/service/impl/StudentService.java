@@ -15,7 +15,6 @@ import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 
@@ -91,56 +90,48 @@ public class StudentService implements IStudentService {
 	}
 	@Override
 	public String DangkiMonhoc(String studentId, String classID) throws NotFoundException {
-		ClassModel classModel = classDAO.getClassInfo(classID);
-		StudentModel studentModel = studentDAO.findById(studentId);
-		// TODO: send message to course service, validate if student can register this course
-		// is this class of course full? call class service to check
-		// is this course conflict with other courses? check student's timetable
-		// is this course have prerequisite courses? check student's finished courses
-		// if all of these conditions are satisfied, then register this course
-		// else return error message
-		// add class to student's classes
-		// call class service to add student to class
-		List<String> finished_course = studentModel.getFinished_courses();
-		List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
-		for (String e : studentModel.getCourses()){
-			if (e.equals(classModel.getCourseId())){
-				return "Dang ky khong thanh cong vi ban da dang ky mon nay";
+		try {
+			ClassModel classModel = classDAO.getClassInfo(classID);
+			StudentModel studentModel = null;
+			studentModel = studentDAO.findById(studentId);
+
+			List<String> finished_course = studentModel.getFinished_courses();
+			List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
+			for (String e : studentModel.getCourses()){
+				if (e.equals(classModel.getCourseId())){
+					return "Dang ky khong thanh cong vi ban da dang ky mon nay";
+				}
 			}
-		}
-		for(ClassModel e : timetable){
-			if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
-				continue;
-			}
-			else {
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
-				LocalTime time_start = LocalTime.parse(e.getTimeStart(), formatter);
-				LocalTime time_end = LocalTime.parse(e.getTimeEnd(), formatter);
-				LocalTime time_start_new_class = LocalTime.parse(e.getTimeStart(), formatter);
-				LocalTime time_end_new_class = LocalTime.parse(e.getTimeEnd(), formatter);
-				if(time_end.isBefore(time_start_new_class)){
-					break;
-				} else if (time_end_new_class.isBefore(time_start)) {
-					break;
+			for(ClassModel e : timetable){
+				if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
+					continue;
 				}
 				else {
-					return "Dang ki khong thanh cong vi trung thoi gian voi " + e.getClassName();
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
+					LocalTime time_start = LocalTime.parse(e.getTimeStart(), formatter);
+					LocalTime time_end = LocalTime.parse(e.getTimeEnd(), formatter);
+					LocalTime time_start_new_class = LocalTime.parse(e.getTimeStart(), formatter);
+					LocalTime time_end_new_class = LocalTime.parse(e.getTimeEnd(), formatter);
+					if(time_end.isBefore(time_start_new_class)){
+						break;
+					} else if (time_end_new_class.isBefore(time_start)) {
+						break;
+					}
+					else {
+						return "Dang ki khong thanh cong vi trung thoi gian voi " + e.getClassName();
+					}
 				}
 			}
-		}
-		for (String e : finished_course){
-			if (e.equals(classModel.getCourseId())){
-				return "Dang ky khong thanh cong vi ban da hoc qua mon nay";
+			for (String e : finished_course){
+				if (e.equals(classModel.getCourseId())){
+					return "Dang ky khong thanh cong vi ban da hoc qua mon nay";
+				}
 			}
+
+			return add_class_to_student(studentId, classID);
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
 		}
-
-
-//		if(!CourseFacade.getINSTANCE()
-//				.addStudentToClass(studentModel.getId(), classModel.getClassId())){
-//			return false;
-//		}
-
-		return add_class_to_student(studentId, classID);
 	}
 
 	public static Comparator<ClassModel> getDateTimeComparator() {
@@ -167,7 +158,12 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public List<ClassModel> getTimetableById(String studentId) throws NotFoundException {
-		StudentModel studentModel = studentDAO.findById(studentId);
+		StudentModel studentModel = null;
+		try {
+			studentModel = studentDAO.findById(studentId);
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
+		}
 		List<String> classes = studentModel.getClasses();
 		List<ClassModel> result = new ArrayList<>();
 		for(String e : classes){
@@ -175,13 +171,16 @@ public class StudentService implements IStudentService {
 			result.add(c);
 		}
 
-//		classes.sort(getDateTimeComparator());
-
 		return result;
 	}
 	@Override
 	public List<PointModel> LearningProcess(String studentId) throws NotFoundException {
-		StudentModel studentModel = studentDAO.findById(studentId);
+		StudentModel studentModel = null;
+		try {
+			studentModel = studentDAO.findById(studentId);
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
+		}
 		List<String> finished_courses = studentModel.getFinished_courses();
 		List<PointModel> result = new ArrayList<>();
 		for(String e : finished_courses){
@@ -192,7 +191,11 @@ public class StudentService implements IStudentService {
 	}
 	@Override
 	public List<PointModel> getPointById(String studentId) throws NotFoundException {
-		StudentModel studentModel = studentDAO.findById(studentId);
+		try {
+			StudentModel studentModel = studentDAO.findById(studentId);
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
+		}
 		List<PointModel> point = new ArrayList<>();
 		point = pointDAO.findPoint(studentId);
 		return point;
@@ -200,7 +203,12 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public List<CourseModel> getCourseByIf(String studentId) throws NotFoundException {
-		StudentModel studentModel = studentDAO.findById(studentId);
+		StudentModel studentModel = null;
+		try {
+			studentModel = studentDAO.findById(studentId);
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
+		}
 		List<CourseModel> result = new ArrayList<>();
 		List<String> courses = studentModel.getCourses();
 		for (String e : courses){
@@ -217,30 +225,18 @@ public class StudentService implements IStudentService {
 
 	@Override
 	public String add_class_to_student(String studentId, String classId) throws NotFoundException {
-		StudentModel studentModel = studentDAO.findById(studentId);
-		ClassModel classModel = classDAO.getClassInfo(classId);
-		CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
-		studentModel.getCourses().add(courseModel.getCourseId());
-		studentModel.getClasses().add(classModel.getClassId());
-		update(studentModel);
-		// state = true is learned
-//		PointModel tmp = new PointModel();
-//		tmp.setId("PT_"+courseModel.getCourseId());
-//		tmp.setStudentId(studentId);
-//		tmp.setStudentName(studentModel.getFullName());
-//		tmp.setCourseId(classModel.getCourseId());
-//		tmp.setCourseName(courseModel.getCourseName());
-//		tmp.setClassId(classId);
-//		tmp.setClassName(classModel.getClassName());
-//		tmp.setSemesterId(classModel.getSemesterId());
-//		tmp.setState(false);
-//		tmp.setPointBT(-1);
-//		tmp.setPointBTL(-1);
-//		tmp.setPointGK(-1);
-//		tmp.setPointCK(-1);
-//		pointDAO.save(tmp);
-		classService.addStudentToClass(studentId,classId);
-		return "Dang ky thanh cong";
+		try {
+			StudentModel studentModel = studentDAO.findById(studentId);
+			ClassModel classModel = classDAO.getClassInfo(classId);
+			CourseModel courseModel = courseDAO.findById(classModel.getCourseId());
+			studentModel.getCourses().add(courseModel.getCourseId());
+			studentModel.getClasses().add(classModel.getClassId());
+			update(studentModel);
+			classService.addStudentToClass(studentId,classId);
+			return "Dang ky thanh cong";
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
+		}
 	}
 
 	@Override
@@ -257,8 +253,8 @@ public class StudentService implements IStudentService {
 	public boolean isExist(String id) {
 		try {
 			return studentDAO.findById(id) != null;
-		} catch (NotFoundException e) {
-			return false;
+		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
+			throw new RuntimeException(notFoundInDB);
 		}
 	}
 	@Override
