@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,6 +50,10 @@ public class HomeController {
 	@RequestMapping(value = "/about")
 	public String about(){
 		return "web/views/about";
+	}
+	@RequestMapping(value = "/contact")
+	public String contact(){
+		return "web/views/contact";
 	}
 	@GetMapping(value="/info")
 	public String info(Principal principal, ModelMap model){
