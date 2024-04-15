@@ -142,32 +142,47 @@ public class TeacherController {
 			throw new RuntimeException(e);
 		}
 	}
-	@PostMapping(value = "/update_score")
-	public String updateStudentPoints(@ModelAttribute PointDTO pointDTO,@RequestParam("classId") String classId,@RequestParam("courseId") String courseId,
-									  Principal principal,
-									  ModelMap model) {
+
+	@GetMapping(value = "/update_point")
+	public String updatePoint(@RequestParam("courseId") String courseId,@RequestParam("studentId") String studentId,Principal principal, ModelMap model){
 		try {
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
 
-//			List<String> stringList = pointDTO.getStudentListId();
-//			for(int i=0;i<stringList.size();i++){
-//				PointModel existingPointModel = existingPointModel = pointService.getPoint(stringList.get(i),courseId);
-//				existingPointModel.setPointBT(pointDTO.getPointBTlist().get(i));
-//				existingPointModel.setPointBTL(pointDTO.getPointBTLlist().get(i));
-//				existingPointModel.setPointGK(pointDTO.getPointGKlist().get(i));
-//				existingPointModel.setPointCK(pointDTO.getPointCKlist().get(i));
-//				pointService.update(existingPointModel);
-//			}
+			PointModel pointModel = pointService.getPoint(studentId,courseId);
 
-			List<PointModel> pointModels = pointService.getListStudentByClassId(classId);
-			model.addAttribute("classId",classId);
+			model.addAttribute("studentId",studentId);
 			model.addAttribute("courseId",courseId);
-			model.addAttribute("points", pointModels);
-			model.addAttribute("name", "Danh sách lớp " + pointModels.getFirst().getClassName() + " - khóa học " + pointModels.getFirst().getCourseName());
+			model.addAttribute("point",pointModel);
+			model.addAttribute("name","Sinh viên "+pointModel.getStudentName()+" - lớp " +pointModel.getClassName() +" - khóa học " +pointModel.getCourseName());
 
-			return "web/views/teacher-service/InputScore/list_student";
+			return "web/views/teacher-service/InputScore/UpdatePoint";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
+	@PostMapping(value = "/update_point")
+	public String UpdatePoint(@RequestParam("courseId") String courseId,@RequestParam("studentId") String studentId,@ModelAttribute PointDTO pointDTO,Principal principal, ModelMap model){
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+
+			PointModel pointModel = pointService.getPoint(studentId,courseId);
+//			PointModel pointModel = pointService.getPoint("2213001","XSTK");
+			pointModel.setPointBT(pointDTO.getPointBT());
+			pointModel.setPointBTL(pointDTO.getPointBTL());
+			pointModel.setPointGK(pointDTO.getPointGK());
+			pointModel.setPointCK(pointDTO.getPointCK());
+			pointService.update(pointModel);
+
+			model.addAttribute("studentId",studentId);
+			model.addAttribute("courseId",courseId);
+			model.addAttribute("classId",pointModel.getClassId());
+			model.addAttribute("point",pointModel);
+			model.addAttribute("name","Sinh viên "+pointModel.getStudentName()+" - lớp " +pointModel.getClassName() +" - khóa học " +pointModel.getCourseName());
+
+			return "web/views/teacher-service/InputScore/UpdatePoint";
 		} catch (NotFoundException e) {
 			throw new RuntimeException(e);
 		}

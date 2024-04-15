@@ -17,9 +17,4 @@ public class PointDTO {
 	private double pointBTL;
 	private double pointGK;
 	private double pointCK;
-//	private List<String> studentListId;
-//	private List<Double> pointBTlist;
-//	private List<Double> pointBTLlist;
-//	private List<Double> pointGKlist;
-//	private List<Double> pointCKlist;
 }
