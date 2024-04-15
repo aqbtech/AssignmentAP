@@ -29,6 +29,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 	private final Firestore db = FirestoreClient.getFirestore();
 	private final Class<T> documentClass;
 	private final Field documentId;
+	private final Field secondaryId;
 	private final String collectionPath;
 	public DefaultFirebaseDatabase() {
 		documentClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
@@ -37,6 +38,9 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		documentId = Arrays.stream(documentClass.getDeclaredFields()).filter(
 				field -> field.isAnnotationPresent(DocumentId.class)).findFirst().orElseThrow(() ->
 				new FirebaseDAOException(String.format("Class %s must have DocumentId annotation", documentClass.getSimpleName())));
+		secondaryId = Arrays.stream(documentClass.getDeclaredFields()).filter(
+				field -> field.isAnnotationPresent(SecondaryId.class)).findFirst().orElseThrow(() ->
+				new FirebaseDAOException(String.format("Class %s must have SecondaryId annotation", documentClass.getSimpleName())));
 		collectionPath = annotation.value();
 		assert collectionPath.charAt(0) != '/' : String.format("Collection path of %s must not start with '/'", documentClass.getSimpleName());
 	}
@@ -100,22 +104,11 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 	public Page<T> findAll(Pageable pageable) {
 		return new PageImpl<>(findAll(), pageable, this.size());
 	}
-	private Field findField(Class<?> clazz, String... fieldNames) throws Throwable {
-		for (String fieldName : fieldNames) {
-			try {
-				return clazz.getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				// Ignore and try next field name
-			}
-		}
-		throw new Throwable("Can not find such field"); // or throw an exception if no field found
-	}
 	@Override
 	public Page<T> search(String keyword, Pageable pageable) {
 		try {
-			Field field = findField(documentClass, "classId", "courseId", "id", "semesterId");
 			int offset = (pageable.getPageNumber()) * pageable.getPageSize();
-			String orderBy = field.getName();
+			String orderBy = secondaryId.getName();
 			Query query = db.collection(collectionPath).orderBy(orderBy).startAt(keyword).endAt(keyword + "\uf8ff");
 			if (offset > 0) {
 				DocumentSnapshot last = query.limit(offset).get().get().getDocuments().get(offset - 1);
@@ -189,8 +182,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 	@Override
 	public T findById(ID id) throws NotFoundInDB {
 		try {
-			Field field = findField(documentClass, "classId", "courseId", "id", "semesterId");
-			String key = field.getName();
+			String key = secondaryId.getName();
 			List<T> res = findBy(key, id.toString());
 			if (res.isEmpty()) {
 				throw new NotFoundInDB(String.format("Document with id: %s not found", id));

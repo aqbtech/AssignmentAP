@@ -2,6 +2,7 @@ package com.hcmutap.elearning.model;
 
 import com.hcmutap.elearning.dao.firebase.DocumentId;
 import com.hcmutap.elearning.dao.firebase.FirebaseCollection;
+import com.hcmutap.elearning.dao.firebase.SecondaryId;
 import lombok.*;
 
 @Getter
@@ -13,6 +14,7 @@ import lombok.*;
 public class PointModel {
    @DocumentId
    private String firebaseId;
+   @SecondaryId
    private String id; // timestamp
    private String studentId;
    private String studentName;
