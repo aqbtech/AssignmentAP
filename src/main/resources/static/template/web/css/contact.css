@@ -60,22 +60,3 @@ body {
     padding-right: 10px;
     color: rgba(var(--default-color-rgb), 0.3);
 }
-
-.box{
-    cursor: pointer;
-    padding: 10px 20px;
-    background: white;
-    border-radius: 30px;
-    align-items: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-}
-
-.boxmission{
-    border: 1px;
-    border-color: gray;
-    border-style: solid;
-}
-
-.box:hover{
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-}
