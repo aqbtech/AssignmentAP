@@ -319,33 +319,31 @@ public class HomeController {
 		try{
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			if(infoDTO.getRole().equalsIgnoreCase("student")){
-				if (studentService.isExistStudentInClass(principal.getName(), id)) {
-					model.addAttribute("type", "student");
-				} else {
-					model.addAttribute("message", "You are not in this class");
-					return "login/404_page";
-				}
+				model.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
 			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
-				if (teacherService.isExistTeacherInClass(principal.getName(), id)) {
-					model.addAttribute("type", "teacher");
-				} else {
+				if (!teacherService.isExistTeacherInClass(principal.getName(), id)) {
 					model.addAttribute("message", "You are not in this class");
 					return "login/404_page";
 				}
 			} else {
-				model.addAttribute("message", "You are not a student or teacher");
+				model.addAttribute("message", "You are not a teacher");
 				return "login/404_page";
 			}
-			List<PointModel> listTemp = pointService.getListStudentByClassId(id) ;
-			List<StudentModel> listStudent = new ArrayList<>();
-			for(PointModel tmp : listTemp) {
-				listStudent.add(studentService.findById(tmp.getStudentId()));
+			try {
+				List<PointModel> listTemp = pointService.getListStudentByClassId(id);
+				List<StudentModel> listStudent = new ArrayList<>();
+				for (PointModel tmp : listTemp) {
+					listStudent.add(studentService.findById(tmp.getStudentId()));
+				}
+				model.addAttribute("listStudent", listStudent);
+			} catch (NotFoundException e) {
+				model.addAttribute("listStudent", new ArrayList<>());
 			}
 			ClassModel classModel = classService.findById(id);
 			model.addAttribute("class", classModel);
-			model.addAttribute("listStudent", listStudent);
 			return "web/views/list_student";
-		}catch(NotFoundException e) {
+		} catch(NotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}

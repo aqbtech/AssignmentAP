@@ -31,7 +31,7 @@
                         <th width = "15%">Mã sinh viên</th>
                         <th width = "25%">Họ và tên</th>
                         <th>Email</th>
-                        <th width = "10%" th:if="${type} == 'teacher'">Xóa</th>
+                        <th width = "10%">Xóa</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -39,7 +39,7 @@
                         <td th:text="${student.id}"></td>
                         <td th:text="${student.fullName}"></td>
                         <td th:text="${student.email}"></td>
-                        <td th:if="${type} == 'teacher'">
+                        <td>
                             <a class="btn btn-link delete-button" th:href="@{|/del-student?classId=${class.classId}&id=${student.id}|}">Xóa</a>
                         </td>
                     </tr>
