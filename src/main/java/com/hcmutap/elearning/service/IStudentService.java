@@ -5,6 +5,7 @@ import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.PointModel;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface IStudentService extends IGenericAdminService<StudentModel>{
 	List<ClassModel> getAllClass(String username) throws NotFoundException;
 	boolean isExist(String id);
 	boolean isExistStudentInClass(String username, String classId) throws NotFoundException;
+	Page<StudentModel> getPage(String keyword, int page, int limit);
+	Page<StudentModel> getPage(int page, int limit);
 }

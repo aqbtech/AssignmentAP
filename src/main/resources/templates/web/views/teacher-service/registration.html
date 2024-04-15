@@ -56,7 +56,11 @@
 
                 </div>
 
-                <div th:if="${message}" class="alert alert-danger" th:text="${message}"></div>
+                <div th:switch="${message}">
+                    <div th:case="null" class="" th:text="${message}"></div>
+                    <div th:case="'Dang ky thanh cong'" class="alert alert-success" th:text="${message}"></div>
+                    <div th:case="*" class="alert alert-danger" th:text="${message}"></div>
+                </div>
 
                 <div class="box-search">
 
@@ -75,6 +79,9 @@
                                     </div>
                                     <div class="col-sm-6" style="overflow: auto">
                                         <p th:text="${e.getLophoc().getClassName()}">Class Name</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getLophoc().getDayOfWeek()}">Time</p>
                                     </div>
                                     <div class="col-sm-6" style="overflow: auto">
                                         <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
