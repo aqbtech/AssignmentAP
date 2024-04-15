@@ -66,6 +66,10 @@ public class StudentController{
             List<Class_CourseDTO> class_course = new ArrayList<>();
             List<Class_CourseDTO> class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
 
+            if(!class_courseService.checkClass_Course(class_course_of_student)){
+                return "login/Rare_fault";
+            }
+
             if(id.isEmpty()){
                 model.addAttribute("class_course_of_student", class_course_of_student);
                 model.addAttribute("class_course", class_course);
@@ -100,7 +104,6 @@ public class StudentController{
 
             class_course = class_courseService.getByCourseId(classId);
             class_course_of_student = class_courseService.getClass_Course(studentModel.getUsername());
-
 
             modelMap.addAttribute("class_course_of_student", class_course_of_student);
             redirectAttributes.addFlashAttribute("message", message);
