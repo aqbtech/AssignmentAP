@@ -129,7 +129,8 @@ public class StudentController{
         try {
             InfoDTO infoDTO = userService.getInfo(principal.getName());
             StudentModel studentModel = studentService.findById(infoDTO.getId());
-            List<PointModel> points = studentService.getPointById(studentModel.getId());
+
+            List<PointModel> points = studentService.getPointById("2213001");
             ArrayList<Double> resultAverageList = new ArrayList<>();
             for (PointModel pointModel : points) {
                 resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(), pointModel.getCourseId()));
