@@ -13,7 +13,7 @@
     <div class="container">
         <h4 class="text-center mb-4" th:text="${courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')_HK'+class.semesterId}" style="margin-top: 20px;"></h4>
         <div class="card-body">
-            <button type="button" class="btn btn-outline-primary mr-2" th:attr="classId=${class.classId}" id="svButton">
+            <button type="button" class="btn btn-outline-primary mr-2" th:attr="classId=${class.classId}" id="svButton" sec:authorize="hasAuthority('TEACHER')">
                 Danh sách sinh viên
             </button>
         </div>

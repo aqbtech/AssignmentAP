@@ -46,7 +46,7 @@ public class ClassService implements IClassService {
 
     @Override
     public List<ClassModel> findBy(String key, String value) {
-        return null;
+        return classDAO.findBy(key, value);
     }
 
     @Override
@@ -81,10 +81,13 @@ public class ClassService implements IClassService {
     }
     @Override
     public void delete(String id) throws NotFoundException {
-        ClassModel classModel = findBy("firebaseId",id).getFirst();
-        InfoClassModel infoClass = infoService.findById(classModel.getInfoId());
-        infoService.delete(infoClass.getFirebaseId());
-        classDAO.delete(id);
+        List<ClassModel> cls = findBy("firebaseId", id);
+        if (!cls.isEmpty()) {
+            ClassModel classModel = cls.getFirst();
+            InfoClassModel infoClass = infoService.findById(classModel.getInfoId());
+            infoService.delete(infoClass.getFirebaseId());
+            classDAO.delete(id);
+        }
     }
 
     @Override

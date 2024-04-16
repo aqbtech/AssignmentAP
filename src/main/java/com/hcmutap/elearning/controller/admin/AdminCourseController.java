@@ -8,6 +8,7 @@ import com.hcmutap.elearning.model.SemesterModel;
 import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 
+import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.ISemesterService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -32,6 +33,8 @@ public class AdminCourseController {
 	private ICourseService courseService;
 	@Resource
 	private IClassService classService;
+	@Resource
+	private IPointService pointService;
 	@Resource
 	private ISemesterService semesterService;
 
@@ -90,8 +93,13 @@ public class AdminCourseController {
 							   final RedirectAttributes redirectAttributes) {
 		try {
 			CourseModel courseModel = courseService.findById(id);
-			courseService.delete(courseModel.getFirebaseId());
-			redirectAttributes.addFlashAttribute("message", "Xóa thành công khóa học " + courseModel.getCourseId());
+			List<ClassModel> cls = classService.getClassOfCourse(id);
+			if(cls.isEmpty()) {
+				courseService.delete(courseModel.getFirebaseId());
+				redirectAttributes.addFlashAttribute("message", "Xóa thành công khóa học " + courseModel.getCourseId());
+			} else {
+				redirectAttributes.addFlashAttribute("message", "Khóa học vẫn còn lớp, không thể xóa");
+			}
 			return "redirect:/admin-management-course";
 		} catch (NotFoundException e) {
 			logger.error("Error in deleteCourse");
@@ -135,7 +143,7 @@ public class AdminCourseController {
 		ClassModel classModel = new ClassModel();
 		classModel.setCourseId(classRes.getCourseId());
 		classModel.setClassName(classRes.getClassName());
-		classModel.setClassId(classModel.getCourseId()+"-"+classModel.getClassName());
+		classModel.setClassId(classModel.getCourseId()+"-"+classModel.getClassName()+"-"+classRes.getSemesterId());
 		classModel.setDayOfWeek(classRes.getDayOfWeek());
 		classModel.setTimeStart(classRes.getTimeStart());
 		classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
@@ -235,8 +243,13 @@ public class AdminCourseController {
 							   final RedirectAttributes redirectAttributes) {
 		try {
 			ClassModel classModel = classService.findById(id);
-			classService.delete(classModel.getFirebaseId());
-			redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+			try {
+				pointService.getListStudentByClassId(id);
+				redirectAttributes.addFlashAttribute("message", "Vẫn còn sinh viên trong lớp, không thể xóa!");
+			} catch (Exception e) {
+				classService.delete(classModel.getFirebaseId());
+				redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+			}
 			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 		} catch (NotFoundException e) {
 			logger.error("Error in deleteClass");
