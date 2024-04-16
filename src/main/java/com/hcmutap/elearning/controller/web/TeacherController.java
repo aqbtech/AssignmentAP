@@ -167,7 +167,11 @@ public class TeacherController {
 	}
 
 	@PostMapping(value = "/update_point")
-	public String UpdatePoint(@RequestParam("courseId") String courseId,@RequestParam("studentId") String studentId,@ModelAttribute PointDTO pointDTO,Principal principal, ModelMap model){
+	public String UpdatePoint(@RequestParam("courseId") String courseId,
+							  @RequestParam("studentId") String studentId,
+							  @ModelAttribute PointDTO pointDTO,
+							  Principal principal,
+							  ModelMap model){
 		try {
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
