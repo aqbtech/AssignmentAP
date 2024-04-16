@@ -5,6 +5,17 @@
 <head>
     <title>Student Management System</title>
     <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+
+    <style>
+        a.button {
+            padding: 1px 6px;
+            border: 1px outset buttonborder;
+            border-radius: 3px;
+            color: buttontext;
+            background-color: buttonface;
+            text-decoration: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,6 +35,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 mt-3">
+                <a th:href="@{|/teacher/inputscore|}">Quay lại danh sách lớp</a>
                 <form name="formPoint" class="form-group" th:action="@{|/teacher/update_score?classId=${classId}&courseId=${courseId}|}" method="post">
                     <table class="table table-bordered table-striped" style="overflow: auto">
                         <thead>
@@ -39,73 +51,20 @@
                         </thead>
                         <tbody>
                         <tr th:each="point : ${points}" style="background: #F8F8FF">
-                            <td>
-                                <input type="text" style="border-style: none; background-size: auto" name="studentId" th:value="${point.getStudentId()}" readonly>
-                            </td>
+                            <td th:text="${point.getStudentId()}"></td>
                             <td th:text="${point.getStudentName()}"></td>
-                            <td contenteditable="true" >
-                                <input type="number" step="any" min="0" name="pointBT" th:value="${point.getPointBT()}" disabled>
-                            </td>
-                            <td contenteditable="true" >
-                                <input type="number" step="any" min="0" name="pointBTL" th:value="${point.getPointBTL()}" disabled>
-                            </td>
-                            <td contenteditable="true">
-                                <input type="number" step="any" min="0" name="pointGK" th:value="${point.getPointGK()}" disabled>
-                            </td>
-                            <td contenteditable="true">
-                                <input type="number" step="any" min="0" name="pointCK" th:value="${point.getPointCK()}" disabled>
-                            </td>
-                            <td >
-                                <button type="button" class="edit-button" onclick="check(this)">Update</button>
-                            </td>
+                            <td th:text="${point.getPointBT()}"></td>
+                            <td th:text="${point.getPointBTL()}"></td>
+                            <td th:text="${point.getPointGK()}"></td>
+                            <td th:text="${point.getPointCK()}"></td>
+                            <td><a th:href="@{|/teacher/update_point?courseId=${point.getCourseId()}&studentId=${point.getStudentId()}|}">Update</a></td>
                         </tr>
                         </tbody>
                     </table>
-                    <input type="submit" value="submit">
                 </form>
             </div>
         </div>
     </div>
-
-    <script>
-        function check(button) {
-            var row = button.parentNode.parentNode;
-            var inputs = row.querySelectorAll('input[type="number"]');
-            var bbt = button.textContent;
-
-            if (bbt === "Update") {
-                button.textContent = "Save";
-                inputs.forEach(function(input) {
-                    input.disabled = false;
-                });
-            } else {
-                var isValid = true;
-                inputs.forEach(function(input) {
-                    if (input.value < 0 || input.value > 10) {
-                        isValid = false;
-                        input.style.border = "1px solid red"; // Làm nổi bật các input không hợp lệ
-                    } else {
-                        input.style.border = ""; // Đặt lại viền nếu input hợp lệ
-                    }
-                });
-                if (isValid) {
-                    // document.querySelectorAll('input[type="submit"]').forEach(function(input) {
-                    //     document.getElementById(input.id).click();
-                    // });
-                    // document.getElementById("submitButton").click();
-                    // alert('Dữ liệu đã được cập nhật thành công!');
-                    button.textContent = "Update";
-                    inputs.forEach(function(input) {
-                        input.disabled = true;
-                    });
-                } else {
-                    alert('Bạn đã nhập điểm không đúng!!\nYêu cầu nhập lại');
-                }
-            }
-        }
-    </script>
-
-
 </div>
 
 </body>
