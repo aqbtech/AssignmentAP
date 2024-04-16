@@ -260,7 +260,7 @@ public class HomeController {
 					break;
 				}
 			}
-            if(matchedDocument != null) {
+			if(matchedDocument != null) {
 				List<FileInfo> listFile = matchedDocument.getListFile();
 				if (listFile != null) {
 					for (FileInfo fileInfo : listFile) {
@@ -340,8 +340,12 @@ public class HomeController {
 				for (PointModel tmp : listTemp) {
 					listStudent.add(studentService.findById(tmp.getStudentId()));
 				}
+				if(listStudent.isEmpty()) {
+					model.addAttribute("notHaveStudent","true");
+				}
 				model.addAttribute("listStudent", listStudent);
 			} catch (NotFoundException e) {
+				model.addAttribute("notHaveStudent",true);
 				model.addAttribute("listStudent", new ArrayList<>());
 			}
 			ClassModel classModel = classService.findById(id);
