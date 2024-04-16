@@ -110,11 +110,11 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			int offset = (pageable.getPageNumber()) * pageable.getPageSize();
 			String orderBy = secondaryId.getName();
 			Query query = db.collection(collectionPath).orderBy(orderBy).startAt(keyword).endAt(keyword + "\uf8ff");
+			int size = query.get().get().size();
 			if (offset > 0) {
 				DocumentSnapshot last = query.limit(offset).get().get().getDocuments().get(offset - 1);
 				query = query.startAfter(last);
 			}
-			int size = query.get().get().size();
 			List<QueryDocumentSnapshot> documents = query.limit(pageable.getPageSize()).get().get().getDocuments();
 			List<T> content = documents.stream().map(doc -> doc.toObject(documentClass)).collect(Collectors.toList());
 			return new PageImpl<>(content, pageable, size);
