@@ -55,7 +55,7 @@ public class AdminCourseController {
 		return "admin/views/view-table-course";
 	}
 	@GetMapping("/admin-management/update-course")
-	public String updateCourse(@RequestParam("id") String id, ModelMap model) {
+	public String updateCourse(@RequestParam("id") String id, ModelMap model, final RedirectAttributes redirectAttributes) {
 		try {
 			CourseModel courseModel = courseService.findById(id);
 			List<ClassModel> listClass = classService.getClassOfCourse(courseModel.getCourseId());
@@ -65,12 +65,13 @@ public class AdminCourseController {
 		} catch (Exception e) {
 			logger.error("Error in updateCourse {}", id);
 			// implFunc to redirect to error page and message
-			return"redirect:/admin-management-course";
+			redirectAttributes.addFlashAttribute("message", "Hiện không thể tìm thấy khóa học " + id);
+			return "redirect:/admin-management?type=course";
 		}
 	}
 
 	@PostMapping("/admin-management/update-course")
-	public String updateCourse(@RequestParam("id") String id, @ModelAttribute("course") CourseModel courseModel, ModelMap model){
+	public String updateCourse(@RequestParam("id") String id, @ModelAttribute("course") CourseModel courseModel, ModelMap model, final RedirectAttributes redirectAttributes){
 		courseModel.setCourseId(id);
 		try {
 			CourseModel course = courseService.findById(id);
@@ -84,7 +85,8 @@ public class AdminCourseController {
 		} catch (NotFoundException e) {
 			logger.error("Error in updateCourse Postmethod");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management-course";
+			redirectAttributes.addFlashAttribute("message", "Hiện không thể tìm thấy khóa học " + id);
+			return "redirect:/admin-management?type=course";
 		}
 	}
 
@@ -100,11 +102,12 @@ public class AdminCourseController {
 			} else {
 				redirectAttributes.addFlashAttribute("message", "Khóa học vẫn còn lớp, không thể xóa");
 			}
-			return "redirect:/admin-management-course";
+			return "redirect:/admin-management?type=course";
 		} catch (NotFoundException e) {
 			logger.error("Error in deleteCourse");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management-course";
+			redirectAttributes.addFlashAttribute("message", "Xóa không thành công, không thể tìm thấy khóa học " + id);
+			return "redirect:/admin-management?type=course";
 		}
 	}
 
@@ -181,7 +184,7 @@ public class AdminCourseController {
 	}
 
 	@GetMapping("/admin-management/update-class")
-	public String updateClass (@RequestParam("id") String id, ModelMap model) {
+	public String updateClass (@RequestParam("id") String id, ModelMap model, final RedirectAttributes redirectAttributes) {
 		try {
 			ClassModel classModel = classService.findById(id);
 			ClassResDTO classRes = new ClassResDTO();
@@ -199,7 +202,9 @@ public class AdminCourseController {
 		} catch (NotFoundException e) {
 			logger.error("Error in updateClass");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management-course";
+			redirectAttributes.addFlashAttribute("message", "Không tìm thế lớp học " + id);
+			String[] parts = id.split("-");
+			return "redirect:/admin-management/update-course?id=" + parts[0];
 		}
 	}
 
@@ -234,7 +239,9 @@ public class AdminCourseController {
 		} catch (NotFoundException e) {
 			logger.error("Error in updateClass Postmethod");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management/update-class?id=" + id;
+			redirectAttributes.addFlashAttribute("message", "Chỉnh sửa không thành công, không tìm thế lớp học " + id);
+			String[] parts = id.split("-");
+			return "redirect:/admin-management/update-course?id=" + parts[0];
 		}
 	}
 
@@ -254,7 +261,9 @@ public class AdminCourseController {
 		} catch (NotFoundException e) {
 			logger.error("Error in deleteClass");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management-course";
+			redirectAttributes.addFlashAttribute("message", "Xóa không thành công, không tìm thế lớp học " + id);
+			String[] parts = id.split("-");
+			return "redirect:/admin-management/update-course?id=" + parts[0];
 		}
 	}
 
@@ -297,33 +306,46 @@ public class AdminCourseController {
 		return "admin/views/viewSemester";
 	}
 
+	@GetMapping("/admin-management/add-semester")
+	public String addSemester(ModelMap map) {
+		map.addAttribute("semester", new SemesterModel());
+		return "admin/views/createSemester";
+	}
+
 	@PostMapping("/admin-management/add-semester")
-	public String addSemester(@ModelAttribute SemesterModel semesterModel,
+	public String addSemester(@ModelAttribute("semester") SemesterModel semesterModel, ModelMap model,
 							  final RedirectAttributes redirectAttributes) {
 		try{
-			semesterService.findById(semesterModel.getSemesterName());
-			redirectAttributes.addFlashAttribute("message","Không thành công! Học kì đã được tạo trước đó!");
+			if(semesterService.findById(semesterModel.getSemesterName()) != null) {
+				model.addAttribute("message", "Không thành công! Học kì đã được tạo trước đó!");
+				semesterModel.setId(semesterModel.getSemesterName());
+				model.addAttribute("semester", semesterModel);
+				return "admin/views/createSemester";
+			} else {
+				semesterModel.setId(semesterModel.getSemesterName());
+				semesterService.save(semesterModel);
+				redirectAttributes.addFlashAttribute("message", "Học kì đã tạo thành công!");
+				return "redirect:/admin-management?type=semester";
+			}
 		} catch (Exception e){
 			semesterModel.setId(semesterModel.getSemesterName());
 			semesterService.save(semesterModel);
 			redirectAttributes.addFlashAttribute("message", "Học kì đã tạo thành công!");
-			return "redirect:/admin-management-semester";
+			return "redirect:/admin-management?type=semester";
 		}
-		semesterModel.setId(semesterModel.getSemesterName());
-		semesterService.save(semesterModel);
-		return "redirect:/admin-management-semester";
 	}
 
 	@GetMapping("/admin-management/update-semester")
 	public String updateSemester(@RequestParam("id") String id,
-								 ModelMap model) {
+								 ModelMap model, final RedirectAttributes redirectAttributes) {
 		try {
 			model.addAttribute("semester", semesterService.findById(id));
 			return "admin/views/updateSemester";
 		} catch (NotFoundException e) {
 			logger.error("Error in updateSemester");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management/update-semester?id=" + id;
+			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
+			return "redirect:/admin-management?type=semester";
 		}
 	}
 	@PostMapping("/admin-management/update-semester")
@@ -336,11 +358,12 @@ public class AdminCourseController {
 			semester.setEndDate(semesterModel.getEndDate());
 			semesterService.update(semester);
 			redirectAttributes.addFlashAttribute("message", "Chỉnh sửa thành công");
-			return "redirect:/admin-management-semester";
+			return "redirect:/admin-management?type=semester";
 		} catch (NotFoundException e) {
 			logger.error("Error in updateSemester Postmethod");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management/update-semester?id=" + id;
+			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
+			return "redirect:/admin-management?type=semester";
 		}
 	}
 	@GetMapping("/admin-management/change-semester")
@@ -374,7 +397,8 @@ public class AdminCourseController {
 		} catch(NotFoundException e) {
 			logger.error("Error in changeSemester");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management/change-semester?id=" + id;
+			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
+			return "redirect:/admin-management?type=semester";
 		}
 	}
 
@@ -383,15 +407,30 @@ public class AdminCourseController {
 								  final RedirectAttributes redirectAttributes) {
 		try {
 			SemesterModel semesterModel = semesterService.findById(id);
-			List<String> lst = new ArrayList<>();
-			lst.add(semesterModel.getFirebaseId());
-			semesterService.delete(lst);
-			redirectAttributes.addFlashAttribute("message", "Xóa học kì thành công");
-			return "redirect:/admin-management-semester";
+			try{
+				List<ClassModel> cls = classService.findBy("semesterId", id);
+				if(cls != null) {
+					List<String> lst = new ArrayList<>();
+					lst.add(semesterModel.getFirebaseId());
+					semesterService.delete(lst);
+					redirectAttributes.addFlashAttribute("message", "Xóa học kì thành công");
+					return "redirect:/admin-management?type=semester";
+				} else {
+					redirectAttributes.addFlashAttribute("message", "Vẫn còn lớp ở học kì này, không thể xóa");
+					return "redirect:/admin-management?type=semester";
+				}
+			} catch (NotFoundException e) {
+				List<String> lst = new ArrayList<>();
+				lst.add(semesterModel.getFirebaseId());
+				semesterService.delete(lst);
+				redirectAttributes.addFlashAttribute("message", "Xóa học kì thành công");
+				return "redirect:/admin-management?type=semester";
+			}
 		} catch(NotFoundException e) {
 			logger.error("Error in deleteSemester");
 			// implFunc to redirect to error page and message
-			return "redirect:/admin-management-semester";
+			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
+			return "redirect:/admin-management?type=semester";
 		}
 	}
 
