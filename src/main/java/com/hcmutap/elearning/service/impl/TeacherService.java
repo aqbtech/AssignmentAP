@@ -173,7 +173,7 @@ public class TeacherService implements ITeacherService {
 
 			for (String e : teacherModel.getClasses()){
 				if(e.equals(classId)){
-					return "Dang day khoa hoc nay";
+					return "Dang day lop hoc nay";
 				}
 			}
 
@@ -187,8 +187,8 @@ public class TeacherService implements ITeacherService {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
 					LocalTime time_start = LocalTime.parse(e.getTimeStart(), formatter);
 					LocalTime time_end = LocalTime.parse(e.getTimeEnd(), formatter);
-					LocalTime time_start_new_class = LocalTime.parse(e.getTimeStart(), formatter);
-					LocalTime time_end_new_class = LocalTime.parse(e.getTimeEnd(), formatter);
+					LocalTime time_start_new_class = LocalTime.parse(classModel.getTimeStart(), formatter);
+					LocalTime time_end_new_class = LocalTime.parse(classModel.getTimeEnd(), formatter);
 					if(time_end.isBefore(time_start_new_class)){
 						break;
 					} else if (time_end_new_class.isBefore(time_start)) {

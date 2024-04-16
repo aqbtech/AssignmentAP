@@ -118,7 +118,7 @@ public class ClassService implements IClassService {
     @Override
     public boolean addStudentToClass(String studentId, String classId) throws NotFoundException {
         try {
-            List<String> listClass = studentDAO.findBy("studentId", studentId).getFirst().getClasses();
+            List<String> listClass = studentDAO.findBy("id", studentId).getFirst().getClasses();
             for (String item : listClass) {
                 if (item.equals(classId)) {
                     return false;

@@ -41,6 +41,9 @@
                         <p th:text="${e.getLophoc().getClassName()}">Name</p>
                     </div>
                     <div class="time">
+                        <p th:text="${e.getLophoc().getDayOfWeek()}">Time</p>
+                    </div>
+                    <div class="time">
                         <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
                     </div>
                 </div>

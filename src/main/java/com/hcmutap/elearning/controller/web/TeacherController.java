@@ -56,6 +56,10 @@ public class TeacherController {
 			List<Class_CourseDTO> class_course = new ArrayList<>();
 			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
 
+			if(!class_courseService.checkClass_Course(class_course_of_teacher)){
+				return "login/Rare_fault";
+			}
+
 			if(id.isEmpty()){
 				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 				model.addAttribute("class_course", class_course);

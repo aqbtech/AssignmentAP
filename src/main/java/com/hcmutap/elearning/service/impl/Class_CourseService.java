@@ -73,4 +73,15 @@ public class Class_CourseService implements IClass_CourseService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public boolean checkClass_Course(List<Class_CourseDTO> list_e){
+        for (Class_CourseDTO e : list_e){
+            if(e.getLophoc() != null && e.getCourse() == null){
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

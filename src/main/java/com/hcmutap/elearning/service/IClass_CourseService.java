@@ -8,4 +8,5 @@ import java.util.List;
 public interface IClass_CourseService {
     List<Class_CourseDTO> getClass_Course(String studentId) throws NotFoundException;
     List<Class_CourseDTO> getByCourseId(String courseId);
+    boolean checkClass_Course(List<Class_CourseDTO> e);
 }
