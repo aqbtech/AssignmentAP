@@ -47,7 +47,6 @@ public class HomeController {
 	@Resource
 	private ISemesterService semesterService;
 	private IFileService fileService;
-	private ICourseFacade courseFacade;
 	@Autowired
 	public void setFileService(IFileService fileService) {
 		this.fileService = fileService;
