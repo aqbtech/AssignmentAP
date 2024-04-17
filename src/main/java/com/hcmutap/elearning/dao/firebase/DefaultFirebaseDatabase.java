@@ -64,7 +64,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		DocumentReference docRef = db.collection(collectionPath).document(id.toString());
 		Map<String, ?> test = MapperUtil.getInstance().toMap(t);
 		ApiFuture<WriteResult> apiFuture = docRef.update(Map.copyOf(test));
-		apiFuture.isDone();
+		apiFuture.isDone(); // wait for done
 		// TODO: need to return response model
 		return t;
 	}
@@ -81,7 +81,8 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		try {
 			ids = findDocumentId(id);
 			assert ids != null : String.format("%s Not found!", documentClass.getSimpleName());
-			db.collection(collectionPath).document(ids.getFirst()).delete();
+			ApiFuture<WriteResult> apiFuture = db.collection(collectionPath).document(ids.getFirst()).delete();
+			apiFuture.isDone();
 		} catch (ExecutionException | InterruptedException e) {
 			logger.error("Error while deleting document with id: {}", id);
 		}
