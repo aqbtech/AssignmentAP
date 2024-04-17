@@ -33,7 +33,8 @@ public class SecurityConfig {
 								-> authorizeRequests
 								.requestMatchers("/", "/trang-chu/**", "/api/**", "/login", "/logout", "static/**", "templates/**","template/**")
 								.permitAll()
-								.requestMatchers("/admin-**")
+								.requestMatchers("/admin-**/**")
+//								.requestMatchers("/admin-**")
 								.hasAuthority("ADMIN")
 //								.requestMatchers("/edit")
 //								.hasAnyRole("ADMIN", "TEACHER")
