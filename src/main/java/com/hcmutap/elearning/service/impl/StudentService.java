@@ -11,6 +11,7 @@ import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IClassService;
+import com.hcmutap.elearning.service.ICourseService;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.annotation.Resource;
@@ -40,6 +41,8 @@ public class StudentService implements IStudentService {
 	private IPointService pointService;
 	@Resource
 	private IClassService classService;
+	@Resource
+	private ICourseService courseService;
 	@Override
 	public List<StudentModel> findAll() {
 		return studentDAO.findAll();
@@ -167,7 +170,7 @@ public class StudentService implements IStudentService {
 		List<String> classes = studentModel.getClasses();
 		List<ClassModel> result = new ArrayList<>();
 		for(String e : classes){
-			ClassModel c = CourseFacade.getInstance().getClassInfo(e);
+			ClassModel c = classService.getClassInfo(e);
 			result.add(c);
 		}
 
@@ -184,7 +187,7 @@ public class StudentService implements IStudentService {
 		List<String> finished_courses = studentModel.getFinished_courses();
 		List<PointModel> result = new ArrayList<>();
 		for(String e : finished_courses){
-			CourseModel c = CourseFacade.getInstance().getCourseInfo(e);
+			CourseModel c = courseService.getCourseInfo(e);
 			result.add(pointService.getPoint(studentId, c.getCourseId()));
 		}
 		return result;
@@ -212,7 +215,7 @@ public class StudentService implements IStudentService {
 		List<CourseModel> result = new ArrayList<>();
 		List<String> courses = studentModel.getCourses();
 		for (String e : courses){
-			CourseModel c = CourseFacade.getInstance().getCourseInfo(e);
+			CourseModel c = courseService.getCourseInfo(e);
 			result.add(c);
 		}
 		return result;
@@ -244,7 +247,7 @@ public class StudentService implements IStudentService {
 		List<String> classes = findByUsername(username).getClasses();
 		List<ClassModel> result = new ArrayList<>();
 		for (String e : classes){
-			ClassModel c = CourseFacade.getInstance().getClassInfo(e);
+			ClassModel c = classService.getClassInfo(e);
 			result.add(c);
 		}
 		return result;
