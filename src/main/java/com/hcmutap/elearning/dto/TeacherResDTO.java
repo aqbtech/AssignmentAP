@@ -7,23 +7,21 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeacherResDTO {
-//	{
-//			"username": "abc",
-//			"password": "abc",
-//			"role": "TEACHER",
-//			"fullName": "Nguyen Van A",
-//			"id": "CB0001",
-//			"age": 26,
-//			"email": "nva@hcmut.edu.vn",
-//			"degree": "Ph.D"
-//	}
+	@ColName("Tên đăng nhập")
 	private String username;
+	@ColName("Mật khẩu")
 	private String password;
+	@ColName("Role")
 	private String role;
+	@ColName("Họ tên")
 	private String fullName;
+	@ColName("ID")
 	private String id;
+	@ColName("Tuổi")
 	private Long age;
 	private String email;
+	@ColName("Bằng cấp")
 	private String degree;
+	@ColName("Giới tính")
 	private String gender;
 }
