@@ -128,7 +128,7 @@ public class TeacherService implements ITeacherService {
 				return new ArrayList<>();
 			} else {
 				for(String classId : teacherModel.getClasses()){
-					ClassModel classModel = CourseFacade.getInstance().findClassById(classId);
+					ClassModel classModel = classService.findById(classId);
 					classModels.add(classModel);
 				}
 			}
@@ -145,7 +145,7 @@ public class TeacherService implements ITeacherService {
 		List<CourseModel> result = new ArrayList<>();
 		List<String> courses = teacherModel.getCourses();
 		for (String e : courses){
-			CourseModel c = CourseFacade.getInstance().getCourseInfo(e);
+			CourseModel c = courseService.getCourseInfo(e);
 			result.add(c);
 		}
 		return result;
