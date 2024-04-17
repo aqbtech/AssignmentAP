@@ -78,7 +78,7 @@ public class HomeController {
 						  @RequestParam(required = false) String keyword,
 						  @RequestParam(defaultValue = "1") int page,
 						  @RequestParam(defaultValue = "3") int size) {
-		Page<?> pageResult = null;
+		Page<?> pageResult;
 		switch (type) {
 			case "student":
 				pageResult = studentService.getPage(keyword, page, size);

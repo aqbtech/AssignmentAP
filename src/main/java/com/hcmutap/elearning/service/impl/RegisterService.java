@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -41,7 +42,7 @@ public class RegisterService implements IRegisterService {
 			return "Success";
 		}
 	}
-	private String registerStudent(StudentResDTO student) throws NotFoundException {
+	private String registerStudent(StudentResDTO student) {
 		if(userService.isExist(student.getUsername())) {
 			return "Username is already exist";
 		} else if (studentService.isExist(student.getId())) {
@@ -69,6 +70,21 @@ public class RegisterService implements IRegisterService {
 			return registerStudent(student);
 		}
 		return "Role is not valid";
+	}
+
+	@Override
+	public String register(List<ModelMap> models) throws NotFoundException {
+		StringBuilder result = new StringBuilder();
+		for(ModelMap model : models) {
+			String subResult = register(model);
+			if (!subResult.equals("Success")) {
+				result.append(subResult).append(" when register user with ID ")
+						.append(model.getAttribute("id")).append("\n");
+			} else {
+				result.append("Success").append("\n");
+			}
+		}
+		return result.toString();
 	}
 
 }
