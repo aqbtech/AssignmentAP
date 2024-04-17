@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Title</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <h1>Quản lý đăng kí khóa học, lớp học</h1>
+        <hr>
+        <form th:action="@{/admin-management/registration}" method="post">
+            <label class="" for="teacher">Mở đăng kí lớp học cho giảng viên</label>
+            <select id="teacher" name="teacher" class="form-control"  required>
+                <option th:if="${teacher}" selected value="Open">Đang được mở</option>
+                <option th:unless="${teacher}" value="Open">Mở</option>
+                <option th:unless="${teacher}" value="Close" selected>Đang đóng</option>
+                <option th:if="${teacher}" value="Close">Đóng</option>
+            </select><br>
+
+            <label class="" for="student">Mở đăng kí khóa học cho sinh viên</label>
+            <select id="student" name="student" class="form-control"  required>
+                <option th:if="${student}" selected value="Open">Đang được mở</option>
+                <option th:unless="${student}" value="Open">Mở</option>
+                <option th:unless="${student}" value="Close" selected>Đang đóng</option>
+                <option th:if="${student}" value="Close">Đóng</option>
+            </select><br>
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

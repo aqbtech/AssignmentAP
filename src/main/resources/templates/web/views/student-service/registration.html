@@ -37,15 +37,24 @@
                     <div class="coursename">
                         <p th:text="${e.getCourse().getCourseName()}">Name</p>
                     </div>
+                    <div class="coursename">
+                        <p th:text="${e.getLophoc().getClassName()}">Name</p>
+                    </div>
+                    <div class="time">
+                        <p th:text="${e.getLophoc().getDayOfWeek()}">Time</p>
+                    </div>
+                    <div class="time">
+                        <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
+                    </div>
                 </div>
             </div>
 
             <div class="col-md-6 col-sm-6 m-4 ">
 
                 <div class="box p-3 mb-4">
-                    <form style="width: 100%" method="get" id="my-search" >
-                        <input style="width: 90%" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId">
-                        <button type="submit" style="background: none; border: none"><span class="material-symbols-outlined">search</span></button>
+                    <form style="width: 100%; display: flex" method="get" id="my-search" >
+                        <input style="" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId">
+                        <button type="submit" style="width: 10%; background: none; border: none"><span class="material-symbols-outlined">search</span></button>
                     </form>
                 </div>
 
