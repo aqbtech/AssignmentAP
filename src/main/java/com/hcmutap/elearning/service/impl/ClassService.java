@@ -8,6 +8,9 @@ import com.hcmutap.elearning.exception.NotFoundInDB;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -240,5 +243,15 @@ public class ClassService implements IClassService {
 
     public boolean isExist(String id) {
         return classDAO.findBy("classId", id, Options.OptionBuilder.Builder().setEqual().build()) != null;
+    }
+
+    @Override
+    public Page<ClassModel> getPage(String key, String id, int page, int size) {
+        List<ClassModel> listClass = getClassOfCourse(id);
+        for(ClassModel classModel : listClass) {
+            if(!classModel.getClassId().contains(id))
+                listClass.remove(classModel);
+        }
+        return new PageImpl<>(listClass, PageRequest.of(page - 1, size), listClass.size());
     }
 }

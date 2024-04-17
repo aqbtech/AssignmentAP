@@ -4,6 +4,7 @@
       layout:decorate="~{admin/layout/admin-layout.html}">
 <head>
     <title>Trang quản trị</title>
+    <link rel="stylesheet" th:href="@{/template/admin/css/custom-for-all-table.css}"/>
 </head>
 <body>
 <div layout:fragment="content">
@@ -61,57 +62,39 @@
         <div class="card mb-3">
             <div class="card-header">
                 <i class="fas fa-table"></i>
-                <span th:text="'Danh sách lớp của khóa học ' + ${course.courseId}"></span>
+                <span th:switch="${type}">
+                    <span>Danh sách lớp</span>
+                </span>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                        <tr>
-                            <th>Mã lớp</th>
-                            <th>Lớp</th>
-                            <th>Chỉnh sửa</th>
-                            <th>Xóa</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="class : ${classes}">
-                            <td th:text="${class.classId}"></td>
-                            <td th:text="${class.className}"></td>
-                            <!-- Update button -->
-                            <td>
-                                <a class="btn btn-link update-button" th:href="@{|/admin-management/update-class?id=${class.classId}|}">Chỉnh sửa</a>
-                            </td>
-                            <!-- Delete button -->
-                            <td>
-                                <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteClass?id=${class.classId}|}">Xóa</a>
-                            </td>
-                        </tr>
-                        </tbody>
-                        <script>
-                            function toggleInput() {
-                                let button = document.getElementById("switch1");
-                                if(button.checked === false) {
-                                    document.getElementById('courseName').disabled = true;
-                                    document.getElementById('credit').disabled = true;
-                                    document.getElementById('percentBT').disabled = true;
-                                    document.getElementById('percentBTL').disabled = true;
-                                    document.getElementById('percentGK').disabled = true;
-                                    document.getElementById('percentCK').disabled = true;
-                                    document.getElementById('submitButton').disabled = true;
-                                } else {
-                                    document.getElementById('courseName').disabled = false;
-                                    document.getElementById('credit').disabled = false;
-                                    document.getElementById('percentBT').disabled = false;
-                                    document.getElementById('percentBTL').disabled = false;
-                                    document.getElementById('percentGK').disabled = false;
-                                    document.getElementById('percentCK').disabled = false;
-                                    document.getElementById('submitButton').disabled = false;
-                                }
-                            }
-                        </script>
-                    </table>
+                <div class="my-3">
+                    <form th:action="@{${href}}" id="searchForm">
+                        <input type="hidden" name="type" th:value="${type}">
+                        <div class="row d-flex">
+                            <div class="col-md-6 mt-2">
+                                <div class="search">
+                                    <i class="fa fa-search"></i>
+                                    <input id="keyword" type="search" name="keyword" th:value="${keyword}" class="form-control"
+                                           placeholder="Enter keyword">
+                                    <button type="submit" class="btn btn-secondary">Search</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 input-group mt-2">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="pageSize">Items per page:</label>
+                                </div>
+                                <select form="searchForm" name="size" th:value="${pageSize}" onchange="changePageSizeAll()" class="size-select"
+                                        id="pageSize">
+                                    <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-1 mt-2">
+                                <button id="btnClear" class="btn btn-info" onclick="clearFuncAll()">Clear</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
+                <div th:replace="~{admin/fragments/table :: dynamicTable(${type}, ${models}, ${cols}, ${currentPage}, ${totalItems}, ${totalPages}, ${pageSize}, ${updateLink}, ${deleteLink}, ${href})}"></div>
             </div>
         </div>
     </div>
@@ -147,6 +130,27 @@
                 document.getElementById("errorMessage").style.display = "block";
             }
         });
+
+        function toggleInput() {
+            let button = document.getElementById("switch1");
+            if(button.checked === false) {
+                document.getElementById('courseName').disabled = true;
+                document.getElementById('credit').disabled = true;
+                document.getElementById('percentBT').disabled = true;
+                document.getElementById('percentBTL').disabled = true;
+                document.getElementById('percentGK').disabled = true;
+                document.getElementById('percentCK').disabled = true;
+                document.getElementById('submitButton').disabled = true;
+            } else {
+                document.getElementById('courseName').disabled = false;
+                document.getElementById('credit').disabled = false;
+                document.getElementById('percentBT').disabled = false;
+                document.getElementById('percentBTL').disabled = false;
+                document.getElementById('percentGK').disabled = false;
+                document.getElementById('percentCK').disabled = false;
+                document.getElementById('submitButton').disabled = false;
+            }
+        }
 
         window.addEventListener("load", function() {
             let message = document.getElementById("message").getAttribute("message");
