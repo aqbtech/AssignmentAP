@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.controller.web;
 
+import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.dto.Class_CourseDTO;
 import com.hcmutap.elearning.dto.InfoDTO;
 import com.hcmutap.elearning.dto.PointDTO;
@@ -50,12 +51,18 @@ public class TeacherController {
 	@GetMapping(value = "/registration")
 	public String regis(@RequestParam("courseId") String id, Principal principal, ModelMap model) {
 		try {
+			Singleton check = Singleton.getInstance();
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
 
 			List<Class_CourseDTO> class_course = new ArrayList<>();
 			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
-
+			if(!check.isTeacher_state()){
+				model.addAttribute("message", "Hien khong duoc dang ky");
+				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
+				model.addAttribute("class_course", class_course);
+				return "web/views/teacher-service/registration";
+			}
 			if(!class_courseService.checkClass_Course(class_course_of_teacher)){
 				return "login/Rare_fault";
 			}
