@@ -2,6 +2,7 @@ package com.hcmutap.elearning.utils;
 
 import com.hcmutap.elearning.dto.ColName;
 import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
+import com.hcmutap.elearning.exception.FieldNotFound;
 import com.hcmutap.elearning.exception.MappingException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -23,7 +24,7 @@ public class ExcelMapperUtil {
 		}
 		return excelMapper;
 	}
-	private Integer getCellIndex(XSSFRow row, String givenValue) throws IOException {
+	private Integer getCellIndex(XSSFRow row, String givenValue) {
 		for (Cell cell : row) {
 			if (cell.getCellType() == CellType.STRING) {
 				String cellValue = cell.getStringCellValue();
@@ -32,23 +33,23 @@ public class ExcelMapperUtil {
 				}
 			}
 		}
-		throw new IOException("Given value not found in the row");
+		return null;
 	}
-	public <T> Map<String, Integer> getHeaders(XSSFRow row, Class<T> tClass) {
-		try {
-			Map<String, Integer> headers = new HashMap<>();
-			Field[] fields = tClass.getDeclaredFields();
-
-			for (Field field : fields) {
-				if (field.isAnnotationPresent(ColName.class)) {
-					ColName colName = field.getAnnotation(ColName.class);
-					headers.put(colName.value(), getCellIndex(row, colName.value()));
+	public <T> Map<String, Integer> getHeaders(XSSFRow row, Class<T> tClass) throws FieldNotFound {
+		Map<String, Integer> headers = new HashMap<>();
+		Field[] fields = tClass.getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(ColName.class)) {
+				ColName colName = field.getAnnotation(ColName.class);
+				Integer cellIndex = getCellIndex(row, colName.value());
+				if (cellIndex != null) {
+					headers.put(colName.value(), cellIndex);
+				} else if (!colName.optional()) {
+					throw new FieldNotFound("Field "+ colName.value() +"not found in excel");
 				}
 			}
-			return headers;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
+		return headers;
 	}
 
 	private String getValueOfCell(XSSFRow row, int cellIndex ) {
@@ -71,14 +72,26 @@ public class ExcelMapperUtil {
 			XSSFSheet worksheet = workbook.getSheetAt(0);
 			Map<String, Integer> headers = getHeaders(worksheet.getRow(0), clazz);
 			List<T> result = new ArrayList<>();
+			Field[] fields = clazz.getDeclaredFields();
+			int classFieldCount = (int) Arrays.stream(fields)
+				.filter(field -> field.isAnnotationPresent(ColName.class))
+				.filter(field -> !field.getAnnotation(ColName.class).optional())
+				.count();
+			if (classFieldCount > headers.size()) {
+				throw new MappingException("Error when mapping excel because given data is not enough to require data");
+			}
 			for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
 				Map<String, String> FieldPool = new HashMap<>();
-				Field[] fields = clazz.getDeclaredFields();
 				for (Field field : fields) {
 					if (field.isAnnotationPresent(ColName.class)) {
 						ColName colName = field.getAnnotation(ColName.class);
-						FieldPool.put(field.getName(),
-								getValueOfCell(worksheet.getRow(i), headers.get(colName.value())));
+						if(colName.optional() && !headers.containsKey(colName.value())) {
+							FieldPool.put(field.getName(), null);
+						} else if (!headers.containsKey(colName.value())) {
+							throw new FieldNotFound("Field "+ colName.value() +"not found in excel");
+						} else {
+							FieldPool.put(field.getName(), getValueOfCell(worksheet.getRow(i), headers.get(colName.value())));
+						}
 					}
 				}
 				String json = MapperUtil.getInstance().toJson(FieldPool);
@@ -86,9 +99,8 @@ public class ExcelMapperUtil {
 				result.add(model);
 			}
 			return Optional.of(result);
-		} catch (MappingException | IOException e) {
+		} catch (MappingException | IOException | FieldNotFound e) {
 			throw new ConvertExcelToObjectException(e.getMessage());
 		}
 	}
-
 }

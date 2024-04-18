@@ -2,10 +2,12 @@ package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.dto.RegisterDTO;
+import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 
+import com.hcmutap.elearning.service.impl.ExcelService;
 import com.hcmutap.elearning.service.impl.RegisterService;
 import com.hcmutap.elearning.service.impl.SemesterService;
 import com.hcmutap.elearning.utils.MapperUtil;
@@ -15,20 +17,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller(value = "homeControllerOfAdmin")
 public class HomeController {
@@ -152,6 +155,7 @@ public class HomeController {
 				del.add(student.getFirebaseId());
 				studentService.delete(del);
 				userService.delete(student.getUsername());
+				// implfunc need to change exception
 				List<PointModel> points = pointService.getListPointByStudentId(student.getId());
 				List<String> delPoint = new ArrayList<>();
 				for (PointModel point : points) {
@@ -162,7 +166,7 @@ public class HomeController {
 			}
 			return "redirect:/admin-management?type=" + type;
 		} catch (NotFoundException e) {
-			logger.error("Can't delete account because not found");
+			logger.error("Can't delete account because not found {}", e.getMessage());
 			return "redirect:/404";
 		}
 	}
@@ -292,6 +296,57 @@ public class HomeController {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+	@Autowired
+	private SimpMessagingTemplate template;
+	@GetMapping("/admin-management/add-by-file")
+	public String addAccountByFile() {
+		return "admin/views/add-many-account";
+	}
+	@PostMapping(value = "/admin-management/add-by-file")
+	public String addAccount(@RequestParam("file") MultipartFile file) {
+		try {
+			ExcelService<RegisterDTO> excelService = new ExcelService<>();
+			Optional<List<RegisterDTO>> list = excelService.readAndConvert(file, RegisterDTO.class);
+			Map<String, String> complete = new HashMap<>();
+			Map<String, String> failure = new HashMap<>();
+			if (list.isPresent()) {
+				for (RegisterDTO registerDTO : list.get()) {
+					template.convertAndSend("/topic/accounts",
+							"Adding account: " + registerDTO.getUsername());
+					Errors errors = new BeanPropertyBindingResult(registerDTO, "registerDTO");
+					registerDTOValidator.validate(registerDTO, errors);
+					if (errors.hasErrors()) {
+						failure.put(registerDTO.getUsername(),
+								"Failed to add account, message: " + errors.getAllErrors());
+						template.convertAndSend("/topic/accounts",
+								"Failed to add account: " + registerDTO.getUsername());
+					} else {
+						ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
+						String message = registerService.register(modelMap);
+						if (!message.equals("Success")) {
+							if (!failure.containsKey(registerDTO.getUsername())) {
+								failure.put(registerDTO.getUsername(), "Failed to add account, message: " + message);
+							}
+							logger.error(message);
+						} else {
+							complete.put(registerDTO.getUsername(), "Success");
+							template.convertAndSend("/topic/accounts",
+									"New account added: " + registerDTO.getUsername());
+						}
+					}
+				}
+				template.convertAndSend("/topic/accounts", "Complete register process, " +
+						"complete: " + complete.size() + ", failure: " + failure.size());
+			} else {
+				logger.atDebug().log("List is empty");
+			}
+			return "admin/views/add-many-account";
+		} catch (ConvertExcelToObjectException | NotFoundException e) {
+			logger.error("Can't add account because {}", e.getMessage());
+			template.convertAndSend("/topic/accounts", "Can't add account because " + e.getMessage());
+			return "admin/views/add-many-account";
 		}
 	}
 }

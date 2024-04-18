@@ -1,9 +1,5 @@
 package com.hcmutap.elearning.dto;
 
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,17 +10,24 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterDTO {
-	@Pattern(regexp = "^[a-zA-Z0-9]{6,20}$", message = "Username must be 6-20 characters and no special characters")
+	@ColName("Username")
 	private String username;
-	@NotBlank(message = "Password is required dto")
-	@Size(min = 6, max = 20, message = "Password must be 6-20 characters")
+	@ColName("Password")
 	private String password;
+	@ColName("Role")
 	private String role;
+	@ColName("Họ tên")
 	private String fullName;
+	@ColName("ID")
 	private String id;
+	@ColName("Tuổi")
 	private Long age;
+	@ColName("Email")
 	private String email;
+	@ColName(value = "Bằng cấp", optional = true)
 	private String degree;
+	@ColName("Giới tính")
 	private String gender;
+	@ColName(value = "Chuyên ngành", optional = true)
 	private String major;
 }

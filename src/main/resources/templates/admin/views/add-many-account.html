@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Trang quản trị</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+        var socket = new SockJS('/websocket');
+        var stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            stompClient.subscribe('/topic/accounts', function(message) {
+                // Update the account count in the UI
+                var data = JSON.parse(message.body);
+                var table = document.getElementById("accountTable");
+                var row = table.insertRow(-1);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                cell1.innerHTML = data.username;
+                cell2.innerHTML = data.status;
+            });
+        });
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Content -->
+    <div class="container">
+        <h1>Trang chủ</h1>
+        <hr>
+        <form th:action="@{/admin-management/add-by-file}" method="post" enctype="multipart/form-data">
+            <input type="file" th:name="file" />
+            <input th:type="submit" value="Import" />
+        </form>
+        <table id="accountTable">
+            <tr>
+                <th>Username</th>
+                <th>Status</th>
+            </tr>
+        </table>
+    </div>
+    <!-- /.container -->
+</div>
+</body>
+</html>
