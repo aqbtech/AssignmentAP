@@ -115,31 +115,15 @@
                         <tr th:each="point : ${points}">
                             <td th:text="${point.getStudentId()}"></td>
                             <td th:text="${point.getStudentName()}"></td>
-                            <td th:if="${point.getPointBT()>=0 && course.getPercentBT()>0}" th:text="${point.getPointBT()}"></td>
-                            <td th:if="${point.getPointBTL()>=0 && course.getPercentBTL()>0}"  th:text="${point.getPointBTL()}"></td>
-                            <td th:if="${point.getPointGK()>=0 && course.getPercentGK()>0}"  th:text="${point.getPointGK()}"></td>
-                            <td th:if="${point.getPointCK()>=0 && course.getPercentCK()>0}"  th:text="${point.getPointCK()}"></td>
+                            <td th:if="${point.getPointBT() >= 0 && course.getPercentBT() > 0}"
+                                th:text="${point.getPointBT() == 15 ? '' : point.getPointBT()}"></td>
+                            <td th:if="${point.getPointBTL() >= 0 && course.getPercentBTL() > 0}"
+                                th:text="${point.getPointBTL() == 15 ? '' : point.getPointBTL()}"></td>
+                            <td th:if="${point.getPointGK() >= 0 && course.getPercentGK() > 0}"
+                                th:text="${point.getPointGK() == 15 ? '' : point.getPointGK()}"></td>
+                            <td th:if="${point.getPointCK() >= 0 && course.getPercentCK() > 0}"
+                                th:text="${point.getPointCK() == 15 ? '' : point.getPointCK()}"></td>
                             <td style="text-align: center;"><a class="update-link" th:data-studentId="${point.getStudentId()}" th:data-studentName="${point.getStudentName()}" href="javascript:;" role="button" style="color: #007bff; text-decoration: none;">Cập nhật</a></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div>
-                    <hr>
-                    <h4>Lưu ý:</h4>
-                    <table class="table table-bordered table-striped" style="overflow: auto">
-                        <thead>
-                        <tr style="text-align: center; color: white; background-color: black;">
-                            <th width = "100px">Loại điểm</th>
-                            <th width = "30px">Điểm thi</th>
-                            <th width = "200px">Ghi chú</th>
-                        </tr>
-                        </thead>
-                        <tbody style="text-align: left">
-                        <tr>
-                            <td>Chưa có điểm</td>
-                            <td style="text-align: center">15</td>
-                            <td>Chưa nhập điểm</td>
                         </tr>
                         </tbody>
                     </table>
