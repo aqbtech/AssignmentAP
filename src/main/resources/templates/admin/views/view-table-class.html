@@ -69,6 +69,7 @@
             <div class="card-body">
                 <div class="my-3">
                     <form th:action="@{${href}}" id="searchForm">
+                        <input type="hidden" name="id" th:value="${course.getFirebaseId()}">
                         <input type="hidden" name="type" th:value="${type}">
                         <div class="row d-flex">
                             <div class="col-md-6 mt-2">
