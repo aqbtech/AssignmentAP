@@ -9,7 +9,6 @@ import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.service.*;
 
-import com.hcmutap.elearning.service.impl.CourseFacade;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,14 +112,14 @@ public class HomeController {
 			InfoClassModel info = infoService.getClassInfo(id);
 			if (infoDTO.getRole().equalsIgnoreCase("student")) {
 				if (studentService.isExistStudentInClass(principal.getName(), id))
-					classModel = CourseFacade.getInstance().getClassInfo(id);
+					classModel = classService.getClassInfo(id);
 				else {
 					model.addAttribute("message", "You are not in this class");
 					return "login/404_page";
 				}
 			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
 				if (teacherService.isExistTeacherInClass(principal.getName(), id))
-					classModel = CourseFacade.getInstance().getClassInfo(id);
+					classModel = classService.getClassInfo(id);
 				else {
 					model.addAttribute("message", "You are not in this class");
 					return "login/404_page";
@@ -192,11 +191,8 @@ public class HomeController {
 			model.addAttribute("coursesName", coursesName);
 
 			List<String> listOfImageLinks = Arrays.asList(
-					"https://i.imgur.com/ocueq8H.png",
-					"https://i.imgur.com/derGMH0.png",
-					"https://i.imgur.com/xz6aeKH.png",
-					"https://i.imgur.com/TDfhls4.png",
-					"https://i.imgur.com/EHXPUkU.png"
+					"/images/myCourse/1.png", "/images/myCourse/2.png", "/images/myCourse/3.png",
+					"/images/myCourse/4.png", "/images/myCourse/5.png"
 			);
 			model.addAttribute("listOfImageLinks", listOfImageLinks);
 
@@ -259,7 +255,7 @@ public class HomeController {
 					break;
 				}
 			}
-            if(matchedDocument != null) {
+			if(matchedDocument != null) {
 				List<FileInfo> listFile = matchedDocument.getListFile();
 				if (listFile != null) {
 					for (FileInfo fileInfo : listFile) {
@@ -339,8 +335,12 @@ public class HomeController {
 				for (PointModel tmp : listTemp) {
 					listStudent.add(studentService.findById(tmp.getStudentId()));
 				}
+				if(listStudent.isEmpty()) {
+					model.addAttribute("notHaveStudent","true");
+				}
 				model.addAttribute("listStudent", listStudent);
 			} catch (NotFoundException e) {
+				model.addAttribute("notHaveStudent",true);
 				model.addAttribute("listStudent", new ArrayList<>());
 			}
 			ClassModel classModel = classService.findById(id);

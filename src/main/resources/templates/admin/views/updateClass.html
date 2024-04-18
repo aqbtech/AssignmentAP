@@ -62,6 +62,7 @@
         </form>
     </div>
     <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+
     <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-content">
@@ -108,7 +109,6 @@
                 document.getElementById('room').disabled = false;
                 document.getElementById('timeStart').disabled = false;
                 document.getElementById('timeStudy').disabled = false;
-                document.getElementById('semesterId').disabled = false;
                 document.getElementById('submitButton').disabled = false;
             }
         });
@@ -127,14 +127,12 @@
                 document.getElementById('room').disabled = true;
                 document.getElementById('timeStart').disabled = true;
                 document.getElementById('timeStudy').disabled = true;
-                document.getElementById('semesterId').disabled = true;
                 document.getElementById('submitButton').disabled = true;
             } else {
                 document.getElementById('dayOfWeek').disabled = false;
                 document.getElementById('room').disabled = false;
                 document.getElementById('timeStart').disabled = false;
                 document.getElementById('timeStudy').disabled = false;
-                document.getElementById('semesterId').disabled = false;
                 document.getElementById('submitButton').disabled = false;
             }
         }
