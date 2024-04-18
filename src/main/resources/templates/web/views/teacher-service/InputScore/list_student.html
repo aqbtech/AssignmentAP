@@ -3,27 +3,11 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
       layout:decorate="~{web/layout/web-layout.html}">
 <head>
-    <title>Student Management System</title>
+    <title>Nhập điểm sinh viên</title>
     <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
 
     <style>
         body {font-family: Arial, Helvetica, sans-serif;}
-
-        /* The Modal (background) */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
-            padding-top: 100px; /* Location of the box */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
-
         /* Modal Content */
         .modal-content {
             background-color: #fefefe;
@@ -65,9 +49,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 mt-3">
-                <a th:href="@{|/teacher/inputscore|}">Quay lại danh sách lớp</a>
-                <div th:if="${points != null}">
-<!--                 <div class="border-top border-bottom" style="margin-bottom: 20px;">
+                <div class="border-top border-bottom" style="margin-bottom: 20px;">
                     <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
                         <ul class="nav">
                             <li class="nav-item">
@@ -82,20 +64,20 @@
                         </ul>
                     </div>
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <a th:href="@{|/teacher/inputscore|}">Quay lại trang chọn lớp</a>
-                </div>
-                <form name="formPoint" class="form-group" th:action="@{|/teacher/update_score?classId=${classId}&courseId=${courseId}|}" method="post"> -->
+                <div th:if="${points != null}">
+                    <button type="button" class="btn btn-success" id="upLoadExcelButton" style="margin-bottom: 10px;" data-toggle="modal" data-target="#upLoadExcelModal">
+                        Tải lên bảng điểm Excel
+                    </button>
                     <table class="table table-bordered table-striped" style="overflow: auto">
                         <thead>
                         <tr style="text-align: center; color: white; background-color: black;">
-                            <th width="50px">Student ID</th>
-                            <th width="300px">Student name</th>
+                            <th width="50px">MSSV</th>
+                            <th width="300px">Họ và tên</th>
                             <th width="50px" th:if="${course.getPercentBT()>0}">Điểm BT</th>
                             <th width="50px" th:if="${course.getPercentBTL()>0}">Điểm BTL</th>
                             <th width="50px" th:if="${course.getPercentGK()>0}">Điểm GK</th>
                             <th width="50px" th:if="${course.getPercentCK()>0}">Điểm CK</th>
-                            <th width="50px"></th>
+                            <th width="50px">Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -110,7 +92,7 @@
                             <td th:unless="${point.getPointGK()>=0 && course.getPercentGK()>=0}" th:text="15"></td>
                             <td th:if="${point.getPointCK()>=0}"  th:text="${point.getPointCK()}"></td>
                             <td th:unless="${point.getPointCK()>=0}" th:text="15"></td>
-                            <td><a th:id="${point.getStudentId()}" name="huhu" th:attr="stuId=${point.getStudentId()}" th:attrappend="stun=${point.getStudentName()}" href="#">Update</a></td>
+                            <td style="text-align: center;"><a class="update-link" th:data-studentId="${point.getStudentId()}" th:data-studentName="${point.getStudentName()}" href="javascript:;" role="button" style="color: #007bff; text-decoration: none;">Cập nhật</a></td>
                         </tr>
                         </tbody>
                     </table>
@@ -122,118 +104,172 @@
     <div id="crsId" th:text="${courseId}" hidden></div>
     <div id="clsId" th:text="${classId}" hidden></div>
 
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12 mt-3">
-                <!-- The Modal -->
-
+    <!--Modal chỉnh sửa điểm-->
+    <div class="modal fade" id="updatePoint" tabindex="-1" aria-labelledby="updatePointLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePointLabel">Cập nhật điểm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <form th:action="@{/teacher/update_point}" id="updatePointForm" method="post" class="form-group">
+                            <input type="hidden" id="studentId" name="studentId">
+                            <input type="hidden" id="studentName" name="studentName">
+                            <input type="hidden" id="classId" name="classId">
+                            <input type="hidden" id="courseId" name="courseId">
+                            <div class="row">
+                                <div th:if="${course.getPercentBT() > 0}" class="col-md-6">
+                                    <label for="pointBT">Điểm bài tập:</label>
+                                    <input type="number" step="any" min="0" name="pointBT" id="pointBT" class="form-control" style="margin-bottom: 10px;" required>
+                                </div>
+                                <div th:if="${course.getPercentBTL() > 0 || course.getPercentGK() > 0}" class="col-md-6">
+                                    <div class="row">
+                                        <div th:if="${course.getPercentBTL() > 0}" class="col-12">
+                                            <label for="pointBTL">Điểm bài tập lớn:</label>
+                                            <input type="number" step="any" min="0" name="pointBTL" id="pointBTL" class="form-control" style="margin-bottom: 10px;" required>
+                                        </div>
+                                        <div th:if="${course.getPercentGK() > 0}" class="col-12">
+                                            <label for="pointGK">Điểm giữa kì:</label>
+                                            <input type="number" step="any" min="0" name="pointGK" id="pointGK" class="form-control" style="margin-bottom: 10px;" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div th:if="${course.getPercentCK() > 0}" class="col-md-6">
+                                    <label for="pointCK">Điểm cuối kì:</label>
+                                    <input type="number" step="any" min="0" name="pointCK" id="pointCK" class="form-control" style="margin-bottom: 10px;" required>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="error-message" style="color: red; margin-top: 10px; display: none;"></div>
+                        <div id="success-message" style="color: #1e7e34; margin-top: 10px; display: none;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thoát</button>
+                    <button type="button" class="btn btn-primary" onclick="updatePoint()">Lưu thay đổi</button>
+                </div>
             </div>
         </div>
     </div>
-    <div id="myModal" class="modal" >
-        <!-- Modal content -->
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div>
-                <form name="formPoint" id="formPoint" class="form-group" th:action="@{|/teacher/update_student?classId=${classId}&courseId=${courseId}|}" method="post" >
-                    <p id="name"></p>
-                    <div th:if="${course.getPercentBT()>0}">
-                        <label for="pointBT">Điểm bài tập:</label>
-                        <input type="number" step="any" min="0" name="pointBT" id="pointBT" required>
+    <!--Modal upload Excel-->
+    <div class="modal fade" id="upLoadExcelModal" tabindex="-1" aria-labelledby="upLoadExcelLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="upLoadExcelLabel">Tải lên bảng điểm Excel</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="formFileMultiple" class="form-label">Tải bảng điểm định dạng .xlsx</label>
+                        <form th:action="@{/upload_Excel}" enctype="multipart/form-data" id="uploadForm" method="post">
+                            <div class="form-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="formFileMultiple" name="file" accept=".xlsx">
+                                    <label class="custom-file-label" for="formFileMultiple">Chọn file...</label>
+                                </div>
+                                <label for="formFileMultiple" class="form-label" id="selected-file" style="margin-top: 10px; margin-left: 10px; color: #007bff"></label>
+                            </div>
+                        </form>
+                        <div id="upLoadAlert" class="alert alert-danger mt-2" style="display: none;">Vui lòng chọn file.</div>
                     </div>
-                    <div th:if="${course.getPercentBTL()>0}">
-                        <label for="pointBTL">Điểm bài tập lớn:</label>
-                        <input type="number" step="any" min="0" name="pointBTL" id="pointBTL" required>
-                    </div>
-                    <div th:if="${course.getPercentGK()>0}">
-                        <label for="pointGK">Điểm giữa kì:</label>
-                        <input type="number" step="any" min="0" name="pointGK" id="pointGK" required>
-                    </div>
-                    <div>
-                        <label for="pointCK">Điểm cuối kì:</label>
-                        <input type="number" step="any" min="0" name="pointCK" id="pointCK" required>
-                    </div>
-                    <br>
-                    <input type="submit" value="Save">
-                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thoát</button>
+                    <button type="button" class="btn btn-primary" onclick="uploadFile()">Lưu</button>
+                </div>
             </div>
         </div>
     </div>
-
+    <!--End modal-->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            var modal = document.getElementById("myModal");
-            var span = document.getElementsByClassName("close")[0];
-            var updateLinks = document.querySelectorAll('a[name^="huhu"]');
-            var studentId;
-            var clasId = document.getElementById("clsId").textContent;
-            var courId = document.getElementById("crsId").textContent;
-            var form = document.getElementById("formPoint");
-
-            form.addEventListener("submit", function(event) {
-                event.preventDefault(); // Prevent default form submission
-                form.action = "/teacher/update_student?classId=" + clasId + "&courseId=" + courId + "&studentId=" + studentId;
-
-               if(check()){
-                   // Submit the form
-                   var formData = new FormData(form);
-                   var xhr = new XMLHttpRequest();
-                   xhr.open(form.method, form.action);
-                   xhr.onload = function() {
-                       if (xhr.status === 200) {
-                           // Form submission successful, reload the page
-                           reloadPage();
-                       }
-                   };
-                   xhr.send(formData);
-               }
-            });
-
-            span.onclick = function() {
-                modal.style.display = "none";
-            }
-
-
+            var updateLinks = document.querySelectorAll(".update-link");
             updateLinks.forEach(function(link) {
-                link.addEventListener("click", function () {
-                    studentId = link.getAttribute("stuId");
-                    var studentName = link.getAttribute("stun");
-                    document.getElementById("name").innerText = "ID: " + studentId + " - fullName: " + studentName;
-                    modal.style.display = "block";
+                link.addEventListener("click", function() {
+                    var modal = document.getElementById("updatePoint");
+                    if (modal) {
+                        $(modal).modal("show");
+                        var studentId = link.getAttribute("data-studentId");
+                        var studentName = link.getAttribute("data-studentName");
+                        document.getElementById("studentId").value = studentId;
+                        document.getElementById("studentName").value = studentName;
+                        document.getElementById("classId").value = '[[${classId}]]';
+                        document.getElementById("courseId").value = '[[${courseId}]]';
+                    }
                 });
             });
-
-            function reloadPage() {
-                location.reload();
-            }
         });
 
-    </script>
-    <script>
-        function check(){
-            var inputs = document.querySelectorAll('input[type="number"]');
+        function updatePoint() {
+            var errorMessage = document.getElementById("error-message");
             var isValid = true;
-            inputs.forEach(function(input) {
-                if (input.value < 0 || input.value > 10) {
-                    isValid = false;
-                    input.style.border = "1px solid red";
-                } else {
-                    input.style.border = "";
-                }
-            });
-            if (!isValid) {
-                alert('Bạn đã nhập điểm không đúng!!\nYêu cầu nhập lại');
+            function showError(message) {
+                errorMessage.innerText = message;
+                errorMessage.style.display = "block";
+                isValid = false;
             }
-            return isValid;
+            function validatePointInput(pointElement, errorMessageText) {
+                var pointValue = pointElement.value.trim();
+                if (pointValue === '') {
+                    showError(errorMessageText);
+                } else if (isNaN(pointValue) || parseFloat(pointValue) < 0 || parseFloat(pointValue) > 10) {
+                    showError("Điểm không hợp lệ");
+                }
+            }
+            var pointBTElement = document.getElementById("pointBT");
+            if (pointBTElement) {
+                validatePointInput(pointBTElement, "Vui lòng điền điểm bài tập");
+            }
+            var pointBTLElement = document.getElementById("pointBTL");
+            if (pointBTLElement) {
+                validatePointInput(pointBTLElement, "Vui lòng điền điểm bài tập lớn");
+            }
+            var pointGKElement = document.getElementById("pointGK");
+            if (pointGKElement) {
+                validatePointInput(pointGKElement, "Vui lòng điền điểm giữa kì");
+            }
+            var pointCKElement = document.getElementById("pointCK");
+            if (pointCKElement) {
+                validatePointInput(pointCKElement, "Vui lòng điền điểm cuối kì");
+            }
+            if (isValid) {
+                document.getElementById("error-message").style.display = "none";
+                document.getElementById("success-message").innerText = "Cập nhật điểm thành công";
+                document.getElementById("success-message").style.display = "block";
+                document.getElementById("updatePointForm").submit();
+            }
         }
     </script>
-
-
-
-
 </div>
-
-
-
 </body>
+<div layout:fragment="custom-scripts">
+    <script>
+        $(document).ready(function () {
+            $('.custom-file-input').on('change', function() {
+                let numberOfFiles = $(this)[0].files.length;
+                let fileLabel = numberOfFiles > 1 ? numberOfFiles + ' files selected' : $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileLabel);
+                $('#selected-file').html(fileLabel);
+            });
+        });
+        function uploadFile() {
+            var fileInput = document.getElementById('formFileMultiple');
+            if (!fileInput.value) {
+                document.getElementById('upLoadAlert').style.display = 'block';
+                return;
+            }
+            alert("Hello");
+        }document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            uploadFile();
+        });
+    </script>
+</div>
 </html>
