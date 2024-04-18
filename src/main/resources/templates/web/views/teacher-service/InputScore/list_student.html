@@ -67,25 +67,6 @@
             <div class="col-sm-12 mt-3">
                 <a th:href="@{|/teacher/inputscore|}">Quay lại danh sách lớp</a>
                 <div th:if="${points != null}">
-<!--                 <div class="border-top border-bottom" style="margin-bottom: 20px;">
-                    <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
-                        <ul class="nav">
-                            <li class="nav-item">
-                                <a class="nav-link active" th:href="'/course?id=' + ${classId}" style="color: #6c757d">Khoá học</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" th:href="'/list-student?id=' + ${classId}" style="color: #6c757d">Danh sách lớp</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" th:href="'/teacher/update_student?classId=' + ${classId} + '&courseId=' + ${courseId}">Nhập điểm</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <a th:href="@{|/teacher/inputscore|}">Quay lại trang chọn lớp</a>
-                </div>
-                <form name="formPoint" class="form-group" th:action="@{|/teacher/update_score?classId=${classId}&courseId=${courseId}|}" method="post"> -->
                     <table class="table table-bordered table-striped" style="overflow: auto">
                         <thead>
                         <tr style="text-align: center; color: white; background-color: black;">
@@ -102,15 +83,39 @@
                         <tr th:each="point : ${points}" style="background: #F8F8FF">
                             <td th:text="${point.getStudentId()}"></td>
                             <td th:text="${point.getStudentName()}"></td>
-                            <td th:if="${point.getPointBT()>=0 && course.getPercentBT()>0}" th:text="${point.getPointBT()}"></td>
-                            <td th:unless="${point.getPointBT()>=0 && course.getPercentBT()>=0}" th:text="15"></td>
-                            <td th:if="${point.getPointBTL()>=0 && course.getPercentBTL()>0}"  th:text="${point.getPointBTL()}"></td>
-                            <td th:unless="${point.getPointBTL()>=0 && course.getPercentBTL()>=0}" th:text="15"></td>
-                            <td th:if="${point.getPointGK()>=0 && course.getPercentGK()>0}"  th:text="${point.getPointGK()}"></td>
-                            <td th:unless="${point.getPointGK()>=0 && course.getPercentGK()>=0}" th:text="15"></td>
-                            <td th:if="${point.getPointCK()>=0}"  th:text="${point.getPointCK()}"></td>
-                            <td th:unless="${point.getPointCK()>=0}" th:text="15"></td>
+<!--                            point.getPointBT()>=0 &&-->
+                            <td th:if="${course.getPercentBT()>0}" th:text="${point.getPointBT()}"></td>
+<!--                            <td th:unless="${point.getPointBT()>=0 && course.getPercentBT()>=0}" th:text="15"></td>-->
+<!--                            point.getPointBTL()>=0 &&-->
+                            <td th:if="${course.getPercentBTL()>0}"  th:text="${point.getPointBTL()}"></td>
+<!--                            <td th:unless="${point.getPointBTL()>=0 && course.getPercentBTL()>=0}" th:text="15"></td>-->
+<!--                            point.getPointGK()>=0 &&-->
+                            <td th:if="${course.getPercentGK()>0}"  th:text="${point.getPointGK()}"></td>
+<!--                            <td th:unless="${point.getPointGK()>=0 && course.getPercentGK()>=0}" th:text="15"></td>-->
+<!--                            th:if="${point.getPointCK()>=0}"-->
+                            <td th:text="${point.getPointCK()}"></td>
+<!--                            <td th:unless="${point.getPointCK()>=0}" th:text="15"></td>-->
                             <td><a th:id="${point.getStudentId()}" name="huhu" th:attr="stuId=${point.getStudentId()}" th:attrappend="stun=${point.getStudentName()}" href="#">Update</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <hr>
+                    <h4>Lưu ý:</h4>
+                    <table class="table table-bordered table-striped" style="overflow: auto">
+                        <thead>
+                        <tr style="text-align: center; color: white; background-color: black;">
+                            <th width = "100px">Loại điểm</th>
+                            <th width = "30px">Điểm thi</th>
+                            <th width = "200px">Ghi chú</th>
+                        </tr>
+                        </thead>
+                        <tbody style="text-align: left">
+                        <tr>
+                            <td>Chưa có điểm</td>
+                            <td style="text-align: center">15</td>
+                            <td>Chưa nhập điểm</td>
                         </tr>
                         </tbody>
                     </table>
@@ -125,40 +130,39 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 mt-3">
-                <!-- The Modal -->
+                <div id="myModal" class="modal" >
+                    <!-- Modal content -->
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <div>
+                            <form name="formPoint" id="formPoint" class="form-group" th:action="@{|/teacher/update_student?classId=${classId}&courseId=${courseId}|}" method="post" >
+                                <p id="name" style="color: #b21f2d"></p>
+                                <div th:if="${course.getPercentBT()>0}">
+                                    <label for="pointBT">Điểm bài tập:</label>
+                                    <input type="number" step="any" min="0" name="pointBT" id="pointBT" required>
+                                </div>
+                                <div th:if="${course.getPercentBTL()>0}">
+                                    <label for="pointBTL">Điểm bài tập lớn:</label>
+                                    <input type="number" step="any" min="0" name="pointBTL" id="pointBTL" required>
+                                </div>
+                                <div th:if="${course.getPercentGK()>0}">
+                                    <label for="pointGK">Điểm giữa kì:</label>
+                                    <input type="number" step="any" min="0" name="pointGK" id="pointGK" required>
+                                </div>
+                                <div th:if="${course.getPercentCK()>0}">
+                                    <label for="pointCK">Điểm cuối kì:</label>
+                                    <input type="number" step="any" min="0" name="pointCK" id="pointCK" required>
+                                </div>
+                                <br>
+                                <input type="submit" value="Save">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            </div>
-        </div>
-    </div>
-    <div id="myModal" class="modal" >
-        <!-- Modal content -->
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div>
-                <form name="formPoint" id="formPoint" class="form-group" th:action="@{|/teacher/update_student?classId=${classId}&courseId=${courseId}|}" method="post" >
-                    <p id="name"></p>
-                    <div th:if="${course.getPercentBT()>0}">
-                        <label for="pointBT">Điểm bài tập:</label>
-                        <input type="number" step="any" min="0" name="pointBT" id="pointBT" required>
-                    </div>
-                    <div th:if="${course.getPercentBTL()>0}">
-                        <label for="pointBTL">Điểm bài tập lớn:</label>
-                        <input type="number" step="any" min="0" name="pointBTL" id="pointBTL" required>
-                    </div>
-                    <div th:if="${course.getPercentGK()>0}">
-                        <label for="pointGK">Điểm giữa kì:</label>
-                        <input type="number" step="any" min="0" name="pointGK" id="pointGK" required>
-                    </div>
-                    <div>
-                        <label for="pointCK">Điểm cuối kì:</label>
-                        <input type="number" step="any" min="0" name="pointCK" id="pointCK" required>
-                    </div>
-                    <br>
-                    <input type="submit" value="Save">
-                </form>
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -229,11 +233,6 @@
     </script>
 
 
-
-
 </div>
-
-
-
 </body>
 </html>

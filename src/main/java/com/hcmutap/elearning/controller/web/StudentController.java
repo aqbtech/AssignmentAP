@@ -139,9 +139,11 @@ public class StudentController{
                 resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(), pointModel.getCourseId()));
             }
             List<SemesterModel> semesterModels = new ArrayList<>();
+            List<CourseModel> courseModels = new ArrayList<>();
             List<String> classIdlist = studentModel.getClasses();
             for(String s : classIdlist){
                 ClassModel classModel = classService.getClassInfo(s);
+                courseModels.add(courseService.getCourseInfo(classModel.getCourseId()));
                 SemesterModel semesterModell = semesterService.getSemeter(classModel.getSemesterId());
                 boolean condition = true;
                 for (SemesterModel semesterModel : semesterModels) {
@@ -153,10 +155,10 @@ public class StudentController{
                     semesterModels.add(semesterModell);
                 }
             }
-
             model.addAttribute("semesters", semesterModels);
             model.addAttribute("results", resultAverageList);
             model.addAttribute("points", points);
+            model.addAttribute("courses", courseModels);
             return "web/views/student-service/score";
         } catch (Exception e) {
             model.addAttribute("message", "User not found");
