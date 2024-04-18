@@ -62,7 +62,6 @@ public class AdminCourseController {
 							   @RequestParam(defaultValue = "3") int size) {
 		try {
 			CourseModel courseModel = courseService.findById(id);
-			List<ClassModel> listClass = classService.getClassOfCourse(courseModel.getCourseId());
 			model.addAttribute("course", courseModel);
 			Page<ClassModel> pageResult = classService.getPage(keyword, courseModel.getCourseId(), page, size);
 			model.addAttribute("updateLink", "admin-management/update-class");
@@ -93,12 +92,9 @@ public class AdminCourseController {
 		try {
 			CourseModel course = courseService.findById(id);
 			courseModel.setFirebaseId(course.getFirebaseId());
-			model.addAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được chỉnh sửa thành công!");
+			redirectAttributes.addFlashAttribute("message", "Khoá học " + courseModel.getCourseId()+ " đã được chỉnh sửa thành công!");
 			courseService.update(courseModel);
-			List<ClassModel> listClass = classService.getClassOfCourse(course.getCourseId());
-			model.addAttribute("course", courseModel);
-			model.addAttribute("classes", listClass);
-			return "admin/views/view-table-class";
+			return "redirect:/admin-management/update-course?id=" + id;
 		} catch (NotFoundException e) {
 			logger.error("Error in updateCourse Postmethod");
 			// implFunc to redirect to error page and message
@@ -235,7 +231,6 @@ public class AdminCourseController {
 			classModel.setTimeStart(classRes.getTimeStart());
 			classModel.setTimeEnd(convertTime(classRes.getTimeStart(), classRes.getTimeStudy()));
 			classModel.setRoom(classRes.getRoom());
-			classModel.setSemesterId(classRes.getSemesterId());
 			List<ClassModel> listClass = classService.findAll();
 			for(ClassModel cls : listClass) {
 				if(!cls.getClassId().equals(classModel.getClassId())
@@ -261,6 +256,41 @@ public class AdminCourseController {
 			return "redirect:/admin-management/update-course?id=" + parts[0];
 		}
 	}
+	@GetMapping("/admin-management/delete-class")
+	public String forceDelClass (@RequestParam("id") String id,
+								 final RedirectAttributes redirectAttributes) {
+		try {
+			ClassModel classModel = classService.findById(id);
+			TeacherModel teacher;
+			try {
+				teacher = teacherService.findById(classModel.getTeacherId());
+				int i = 0;
+				List<String> classes = teacher.getClasses();
+				while(i < classes.size()){
+					if(classes.get(i).equals(classModel.getClassId()))
+						break;
+					++i;
+				}
+				if(i != classes.size()) {
+					teacher.getClasses().remove(i);
+					teacher.getCourses().remove(i);
+					teacherService.update(teacher);
+				}
+				classService.delete(classModel.getFirebaseId());
+				redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+			} catch (Exception exception) {
+				classService.delete(classModel.getFirebaseId());
+				redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+			}
+			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
+		} catch (NotFoundException e) {
+			logger.error("Error in deleteClass");
+			// implFunc to redirect to error page and message
+			redirectAttributes.addFlashAttribute("message", "Xóa không thành công, không tìm thế lớp học " + id);
+			String[] parts = id.split("-");
+			return "redirect:/admin-management/update-course?id=" + parts[0];
+		}
+	}
 
 	@GetMapping("/admin-management/deleteClass")
 	public String deleteClass (@RequestParam("id") String id,
@@ -274,20 +304,10 @@ public class AdminCourseController {
 				TeacherModel teacher;
 				try {
 					teacher = teacherService.findById(classModel.getTeacherId());
-					int i = 0;
-					List<String> classes = teacher.getClasses();
-					while(i < classes.size()){
-						if(classes.get(i).equals(classModel.getClassId()))
-							break;
-						++i;
-					}
-					if(i != classes.size()) {
-						teacher.getClasses().remove(i);
-						teacher.getCourses().remove(i);
-						teacherService.update(teacher);
-					}
-					classService.delete(classModel.getFirebaseId());
-					redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+					redirectAttributes.addFlashAttribute("message", "Lớp vẫn có giáo viên " + teacher.getFullName() + ", chắc chắn xóa");
+					redirectAttributes.addFlashAttribute("force", true);
+					redirectAttributes.addFlashAttribute("id",id);
+					return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 				} catch (Exception exception) {
 					classService.delete(classModel.getFirebaseId());
 					redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
