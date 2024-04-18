@@ -5,16 +5,15 @@ import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.SemesterModel;
-import com.hcmutap.elearning.service.IClassService;
-import com.hcmutap.elearning.service.ICourseService;
+import com.hcmutap.elearning.model.TeacherModel;
+import com.hcmutap.elearning.service.*;
 
-import com.hcmutap.elearning.service.IPointService;
-import com.hcmutap.elearning.service.ISemesterService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -37,6 +36,8 @@ public class AdminCourseController {
 	private IPointService pointService;
 	@Resource
 	private ISemesterService semesterService;
+	@Resource
+	private ITeacherService teacherService;
 
 	@GetMapping("/admin-management-course")
 	public String viewCourse(ModelMap model, @RequestParam(required = false) String keyword,
@@ -55,12 +56,20 @@ public class AdminCourseController {
 		return "admin/views/view-table-course";
 	}
 	@GetMapping("/admin-management/update-course")
-	public String updateCourse(@RequestParam("id") String id, ModelMap model, final RedirectAttributes redirectAttributes) {
+	public String updateCourse(@RequestParam("id") String id, ModelMap model,
+							   final RedirectAttributes redirectAttributes, @RequestParam(required = false) String keyword,
+							   @RequestParam(defaultValue = "1") int page,
+							   @RequestParam(defaultValue = "3") int size) {
 		try {
 			CourseModel courseModel = courseService.findById(id);
 			List<ClassModel> listClass = classService.getClassOfCourse(courseModel.getCourseId());
 			model.addAttribute("course", courseModel);
-			model.addAttribute("classes", listClass);
+			Page<ClassModel> pageResult = classService.getPage(keyword, courseModel.getCourseId(), page, size);
+			model.addAttribute("updateLink", "admin-management/update-class");
+			model.addAttribute("deleteLink", "admin-management/deleteClass");
+			model.addAttribute("href", "/admin-management/update-course?id=" + id);
+			model.addAttribute("type", "class");
+			genePage(model, pageResult);
 			return "admin/views/view-table-class";
 		} catch (Exception e) {
 			logger.error("Error in updateCourse {}", id);
@@ -68,6 +77,14 @@ public class AdminCourseController {
 			redirectAttributes.addFlashAttribute("message", "Hiện không thể tìm thấy khóa học " + id);
 			return "redirect:/admin-management?type=course";
 		}
+	}
+
+	void genePage(ModelMap model, Page<?> page) {
+		model.addAttribute("models", page.getContent());
+		model.addAttribute("currentPage", page.getNumber() + 1);
+		model.addAttribute("totalItems", page.getTotalElements());
+		model.addAttribute("totalPages", page.getTotalPages());
+		model.addAttribute("pageSize", page.getSize());
 	}
 
 	@PostMapping("/admin-management/update-course")
@@ -149,7 +166,7 @@ public class AdminCourseController {
 		classModel.setClassId(classModel.getCourseId()+"-"+classModel.getClassName()+"-"+classRes.getSemesterId());
 		classModel.setDayOfWeek(classRes.getDayOfWeek());
 		classModel.setTimeStart(classRes.getTimeStart());
-		classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
+		classModel.setTimeEnd(convertTime(classRes.getTimeStart(), classRes.getTimeStudy()));
 		classModel.setRoom(classRes.getRoom());
 		classModel.setSemesterId(classRes.getSemesterId());
 
@@ -194,7 +211,7 @@ public class AdminCourseController {
 			classRes.setDayOfWeek(classModel.getDayOfWeek());
 			classRes.setRoom(classModel.getRoom());
 			classRes.setTimeStart(classModel.getTimeStart());
-			classRes.setTimeStudy(transferTime2(classModel.getTimeStart(),classModel.getTimeEnd()));
+			classRes.setTimeStudy(convertTime2(classModel.getTimeStart(),classModel.getTimeEnd()));
 			classRes.setSemesterId(classModel.getSemesterId());
 			model.addAttribute("class", classRes);
 			model.addAttribute("semester", semesterService.findAll());
@@ -216,7 +233,7 @@ public class AdminCourseController {
 			ClassModel classModel = classService.findById(id);
 			classModel.setDayOfWeek(classRes.getDayOfWeek());
 			classModel.setTimeStart(classRes.getTimeStart());
-			classModel.setTimeEnd(transferTime(classRes.getTimeStart(), classRes.getTimeStudy()));
+			classModel.setTimeEnd(convertTime(classRes.getTimeStart(), classRes.getTimeStudy()));
 			classModel.setRoom(classRes.getRoom());
 			classModel.setSemesterId(classRes.getSemesterId());
 			List<ClassModel> listClass = classService.findAll();
@@ -251,11 +268,30 @@ public class AdminCourseController {
 		try {
 			ClassModel classModel = classService.findById(id);
 			try {
-				pointService.getListStudentByClassId(id);
+				pointService.getListStudentByClassId(classModel.getClassId());
 				redirectAttributes.addFlashAttribute("message", "Vẫn còn sinh viên trong lớp, không thể xóa!");
-			} catch (Exception e) {
-				classService.delete(classModel.getFirebaseId());
-				redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+			} catch (NotFoundException e) {
+				TeacherModel teacher;
+				try {
+					teacher = teacherService.findById(classModel.getTeacherId());
+					int i = 0;
+					List<String> classes = teacher.getClasses();
+					while(i < classes.size()){
+						if(classes.get(i).equals(classModel.getClassId()))
+							break;
+						++i;
+					}
+					if(i != classes.size()) {
+						teacher.getClasses().remove(i);
+						teacher.getCourses().remove(i);
+						teacherService.update(teacher);
+					}
+					classService.delete(classModel.getFirebaseId());
+					redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+				} catch (Exception exception) {
+					classService.delete(classModel.getFirebaseId());
+					redirectAttributes.addFlashAttribute("message", "Xóa thành công lớp " + classModel.getClassName());
+				}
 			}
 			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 		} catch (NotFoundException e) {
@@ -278,7 +314,7 @@ public class AdminCourseController {
 		}
 		return false;
 	}
-	String transferTime (String timeStart, int timeStudy) {
+	String convertTime(String timeStart, int timeStudy) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalTime time = LocalTime.parse(timeStart, formatter);
 		time = time.plusHours(timeStudy);
@@ -287,7 +323,7 @@ public class AdminCourseController {
 		return hour + ":" + minute;
 	}
 
-	int transferTime2 (String timeStart, String timeEnd) {
+	int convertTime2(String timeStart, String timeEnd) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalTime time1 = LocalTime.parse(timeStart, formatter);
 		LocalTime time2 = LocalTime.parse(timeEnd, formatter);

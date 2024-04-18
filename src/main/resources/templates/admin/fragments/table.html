@@ -7,7 +7,8 @@
                     <th scope="col">ID</th>
                     <th scope="col" th:if="${type} == 'student'">Họ tên</th>
                     <th scope="col" th:if="${type} == 'teacher'">Họ tên</th>
-                    <th scope="col" th:if="${type} == 'course'">CourseName</th>
+                    <th scope="col" th:if="${type} == 'course'">Tên khóa học</th>
+                    <th scope="col" th:if="${type} == 'class'">Tên lớp học</th>
                     <th scope="col" th:if="${type} == 'semester'">Tên học kì</th>
                     <th scope="col" th:if="${type} == 'student' or ${type} == 'teacher'">Tuổi</th>
                     <th scope="col" th:if="${type} == 'student'">Ngành học</th>
@@ -22,9 +23,11 @@
                 <!-- Render id-->
                 <th th:if="${type} == 'student' or ${type} == 'teacher' or ${type} == 'semester'" scope="row" th:text="${model.id}"></th>
                 <td th:if="${type} == 'course'" th:text="${model.courseId}"></td>
+                <td th:if="${type} == 'class'" th:text="${model.classId}"></td>
                 <!-- Render Object name -->
                 <td th:if="${type} == 'student' or ${type} == 'teacher'" th:text="${model.fullName}"></td>
                 <td th:if="${type} == 'course'" th:text="${model.courseName}"></td>
+                <td th:if="${type} == 'class'" th:text="${model.className}"></td>
                 <td th:if="${type} == 'semester'" th:text="${model.semesterName}"></td>
                 <!-- Render for special field -->
                 <td th:if="${type} == 'student' or ${type} == 'teacher'" th:text="${model.age}"></td>
