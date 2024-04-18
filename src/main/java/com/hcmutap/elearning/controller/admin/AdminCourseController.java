@@ -147,53 +147,64 @@ public class AdminCourseController {
 
 	@GetMapping("/admin-management/add-class")
 	public String addClass(ModelMap model) {
-		model.addAttribute("courses", courseService.findAll());
-		model.addAttribute("semester", semesterService.findAll());
-		if(!model.containsAttribute("class"))
-			model.addAttribute("class",new ClassResDTO());
-		return "admin/views/createClass";
+		try{
+			model.addAttribute("courses", courseService.findAll());
+			model.addAttribute("semester", semesterService.findAll());
+			if(!model.containsAttribute("class"))
+				model.addAttribute("class",new ClassResDTO());
+			return "admin/views/createClass";
+		}catch (Exception e){
+			logger.error(String.valueOf(new RuntimeException(e)));
+			return "redirect:/login/Rare_fault";
+		}
 	}
 
 	@PostMapping("/admin-management/add-class")
 	public String addClass(@ModelAttribute("class") ClassResDTO classRes, ModelMap model) {
-		ClassModel classModel = new ClassModel();
-		classModel.setCourseId(classRes.getCourseId());
-		classModel.setClassName(classRes.getClassName());
-		classModel.setClassId(classModel.getCourseId()+"-"+classModel.getClassName()+"-"+classRes.getSemesterId());
-		classModel.setDayOfWeek(classRes.getDayOfWeek());
-		classModel.setTimeStart(classRes.getTimeStart());
-		classModel.setTimeEnd(convertTime(classRes.getTimeStart(), classRes.getTimeStudy()));
-		classModel.setRoom(classRes.getRoom());
-		classModel.setSemesterId(classRes.getSemesterId());
+		try {
+			ClassModel classModel = new ClassModel();
+			classModel.setCourseId(classRes.getCourseId());
+			classModel.setClassName(classRes.getClassName());
+			classModel.setClassId(classModel.getCourseId() + "-" + classModel.getClassName() + "-" + classRes.getSemesterId());
+			classModel.setDayOfWeek(classRes.getDayOfWeek());
+			classModel.setTimeStart(classRes.getTimeStart());
+			classModel.setTimeEnd(convertTime(classRes.getTimeStart(), classRes.getTimeStudy()));
+			classModel.setRoom(classRes.getRoom());
+			classModel.setSemesterId(classRes.getSemesterId());
 
-		boolean notSave = false;
-		List<ClassModel> listClass = classService.findAll();
-		for(ClassModel cls : listClass) {
-			if(cls.getClassId().equals(classModel.getClassId())) {
-				model.addAttribute("message", "Lớp " + classModel.getClassName()
-						+" của khóa học " + classModel.getCourseId() + " đã tồn tại!");
-				notSave = true;
-				model.addAttribute("class",classRes);
-				model.addAttribute("error","error");
-				break;
-			} else if(cls.getSemesterId().equals(classModel.getSemesterId()) && conflictTime(cls, classModel)) {
-				model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
-						+" của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
-						+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
-				notSave = true;
-				model.addAttribute("class",classRes);
-				model.addAttribute("error","error");
-				break;
+			boolean notSave = false;
+			List<ClassModel> listClass = classService.findAll();
+			for (ClassModel cls : listClass) {
+				if (cls.getClassId().equals(classModel.getClassId())) {
+					model.addAttribute("message", "Lớp " + classModel.getClassName()
+							+ " của khóa học " + classModel.getCourseId() + " đã tồn tại!");
+					notSave = true;
+					model.addAttribute("class", classRes);
+					model.addAttribute("error", "error");
+					break;
+				} else if (cls.getSemesterId().equals(classModel.getSemesterId()) && conflictTime(cls, classModel)) {
+					model.addAttribute("message", "Trùng lịch với lớp " + cls.getClassName()
+							+ " của khóa học " + cls.getCourseId() + " (" + cls.getTimeStart() + "-" + cls.getTimeEnd()
+							+ " " + cls.getDayOfWeek() + " " + cls.getRoom() + ")");
+					notSave = true;
+					model.addAttribute("class", classRes);
+					model.addAttribute("error", "error");
+					break;
+				}
 			}
+			if (!notSave) {
+				model.addAttribute("message", "Lớp học đã được tạo thành công!");
+				classService.save(classModel);
+				model.addAttribute("class", new ClassResDTO());
+			}
+			model.addAttribute("courses", courseService.findAll());
+			model.addAttribute("semester", semesterService.findAll());
+			return "admin/views/createClass";
 		}
-		if(!notSave) {
-			model.addAttribute("message", "Lớp học đã được tạo thành công!");
-			classService.save(classModel);
-			model.addAttribute("class",new ClassResDTO());
+		catch (Exception e){
+			logger.error(String.valueOf(new RuntimeException(e)));
+			return "redirect:/login/Rare_fault";
 		}
-		model.addAttribute("courses", courseService.findAll());
-		model.addAttribute("semester", semesterService.findAll());
-		return "admin/views/createClass";
 	}
 
 	@GetMapping("/admin-management/update-class")
@@ -352,14 +363,19 @@ public class AdminCourseController {
 
 	@GetMapping("/admin-management-semester")
 	public String viewSemester (ModelMap model) {
-		List<SemesterModel> semesterList = semesterService.findAll();
-		semesterList = sortSemester(semesterList);
-		model.addAttribute("semesters", semesterList);
-		LocalDate currentDate = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		String date = currentDate.format(formatter);
-		model.addAttribute("currentDate", date);
-		return "admin/views/viewSemester";
+		try{
+			List<SemesterModel> semesterList = semesterService.findAll();
+			semesterList = sortSemester(semesterList);
+			model.addAttribute("semesters", semesterList);
+			LocalDate currentDate = LocalDate.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			String date = currentDate.format(formatter);
+			model.addAttribute("currentDate", date);
+			return "admin/views/viewSemester";
+		}catch (Exception e){
+			logger.error(String.valueOf(new RuntimeException(e)));
+			return "redirect:/login/Rare_fault";
+		}
 	}
 
 	@GetMapping("/admin-management/add-semester")

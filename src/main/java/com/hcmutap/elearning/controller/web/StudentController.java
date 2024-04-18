@@ -8,6 +8,8 @@ import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.Class_CourseService;
 import com.hcmutap.elearning.service.impl.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -22,6 +24,7 @@ import java.util.Objects;
 @Controller
 @RequestMapping(value = "/student")
 public class StudentController{
+    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
     @Resource
     private UserService userService;
     @Resource
