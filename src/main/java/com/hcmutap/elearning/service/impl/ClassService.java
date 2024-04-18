@@ -247,10 +247,15 @@ public class ClassService implements IClassService {
 
     @Override
     public Page<ClassModel> getPage(String key, String id, int page, int size) {
-        List<ClassModel> listClass = getClassOfCourse(id);
-        for(ClassModel classModel : listClass) {
-            if(!classModel.getClassId().contains(id))
-                listClass.remove(classModel);
+        List<ClassModel> listClass;
+        try{
+            listClass = getClassOfCourse(id);
+            for(ClassModel classModel : listClass) {
+                if(!classModel.getClassId().contains(key == null ? "" : key))
+                    listClass.remove(classModel);
+            }
+        } catch (Exception e){
+            listClass = new ArrayList<>();
         }
         return new PageImpl<>(listClass, PageRequest.of(page - 1, size), listClass.size());
     }
