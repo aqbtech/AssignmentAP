@@ -97,13 +97,32 @@
                         </tbody>
                     </table>
                 </div>
+                <div>
+                    <hr>
+                    <h4>Lưu ý:</h4>
+                    <table class="table table-bordered table-striped" style="overflow: auto">
+                        <thead>
+                        <tr style="text-align: center; color: white; background-color: black;">
+                            <th width = "100px">Loại điểm</th>
+                            <th width = "30px">Điểm thi</th>
+                            <th width = "200px">Ghi chú</th>
+                        </tr>
+                        </thead>
+                        <tbody style="text-align: left">
+                        <tr>
+                            <td>Chưa có điểm</td>
+                            <td style="text-align: center">15</td>
+                            <td>Chưa nhập điểm</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="crsId" th:text="${courseId}" hidden></div>
     <div id="clsId" th:text="${classId}" hidden></div>
-
     <!--Modal chỉnh sửa điểm-->
     <div class="modal fade" id="updatePoint" tabindex="-1" aria-labelledby="updatePointLabel" aria-hidden="true">
         <div class="modal-dialog">

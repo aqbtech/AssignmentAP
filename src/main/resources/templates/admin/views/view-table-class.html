@@ -112,7 +112,11 @@
             <div class="modal-body" id="modalBody">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+                <form th:if="${force}" th:action="@{/admin-management/delete-class}" method="get">
+                    <input type="hidden" id="id" name="id" th:value="${id}">
+                    <input type="submit" class="btn btn-primary" id="modalSubmit" value="Xác nhận">
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="modalExit"></button>
             </div>
         </div>
     </div>
@@ -162,6 +166,10 @@
                 modalExit.innerText = "Đóng";
                 $('#modal').modal('show');
             }
+        });
+
+        document.getElementById("buttonSubmit").addEventListener("click", function() {
+
         });
 
         function clearFuncAll() {
