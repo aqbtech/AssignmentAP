@@ -143,10 +143,10 @@ public class ClassService implements IClassService {
             tmp.setClassName(classModel.getClassName());
             tmp.setSemesterId(classModel.getSemesterId());
             tmp.setState(false);
-            tmp.setPointBT(-1);
-            tmp.setPointBTL(-1);
-            tmp.setPointGK(-1);
-            tmp.setPointCK(-1);
+            tmp.setPointBT(15);
+            tmp.setPointBTL(15);
+            tmp.setPointGK(15);
+            tmp.setPointCK(15);
             pointService.save(tmp);
             return true;
         } catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
