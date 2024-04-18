@@ -12,6 +12,8 @@ import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.CourseFacade;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ import java.util.Comparator;
 
 @Controller(value = "homeControllerOfWeb")
 public class HomeController {
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	@Resource
 	private IStudentService studentService;
 	@Resource
@@ -47,7 +50,6 @@ public class HomeController {
 	@Resource
 	private ISemesterService semesterService;
 	private IFileService fileService;
-	private ICourseFacade courseFacade;
 	@Autowired
 	public void setFileService(IFileService fileService) {
 		this.fileService = fileService;
@@ -260,7 +262,7 @@ public class HomeController {
 					break;
 				}
 			}
-            if(matchedDocument != null) {
+			if(matchedDocument != null) {
 				List<FileInfo> listFile = matchedDocument.getListFile();
 				if (listFile != null) {
 					for (FileInfo fileInfo : listFile) {
@@ -323,34 +325,34 @@ public class HomeController {
 		try{
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			if(infoDTO.getRole().equalsIgnoreCase("student")){
-				if (studentService.isExistStudentInClass(principal.getName(), id)) {
-					model.addAttribute("type", "student");
-				} else {
-					model.addAttribute("message", "You are not in this class");
-					return "login/404_page";
-				}
+				model.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
 			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
-				if (teacherService.isExistTeacherInClass(principal.getName(), id)) {
-					model.addAttribute("type", "teacher");
-				} else {
+				if (!teacherService.isExistTeacherInClass(principal.getName(), id)) {
 					model.addAttribute("message", "You are not in this class");
 					return "login/404_page";
 				}
 			} else {
-				model.addAttribute("message", "You are not a student or teacher");
+				model.addAttribute("message", "You are not a teacher");
 				return "login/404_page";
 			}
-			List<PointModel> listTemp = pointService.getListStudentByClassId(id) ;
-			List<StudentModel> listStudent = new ArrayList<>();
-			for(PointModel tmp : listTemp) {
-				listStudent.add(studentService.findById(tmp.getStudentId()));
+			try {
+				List<PointModel> listTemp = pointService.getListStudentByClassId(id);
+				List<StudentModel> listStudent = new ArrayList<>();
+				for (PointModel tmp : listTemp) {
+					listStudent.add(studentService.findById(tmp.getStudentId()));
+				}
+				model.addAttribute("listStudent", listStudent);
+			} catch (NotFoundException e) {
+				model.addAttribute("listStudent", new ArrayList<>());
 			}
 			ClassModel classModel = classService.findById(id);
 			model.addAttribute("class", classModel);
-			model.addAttribute("listStudent", listStudent);
 			return "web/views/list_student";
-		}catch(NotFoundException e) {
-			throw new RuntimeException(e);
+		} catch(NotFoundException e) {
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
+			return "redirect:/login/Rare_fault";
 		}
 	}
 
@@ -380,7 +382,9 @@ public class HomeController {
 			redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + student.getId() + " ra khỏi lớp thành công!");
 			return "redirect:/list-student?id=" + classId;
 		} catch(NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
+			return "redirect:/login/Rare_fault";
 		}
 	}
 

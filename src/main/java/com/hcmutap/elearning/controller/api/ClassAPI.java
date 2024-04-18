@@ -1,9 +1,12 @@
 package com.hcmutap.elearning.controller.api;
 
+import com.hcmutap.elearning.controller.admin.HomeController;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IClassService;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,37 +14,44 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class ClassAPI {
-    @Resource
-    private IClassService classService;
-    @GetMapping("/class/findAll")
-    public List<ClassModel> findAll() {
-        return classService.findAll();
-    }
-    @GetMapping("/class/findById")
-    public ClassModel findById(@RequestParam String id) {
+	private static final Logger logger = LoggerFactory.getLogger(ClassAPI.class);
+	@Resource
+	private IClassService classService;
+	@GetMapping("/class/findAll")
+	public List<ClassModel> findAll() {
+		return classService.findAll();
+	}
+	@GetMapping("/class/findById")
+	public ClassModel findById(@RequestParam String id) {
 		try {
 			return classService.findById(id);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
+			return null;
 		}
 	}
-    @PostMapping("/class")
-    public String save(@RequestBody ClassModel classModel) { return classService.save(classModel);}
-    @PutMapping("/class")
-    public void update(@RequestBody ClassModel classModel) {
-        // need to handler not found exception in dao -> service -> controller
+	@PostMapping("/class")
+	public String save(@RequestBody ClassModel classModel) { return classService.save(classModel);}
+	@PutMapping("/class")
+	public void update(@RequestBody ClassModel classModel) {
+		// need to handler not found exception in dao -> service -> controller
 		try {
 			classService.update(classModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
+//			return null;
 		}
 	}
-    @DeleteMapping("/class")
-    public void delete(@RequestBody List<String> ids) {
+	@DeleteMapping("/class")
+	public void delete(@RequestBody List<String> ids) {
 		try {
 			classService.delete(ids);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
+//			return null;
 		}
 	}
 }
