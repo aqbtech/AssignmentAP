@@ -1,19 +1,50 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
       layout:decorate="~{web/layout/web-layout.html}">
 <head>
     <title>Student Management System</title>
     <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
 
     <style>
-        a.button {
-            padding: 1px 6px;
-            border: 1px outset buttonborder;
-            border-radius: 3px;
-            color: buttontext;
-            background-color: buttonface;
+        body {font-family: Arial, Helvetica, sans-serif;}
+
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
             text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -25,7 +56,7 @@
         <div class="container mt-3">
             <div class="row">
                 <div class="col-sm-9">
-                    <h3 th:text="${name}"></h3>
+                    <h3 th:if="${points!=null}" th:text="${name}"></h3>
                 </div>
             </div>
         </div>
@@ -34,7 +65,9 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12 mt-3">
-                <div class="border-top border-bottom" style="margin-bottom: 20px;">
+                <a th:href="@{|/teacher/inputscore|}">Quay lại danh sách lớp</a>
+                <div th:if="${points != null}">
+<!--                 <div class="border-top border-bottom" style="margin-bottom: 20px;">
                     <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
                         <ul class="nav">
                             <li class="nav-item">
@@ -52,16 +85,16 @@
                 <div style="margin-bottom: 10px;">
                     <a th:href="@{|/teacher/inputscore|}">Quay lại trang chọn lớp</a>
                 </div>
-                <form name="formPoint" class="form-group" th:action="@{|/teacher/update_score?classId=${classId}&courseId=${courseId}|}" method="post">
+                <form name="formPoint" class="form-group" th:action="@{|/teacher/update_score?classId=${classId}&courseId=${courseId}|}" method="post"> -->
                     <table class="table table-bordered table-striped" style="overflow: auto">
                         <thead>
                         <tr style="text-align: center; color: white; background-color: black;">
                             <th width="50px">Student ID</th>
                             <th width="300px">Student name</th>
-                            <th width="50px">Điểm BT</th>
-                            <th width="50px">Điểm BTL</th>
-                            <th width="50px">Điểm GK</th>
-                            <th width="50px">Điểm CK</th>
+                            <th width="50px" th:if="${course.getPercentBT()>0}">Điểm BT</th>
+                            <th width="50px" th:if="${course.getPercentBTL()>0}">Điểm BTL</th>
+                            <th width="50px" th:if="${course.getPercentGK()>0}">Điểm GK</th>
+                            <th width="50px" th:if="${course.getPercentCK()>0}">Điểm CK</th>
                             <th width="50px"></th>
                         </tr>
                         </thead>
@@ -69,19 +102,138 @@
                         <tr th:each="point : ${points}" style="background: #F8F8FF">
                             <td th:text="${point.getStudentId()}"></td>
                             <td th:text="${point.getStudentName()}"></td>
-                            <td th:text="${point.getPointBT()}"></td>
-                            <td th:text="${point.getPointBTL()}"></td>
-                            <td th:text="${point.getPointGK()}"></td>
-                            <td th:text="${point.getPointCK()}"></td>
-                            <td><a th:href="@{|/teacher/update_point?courseId=${point.getCourseId()}&studentId=${point.getStudentId()}|}">Update</a></td>
+                            <td th:if="${point.getPointBT()>=0 && course.getPercentBT()>0}" th:text="${point.getPointBT()}"></td>
+                            <td th:unless="${point.getPointBT()>=0 && course.getPercentBT()>=0}" th:text="15"></td>
+                            <td th:if="${point.getPointBTL()>=0 && course.getPercentBTL()>0}"  th:text="${point.getPointBTL()}"></td>
+                            <td th:unless="${point.getPointBTL()>=0 && course.getPercentBTL()>=0}" th:text="15"></td>
+                            <td th:if="${point.getPointGK()>=0 && course.getPercentGK()>0}"  th:text="${point.getPointGK()}"></td>
+                            <td th:unless="${point.getPointGK()>=0 && course.getPercentGK()>=0}" th:text="15"></td>
+                            <td th:if="${point.getPointCK()>=0}"  th:text="${point.getPointCK()}"></td>
+                            <td th:unless="${point.getPointCK()>=0}" th:text="15"></td>
+                            <td><a th:id="${point.getStudentId()}" name="huhu" th:attr="stuId=${point.getStudentId()}" th:attrappend="stun=${point.getStudentName()}" href="#">Update</a></td>
                         </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="crsId" th:text="${courseId}" hidden></div>
+    <div id="clsId" th:text="${classId}" hidden></div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 mt-3">
+                <!-- The Modal -->
+
+            </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal" >
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div>
+                <form name="formPoint" id="formPoint" class="form-group" th:action="@{|/teacher/update_student?classId=${classId}&courseId=${courseId}|}" method="post" >
+                    <p id="name"></p>
+                    <div th:if="${course.getPercentBT()>0}">
+                        <label for="pointBT">Điểm bài tập:</label>
+                        <input type="number" step="any" min="0" name="pointBT" id="pointBT" required>
+                    </div>
+                    <div th:if="${course.getPercentBTL()>0}">
+                        <label for="pointBTL">Điểm bài tập lớn:</label>
+                        <input type="number" step="any" min="0" name="pointBTL" id="pointBTL" required>
+                    </div>
+                    <div th:if="${course.getPercentGK()>0}">
+                        <label for="pointGK">Điểm giữa kì:</label>
+                        <input type="number" step="any" min="0" name="pointGK" id="pointGK" required>
+                    </div>
+                    <div>
+                        <label for="pointCK">Điểm cuối kì:</label>
+                        <input type="number" step="any" min="0" name="pointCK" id="pointCK" required>
+                    </div>
+                    <br>
+                    <input type="submit" value="Save">
                 </form>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var modal = document.getElementById("myModal");
+            var span = document.getElementsByClassName("close")[0];
+            var updateLinks = document.querySelectorAll('a[name^="huhu"]');
+            var studentId;
+            var clasId = document.getElementById("clsId").textContent;
+            var courId = document.getElementById("crsId").textContent;
+            var form = document.getElementById("formPoint");
+
+            form.addEventListener("submit", function(event) {
+                event.preventDefault(); // Prevent default form submission
+                form.action = "/teacher/update_student?classId=" + clasId + "&courseId=" + courId + "&studentId=" + studentId;
+
+               if(check()){
+                   // Submit the form
+                   var formData = new FormData(form);
+                   var xhr = new XMLHttpRequest();
+                   xhr.open(form.method, form.action);
+                   xhr.onload = function() {
+                       if (xhr.status === 200) {
+                           // Form submission successful, reload the page
+                           reloadPage();
+                       }
+                   };
+                   xhr.send(formData);
+               }
+            });
+
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+
+            updateLinks.forEach(function(link) {
+                link.addEventListener("click", function () {
+                    studentId = link.getAttribute("stuId");
+                    var studentName = link.getAttribute("stun");
+                    document.getElementById("name").innerText = "ID: " + studentId + " - fullName: " + studentName;
+                    modal.style.display = "block";
+                });
+            });
+
+            function reloadPage() {
+                location.reload();
+            }
+        });
+
+    </script>
+    <script>
+        function check(){
+            var inputs = document.querySelectorAll('input[type="number"]');
+            var isValid = true;
+            inputs.forEach(function(input) {
+                if (input.value < 0 || input.value > 10) {
+                    isValid = false;
+                    input.style.border = "1px solid red";
+                } else {
+                    input.style.border = "";
+                }
+            });
+            if (!isValid) {
+                alert('Bạn đã nhập điểm không đúng!!\nYêu cầu nhập lại');
+            }
+            return isValid;
+        }
+    </script>
+
+
+
+
 </div>
+
+
 
 </body>
 </html>

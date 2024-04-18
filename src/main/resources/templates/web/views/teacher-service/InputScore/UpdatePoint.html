@@ -32,59 +32,6 @@
         </div>
     </div>
     <hr>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12 mt-3">
-                <a th:href="@{|/teacher/update_student?classId=${classId}&courseId=${courseId}|}">Quay lại danh sách sinh viên</a>
-                <form name="formPoint" class="form-group" th:action="@{|/teacher/update_point?courseId=${courseId}&studentId=${studentId}|}" method="post" onsubmit="return check()">
-                    <table class="table table-bordered table-striped" style="overflow: auto">
-                        <thead>
-                        <tr style="text-align: center; color: white; background-color: black;">
-                            <th width="50px">Student ID</th>
-                            <th width="300px">Student name</th>
-                            <th width="50px">Điểm BT</th>
-                            <th width="50px">Điểm BTL</th>
-                            <th width="50px">Điểm GK</th>
-                            <th width="50px">Điểm CK</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr style="background: #F8F8FF">
-                            <td><input type="text" style="border-style: none; background-size: auto" name="studentId" th:value="${point.getStudentId()}" readonly></td>
-                            <td th:text="${point.getStudentName()}"></td>
-                            <td contenteditable="true" readonly><input type="number" step="any" min="0" name="pointBT" th:value="${point.getPointBT()}" ></td>
-                            <td contenteditable="true" ><input type="number" step="any" min="0" name="pointBTL" th:value="${point.getPointBTL()}"></td>
-                            <td contenteditable="true"><input type="number" step="any" min="0" name="pointGK" th:value="${point.getPointGK()}"></td>
-                            <td contenteditable="true"><input type="number" step="any" min="0" name="pointCK" th:value="${point.getPointCK()}"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <input type="submit" value="submit">
-                </form>
-            </div>
-        </div>
-    </div>
-    <script>
-        function check() {
-            var inputs = document.querySelectorAll('input[type="number"]');
-            var isValid = true;
-            inputs.forEach(function(input) {
-                if (input.value < 0 || input.value > 10) {
-                    isValid = false;
-                    input.style.border = "1px solid red"; // Làm nổi bật các input không hợp lệ
-                } else {
-                    input.style.border = ""; // Đặt lại viền nếu input hợp lệ
-                }
-            });
-            if (!isValid) {
-                alert('Bạn đã nhập điểm không đúng!!\nYêu cầu nhập lại');
-            }
-            return isValid; // Trả về false nếu dữ liệu không hợp lệ, true nếu hợp lệ
-        }
-    </script>
-
-
 </div>
 
 </body>
