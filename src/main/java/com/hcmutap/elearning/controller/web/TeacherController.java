@@ -171,7 +171,6 @@ public class TeacherController {
 			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
 			CourseModel courseModel = courseService.getCourseInfo(courseId);
 			classService.NhapDiem(studentId,classId,pointDTO);
-
 			List<PointModel> pointModels = null;
 			pointModels = pointService.getListStudentByClassId(classId);
 			model.addAttribute("points", pointModels);

@@ -143,10 +143,26 @@ public class ClassService implements IClassService {
             tmp.setClassName(classModel.getClassName());
             tmp.setSemesterId(classModel.getSemesterId());
             tmp.setState(false);
-            tmp.setPointBT(-1);
-            tmp.setPointBTL(-1);
-            tmp.setPointGK(-1);
-            tmp.setPointCK(-1);
+            if(courseModel.getPercentBT()>0){
+                tmp.setPointBT(15);
+            }else{
+                tmp.setPointBT(16);
+            }
+            if(courseModel.getPercentBTL()>0){
+                tmp.setPointBTL(15);
+            }else{
+                tmp.setPointBTL(16);
+            }
+            if(courseModel.getPercentGK()>0){
+                tmp.setPointGK(15);
+            }else{
+                tmp.setPointGK(16);
+            }
+            if(courseModel.getPercentCK()>0){
+                tmp.setPointCK(15);
+            }else{
+                tmp.setPointCK(16);
+            }
             pointService.save(tmp);
             return true;
         } catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
@@ -175,10 +191,23 @@ public class ClassService implements IClassService {
         List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
-                PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
-                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
-                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
-                pointService.update(pointUpdate);
+//                PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
+////                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
+////                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
+                PointModel pointModel = pointService.getPoint(studentId,item.getCourseId());
+                if(item.getPointBT()!=16){
+                    pointModel.setPointBT(point.getPointBT());
+                }
+                if(item.getPointBTL()!=16){
+                    pointModel.setPointBTL(point.getPointBTL());
+                }
+                if(item.getPointGK()!=16){
+                    pointModel.setPointGK(point.getPointGK());
+                }
+                if(item.getPointCK()!=16){
+                    pointModel.setPointCK(point.getPointCK());
+                }
+                pointService.update(pointModel);
                 return true;
             }
         }
