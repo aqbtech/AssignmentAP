@@ -95,8 +95,10 @@ public class StudentService implements IStudentService {
 	public String DangkiMonhoc(String studentId, String classID) throws NotFoundException {
 		try {
 			ClassModel classModel = classDAO.getClassInfo(classID);
-			StudentModel studentModel = null;
-			studentModel = studentDAO.findById(studentId);
+			if(courseDAO.findById(classModel.getCourseId()) == null){
+				return "Khong dang ky duoc vi khong co khoa hoc nay";
+			};
+			StudentModel studentModel = studentDAO.findById(studentId);
 
 			List<String> finished_course = studentModel.getFinished_courses();
 			List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
@@ -113,8 +115,8 @@ public class StudentService implements IStudentService {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
 					LocalTime time_start = LocalTime.parse(e.getTimeStart(), formatter);
 					LocalTime time_end = LocalTime.parse(e.getTimeEnd(), formatter);
-					LocalTime time_start_new_class = LocalTime.parse(e.getTimeStart(), formatter);
-					LocalTime time_end_new_class = LocalTime.parse(e.getTimeEnd(), formatter);
+					LocalTime time_start_new_class = LocalTime.parse(classModel.getTimeStart(), formatter);
+					LocalTime time_end_new_class = LocalTime.parse(classModel.getTimeEnd(), formatter);
 					if(time_end.isBefore(time_start_new_class)){
 						break;
 					} else if (time_end_new_class.isBefore(time_start)) {

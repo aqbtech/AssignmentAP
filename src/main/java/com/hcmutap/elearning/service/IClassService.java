@@ -3,6 +3,7 @@ package com.hcmutap.elearning.service;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -23,4 +24,5 @@ public interface IClassService extends IGenericAdminService<ClassModel> {
     boolean addNewDoc(String classId) throws NotFoundException;
     boolean addDoc(String classId, Document doc) throws NotFoundException;
     boolean deleteDoc(String classId, Document doc) throws NotFoundException;
+    Page<ClassModel> getPage(String key, String id, int page, int size);
 }

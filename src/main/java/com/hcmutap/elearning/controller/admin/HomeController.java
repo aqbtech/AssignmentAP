@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.controller.admin;
 
+import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
@@ -202,6 +203,34 @@ public class HomeController {
 			// TODO: redirect to error page
 			throw new RuntimeException(e);
 		}
+	}
+
+	@GetMapping("/admin-management/registration")
+	public String regis_manage(ModelMap modelMap){
+		Singleton check = Singleton.getInstance();
+		boolean student_check = check.isStudent_state();
+		boolean teacher_check = check.isTeacher_state();
+		modelMap.addAttribute("student", student_check);
+		modelMap.addAttribute("teacher", teacher_check);
+		return "admin/views/manage_course_registration";
+	}
+	@PostMapping("/admin-management/registration")
+	public String regis_manage(@RequestParam("teacher") String teacher,
+							   @RequestParam("student") String student){
+		Singleton check = Singleton.getInstance();
+		if(teacher.equals("Close")){
+			check.setTeacher_state(false);
+		}
+		if(teacher.equals("Open")){
+			check.setTeacher_state(true);
+		}
+		if (student.equals("Close")){
+			check.setStudent_state(false);
+		}
+		if (student.equals("Open")){
+			check.setStudent_state(true);
+		}
+		return "redirect:/admin-management/registration";
 	}
 
 	@GetMapping("/admin-management/view-info")
