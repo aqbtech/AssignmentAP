@@ -53,16 +53,18 @@
                                 </thead>
                                 <tbody style="text-align: center">
                                 <tr th:if="${point.getSemesterId() == semester.getSemesterName()}" th:each="point, iterp: ${points}">
-                                    <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"></td>
-                                    <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"></td>
-                                    <td>
-                                        <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${point.getPointBT()!=16}" th:text="${'BT: '+point.getPointBT()}"></div>
-                                        <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${point.getPointBTL()!=16}" th:text="${' BTL: '+point.getPointBTL()}"></div>
-                                        <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${point.getPointGK()!=16}" th:text="${' GK: '+point.getPointGK()}"></div>
-                                    </td>
-                                    <td th:if="${point.getPointCK()!=16}" th:text="${point.getPointCK()}"></td>
-                                    <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
-                                        <td th:if="${point.getPointCK()!=16}" th:text="${result}"></td>
+                                    <div th:each="course, iterc: ${courses}" th:if="${course.getCourseId()==point.getCourseId()}">
+                                        <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"></td>
+                                        <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"></td>
+                                        <td>
+                                            <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${course.getPercentBT()>0}" th:text="${'BT: '+point.getPointBT()}"></div>
+                                            <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${course.getPercentBTL()>0}" th:text="${' BTL: '+point.getPointBTL()}"></div>
+                                            <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${course.getPercentGK()>0}" th:text="${' GK: '+point.getPointGK()}"></div>
+                                        </td>
+                                        <td th:if="${course.getPercentCK()>0}" th:text="${point.getPointCK()}"></td>
+                                        <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
+                                            <td th:if="${point.getPointCK()!=15}" th:text="${result}"></td>
+                                        </div>
                                     </div>
                                 </tr>
                                 </tbody>

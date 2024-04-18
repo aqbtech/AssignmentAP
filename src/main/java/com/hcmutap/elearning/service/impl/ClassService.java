@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ClassService implements IClassService {
@@ -143,26 +144,10 @@ public class ClassService implements IClassService {
             tmp.setClassName(classModel.getClassName());
             tmp.setSemesterId(classModel.getSemesterId());
             tmp.setState(false);
-            if(courseModel.getPercentBT()>0){
-                tmp.setPointBT(15);
-            }else{
-                tmp.setPointBT(16);
-            }
-            if(courseModel.getPercentBTL()>0){
-                tmp.setPointBTL(15);
-            }else{
-                tmp.setPointBTL(16);
-            }
-            if(courseModel.getPercentGK()>0){
-                tmp.setPointGK(15);
-            }else{
-                tmp.setPointGK(16);
-            }
-            if(courseModel.getPercentCK()>0){
-                tmp.setPointCK(15);
-            }else{
-                tmp.setPointCK(16);
-            }
+            tmp.setPointBT(15);
+            tmp.setPointBTL(15);
+            tmp.setPointGK(15);
+            tmp.setPointCK(15);
             pointService.save(tmp);
             return true;
         } catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
@@ -195,16 +180,24 @@ public class ClassService implements IClassService {
 ////                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
 ////                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
                 PointModel pointModel = pointService.getPoint(studentId,item.getCourseId());
-                if(item.getPointBT()!=16){
+                List<CourseModel> courseModels = courseDAO.findAll();
+                CourseModel courseModel = null;
+                for(CourseModel crs : courseModels){
+                    if(Objects.equals(crs.getCourseId(), item.getCourseId())){
+                        courseModel = crs;
+                        break;
+                    }
+                }
+                if(courseModel.getPercentBT()>0){
                     pointModel.setPointBT(point.getPointBT());
                 }
-                if(item.getPointBTL()!=16){
+                if(courseModel.getPercentBTL()>0){
                     pointModel.setPointBTL(point.getPointBTL());
                 }
-                if(item.getPointGK()!=16){
+                if(courseModel.getPercentGK()>0){
                     pointModel.setPointGK(point.getPointGK());
                 }
-                if(item.getPointCK()!=16){
+                if(courseModel.getPercentCK()>0){
                     pointModel.setPointCK(point.getPointCK());
                 }
                 pointService.update(pointModel);

@@ -9,6 +9,8 @@ import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.Class_CourseService;
 import com.hcmutap.elearning.service.impl.UserService;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.Objects;
 @Controller
 @RequestMapping(value = "/student")
 public class StudentController{
+    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
     @Resource
     private UserService userService;
     @Resource
@@ -146,8 +149,10 @@ public class StudentController{
             for (PointModel pointModel : points) {
                 resultAverageList.add(pointService.getAveragePoint(pointModel.getStudentId(), pointModel.getCourseId()));
             }
+
             List<SemesterModel> semesterModels = new ArrayList<>();
             List<CourseModel> courseModels = new ArrayList<>();
+
             List<String> classIdlist = studentModel.getClasses();
             for(String s : classIdlist){
                 ClassModel classModel = classService.getClassInfo(s);
