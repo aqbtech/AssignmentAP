@@ -143,26 +143,10 @@ public class ClassService implements IClassService {
             tmp.setClassName(classModel.getClassName());
             tmp.setSemesterId(classModel.getSemesterId());
             tmp.setState(false);
-            if(courseModel.getPercentBT()>0){
-                tmp.setPointBT(15);
-            }else{
-                tmp.setPointBT(16);
-            }
-            if(courseModel.getPercentBTL()>0){
-                tmp.setPointBTL(15);
-            }else{
-                tmp.setPointBTL(16);
-            }
-            if(courseModel.getPercentGK()>0){
-                tmp.setPointGK(15);
-            }else{
-                tmp.setPointGK(16);
-            }
-            if(courseModel.getPercentCK()>0){
-                tmp.setPointCK(15);
-            }else{
-                tmp.setPointCK(16);
-            }
+            tmp.setPointBT(15);
+            tmp.setPointBTL(15);
+            tmp.setPointGK(15);
+            tmp.setPointCK(15);
             pointService.save(tmp);
             return true;
         } catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
@@ -191,23 +175,10 @@ public class ClassService implements IClassService {
         List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
-//                PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
-////                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
-////                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
-                PointModel pointModel = pointService.getPoint(studentId,item.getCourseId());
-                if(item.getPointBT()!=16){
-                    pointModel.setPointBT(point.getPointBT());
-                }
-                if(item.getPointBTL()!=16){
-                    pointModel.setPointBTL(point.getPointBTL());
-                }
-                if(item.getPointGK()!=16){
-                    pointModel.setPointGK(point.getPointGK());
-                }
-                if(item.getPointCK()!=16){
-                    pointModel.setPointCK(point.getPointCK());
-                }
-                pointService.update(pointModel);
+                PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
+                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
+                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
+                pointService.update(pointUpdate);
                 return true;
             }
         }
@@ -276,15 +247,10 @@ public class ClassService implements IClassService {
 
     @Override
     public Page<ClassModel> getPage(String key, String id, int page, int size) {
-        List<ClassModel> listClass;
-        try{
-            listClass = getClassOfCourse(id);
-            for(ClassModel classModel : listClass) {
-                if(!classModel.getClassId().contains(key == null ? "" : key))
-                    listClass.remove(classModel);
-            }
-        } catch (Exception e){
-            listClass = new ArrayList<>();
+        List<ClassModel> listClass = getClassOfCourse(id);
+        for(ClassModel classModel : listClass) {
+            if(!classModel.getClassId().contains(id))
+                listClass.remove(classModel);
         }
         return new PageImpl<>(listClass, PageRequest.of(page - 1, size), listClass.size());
     }
