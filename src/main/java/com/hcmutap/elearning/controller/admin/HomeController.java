@@ -55,19 +55,14 @@ public class HomeController {
 	public void setCourseService(ICourseService courseService) {
 		this.courseService = courseService;
 	}
-//	@Autowired
-//	public void setRegisterDTOValidator(RegisterDTOValidator registerDTOValidator) {
-//		this.registerDTOValidator = registerDTOValidator;
-//	}
 	@Autowired
 	public void setRegisterService(RegisterService registerService) {
 		this.registerService = registerService;
 	}
 	@GetMapping("/admin-home")
 	public String index(Principal principal, ModelMap model) {
-		UserModel userModel = null;
 		try {
-			userModel = userService.findByUsername(principal.getName());
+			UserModel userModel = userService.findByUsername(principal.getName());
 			model.addAttribute("user", userModel);
 			return "admin/views/home";
 		} catch (NotFoundException e) {
@@ -141,12 +136,12 @@ public class HomeController {
 					userService.delete(teacher.getUsername());
 					redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
 				} else {
-					String message = "Giáo viên vẫn còn dạy các lớp";
+					StringBuilder message = new StringBuilder("Giáo viên vẫn còn dạy các lớp");
 					for (String classId : teacher.getClasses()) {
-						message += " " + classId;
+						message.append(" ").append(classId);
 					}
-					message += " nên chưa thể xóa!";
-					redirectAttributes.addFlashAttribute("message", message);
+					message.append(" nên chưa thể xóa!");
+					redirectAttributes.addFlashAttribute("message", message.toString());
 				}
 			} else {
 				StudentModel student = studentService.findById(id);
