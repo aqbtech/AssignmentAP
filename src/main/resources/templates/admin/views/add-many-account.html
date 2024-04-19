@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Trang quản trị</title>
+</head>
+    <body>
+    <div layout:fragment="content">
+        <!-- Page Content -->
+        <div class="container">
+            <h1>Trang chủ</h1>
+            <hr>
+            <form th:action="@{/admin-management/add-by-file}" method="post" enctype="multipart/form-data">
+                <input type="file" th:name="file" />
+                <input th:type="submit" value="Import" />
+            </form>
+            <div th:if="${message}">
+                <p th:text="${message}"></p>
+            </div>
+        </div>
+        <!-- /.container -->
+    </div>
+    </body>
+</html>

@@ -2,10 +2,12 @@ package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.dto.RegisterDTO;
+import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 
+import com.hcmutap.elearning.service.impl.ExcelService;
 import com.hcmutap.elearning.service.impl.RegisterService;
 import com.hcmutap.elearning.service.impl.SemesterService;
 import com.hcmutap.elearning.utils.MapperUtil;
@@ -18,17 +20,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller(value = "homeControllerOfAdmin")
 public class HomeController {
@@ -53,19 +55,14 @@ public class HomeController {
 	public void setCourseService(ICourseService courseService) {
 		this.courseService = courseService;
 	}
-//	@Autowired
-//	public void setRegisterDTOValidator(RegisterDTOValidator registerDTOValidator) {
-//		this.registerDTOValidator = registerDTOValidator;
-//	}
 	@Autowired
 	public void setRegisterService(RegisterService registerService) {
 		this.registerService = registerService;
 	}
 	@GetMapping("/admin-home")
 	public String index(Principal principal, ModelMap model) {
-		UserModel userModel = null;
 		try {
-			userModel = userService.findByUsername(principal.getName());
+			UserModel userModel = userService.findByUsername(principal.getName());
 			model.addAttribute("user", userModel);
 			return "admin/views/home";
 		} catch (NotFoundException e) {
@@ -79,7 +76,7 @@ public class HomeController {
 						  @RequestParam(required = false) String keyword,
 						  @RequestParam(defaultValue = "1") int page,
 						  @RequestParam(defaultValue = "3") int size) {
-		Page<?> pageResult = null;
+		Page<?> pageResult;
 		switch (type) {
 			case "student":
 				pageResult = studentService.getPage(keyword, page, size);
@@ -139,12 +136,12 @@ public class HomeController {
 					userService.delete(teacher.getUsername());
 					redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
 				} else {
-					String message = "Giáo viên vẫn còn dạy các lớp";
+					StringBuilder message = new StringBuilder("Giáo viên vẫn còn dạy các lớp");
 					for (String classId : teacher.getClasses()) {
-						message += " " + classId;
+						message.append(" ").append(classId);
 					}
-					message += " nên chưa thể xóa!";
-					redirectAttributes.addFlashAttribute("message", message);
+					message.append(" nên chưa thể xóa!");
+					redirectAttributes.addFlashAttribute("message", message.toString());
 				}
 			} else {
 				StudentModel student = studentService.findById(id);
@@ -152,6 +149,7 @@ public class HomeController {
 				del.add(student.getFirebaseId());
 				studentService.delete(del);
 				userService.delete(student.getUsername());
+				// implfunc need to change exception
 				List<PointModel> points = pointService.getListPointByStudentId(student.getId());
 				List<String> delPoint = new ArrayList<>();
 				for (PointModel point : points) {
@@ -162,7 +160,7 @@ public class HomeController {
 			}
 			return "redirect:/admin-management?type=" + type;
 		} catch (NotFoundException e) {
-			logger.error("Can't delete account because not found");
+			logger.error("Can't delete account because not found {}", e.getMessage());
 			return "redirect:/404";
 		}
 	}
@@ -292,6 +290,50 @@ public class HomeController {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+	@GetMapping("/admin-management/add-by-file")
+	public String addAccountByFile() {
+		return "admin/views/add-many-account";
+	}
+	@PostMapping(value = "/admin-management/add-by-file")
+	public String addAccount(@RequestParam("file") MultipartFile file, Model model) {
+		try {
+			ExcelService<RegisterDTO> excelService = new ExcelService<>();
+			Optional<List<RegisterDTO>> list = excelService.readAndConvert(file, RegisterDTO.class);
+			Map<String, String> complete = new HashMap<>();
+			Map<String, String> failure = new HashMap<>();
+			if (list.isPresent()) {
+				for (RegisterDTO registerDTO : list.get()) {
+					Errors errors = new BeanPropertyBindingResult(registerDTO, "registerDTO");
+					registerDTOValidator.validate(registerDTO, errors);
+					if (errors.hasErrors()) {
+						failure.put(registerDTO.getUsername(),
+								"Failed to add account, message: " + errors.getAllErrors());
+					} else {
+						ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
+						String message = registerService.register(modelMap);
+						if (!message.equals("Success")) {
+							if (!failure.containsKey(registerDTO.getUsername())) {
+								failure.put(registerDTO.getUsername(), "Failed to add account, message: " + message);
+							}
+							logger.error(message);
+						} else {
+							complete.put(registerDTO.getUsername(), "Success");
+						}
+					}
+				}
+			} else {
+				logger.atDebug().log("List is empty");
+			}
+			String result = "Complete: " + complete.size() + " accounts\n" +
+					"Failure: " + failure.size() + " accounts\n";
+			model.addAttribute("message", result);
+			return "admin/views/add-many-account";
+		} catch (ConvertExcelToObjectException | NotFoundException e) {
+			logger.error("Can't add account because {}", e.getMessage());
+			model.addAttribute("message", e.getMessage());
+			return "admin/views/add-many-account";
 		}
 	}
 }

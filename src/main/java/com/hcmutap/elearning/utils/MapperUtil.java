@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmutap.elearning.exception.MappingException;
 import org.springframework.ui.ModelMap;
 
 import java.util.Map;
@@ -52,13 +53,12 @@ public class MapperUtil {
 		}
 		return null;
 	}
-	public <T> T toModel(String value, Class<T> tClass) {
+	public <T> T toModel(String value, Class<T> tClass) throws MappingException {
 		try {
 			return new ObjectMapper().readValue(value, tClass);
 		} catch (Exception e) {
-			System.out.print(e.getMessage());
+			throw new MappingException(e.getMessage());
 		}
-		return null;
 	}
 	public String toJson(Object object) {
 		try {
