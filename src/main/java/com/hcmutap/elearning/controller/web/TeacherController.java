@@ -18,7 +18,9 @@ import com.hcmutap.elearning.service.impl.UserService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -139,54 +141,107 @@ public class TeacherController {
 			throw new RuntimeException(e);
 		}
 	}
+
+	private void genePage(Model model, Page<?> page) {
+		model.addAttribute("points", page.getContent());
+		model.addAttribute("currentPage", page.getNumber() + 1);
+		model.addAttribute("totalItems", page.getTotalElements());
+		model.addAttribute("totalPages", page.getTotalPages());
+		model.addAttribute("pageSize", page.getSize());
+	}
+
+
 	@GetMapping(value = "/update_student")
 	public String listStudent(@RequestParam("classId") String classId,
 							  @RequestParam("courseId") String courseId,
-							  final RedirectAttributes redirectAttributes,
-							  Principal principal, ModelMap model){
-		try {
+							  @RequestParam(required = false) String keyword,
+							  @RequestParam(defaultValue = "1") Integer page,
+							  @RequestParam(defaultValue = "3") Integer size,
+							  Principal principal, Model model){
+		try{
+			List<PointModel> check = pointService.getListStudentByClassId(classId);
+		}catch (NotFoundException e){
+			return "redirect:/teacher/update_point?classId="+classId+"&courseId="+courseId;
+		}
+		try{
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
-			CourseModel courseModel = courseService.getCourseInfo(courseId);
-			List<PointModel> pointModels = pointService.getListStudentByClassId(classId);
-			model.addAttribute("points", pointModels);
-			model.addAttribute("name","Danh sách lớp "+pointModels.getFirst().getClassName() +" - khóa học " +pointModels.getFirst().getCourseName());
-			model.addAttribute("classId",classId);
-			model.addAttribute("courseId",courseId);
-			model.addAttribute("course",courseModel);
-			return "web/views/teacher-service/InputScore/list_student";
-		} catch (NotFoundException e) {
-			logger.error("Error in update_student");
-			return "redirect:/teacher/update_point";
+			if(infoDTO.getRole().equalsIgnoreCase("student")){
+				model.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
+				if (!teacherService.isExistTeacherInClass(principal.getName(), classId)) {
+					model.addAttribute("message", "You are not in this class");
+					return "login/404_page";
+				}
+			} else {
+				model.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
+			}
+			try {
+				CourseModel courseModel = courseService.getCourseInfo(courseId);
+				ClassModel cl = classService.findById(classId);
+
+				Page<PointModel> pointPage = pointService.getPage(keyword,classId, page, size);
+				genePage(model, pointPage);
+
+
+
+				model.addAttribute("classId",classId);
+				model.addAttribute("courseId",courseId);
+				model.addAttribute("course",courseModel);
+				model.addAttribute("name","Danh sách lớp "+ cl.getClassName() +" - khóa học " + courseModel.getCourseName());
+
+
+				return "web/views/teacher-service/InputScore/list_student";
+			} catch (NotFoundException e) {
+				logger.error("Error in update_student");
+				return "redirect:/teacher/update_point?classId="+classId+"&courseId="+courseId;
+			}
+		} catch(NotFoundException e) {
+			throw new RuntimeException(e);
 		}
 	}
-	@PostMapping(value = "/update_student")
-	public String listStudentt(@RequestParam("studentId") String studentId,
-                               @RequestParam("courseId") String courseId,
-                               @RequestParam("classId") String classId,
-							   @ModelAttribute PointDTO pointDTO,
-                               Principal principal, ModelMap model){
+
+	@PostMapping(value = "/update_point")
+	public String updatePoint(@RequestParam("studentId") String studentId,
+							  @RequestParam("classId") String classId,
+							  @RequestParam("courseId") String courseId,
+							  @RequestParam(name="pointBT", defaultValue = "15") String pointBT,
+							  @RequestParam(name="pointBTL", defaultValue = "15") String pointBTL,
+							  @RequestParam(name="pointGK", defaultValue = "15") String pointGK,
+							  @RequestParam(name="pointCK", defaultValue = "15") String pointCK) {
 		try {
-			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
-			CourseModel courseModel = courseService.getCourseInfo(courseId);
-			classService.NhapDiem(studentId,classId,pointDTO);
-			List<PointModel> pointModels = null;
-			pointModels = pointService.getListStudentByClassId(classId);
-			model.addAttribute("points", pointModels);
-			model.addAttribute("name","Danh sách lớp "+pointModels.getFirst().getClassName() +" - khóa học " +pointModels.getFirst().getCourseName());
-			model.addAttribute("classId",classId);
-			model.addAttribute("courseId",courseId);
-			model.addAttribute("course",courseModel);
-			return "web/views/teacher-service/InputScore/list_student";
+			PointDTO pointDTO = new PointDTO(studentId, Double.parseDouble(pointBT), Double.parseDouble(pointBTL),
+					Double.parseDouble(pointGK), Double.parseDouble(pointCK));
+			classService.NhapDiem(studentId, classId, pointDTO);
+			return "redirect:/teacher/update_student?classId=" + classId + "&courseId=" + courseId;
 		} catch (NotFoundException e) {
 			throw new RuntimeException(e);
-        }
+		}
 	}
-
 	@GetMapping(value = "/update_point")
-	public String listStudent(ModelMap modelMap){
+	public String listStudent(ModelMap modelMap, @RequestParam("courseId") String courseId,
+							  @RequestParam("classId") String classId, Principal principal){
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			if (infoDTO.getRole().equalsIgnoreCase("student")) {
+				modelMap.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
+				if (!teacherService.isExistTeacherInClass(principal.getName(), classId)) {
+					modelMap.addAttribute("message", "You are not in this class");
+					return "login/404_page";
+				}
+			} else {
+				modelMap.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
+			}
 			modelMap.addAttribute("name","Hiện không thể tìm thấy sinh viên ");
+			modelMap.addAttribute("classId",classId);
+			modelMap.addAttribute("courseId",courseId);
 			return "web/views/teacher-service/InputScore/UpdatePoint";
+		} catch(NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

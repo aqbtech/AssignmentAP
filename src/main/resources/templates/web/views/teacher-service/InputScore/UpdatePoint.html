@@ -31,7 +31,31 @@
             </div>
         </div>
     </div>
-    <hr>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 mt-3">
+                <div class="border-top border-bottom" style="margin-bottom: 20px;">
+                    <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link active" th:href="'/course?id=' + ${classId}" style="color: #6c757d">Khoá học</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="'/list-student?id=' + ${classId}" style="color: #6c757d">Danh sách lớp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="'/teacher/update_student?classId=' + ${classId} + '&courseId=' + ${courseId}">Nhập điểm</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 </div>
 
 </body>

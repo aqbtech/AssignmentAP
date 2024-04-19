@@ -5,11 +5,17 @@ import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.IPointService;
 import jakarta.annotation.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import java.util.stream.Collectors;
+
 
 import java.util.List;
 import java.util.Objects;
@@ -154,6 +160,7 @@ public class PointService implements IPointService {
         else {
             return pointModelList;
         }
+
 //        List<PointModel> pointModelList = pointDAO.findAll();
 //        List<PointModel> pointModelList1= new ArrayList<>();
 //        for(PointModel pointModel : pointModelList) {
@@ -162,5 +169,31 @@ public class PointService implements IPointService {
 //        }
 //        return  pointModelList1;
     }
+    @Override
+    public Page<PointModel> getPage(String key, String id, int page, int size) {
+        try {
+            List<PointModel> listPoint = getListStudentByClassId(id);
 
+            listPoint = listPoint.stream()
+                    .filter(pointModel -> pointModel.getClassId().equals(id))
+                    .collect(Collectors.toList());
+            if(key!=null) {
+                String lowercaseKey = key.toLowerCase();
+                listPoint = listPoint.stream()
+                        .filter(point -> point.getStudentId().contains(lowercaseKey) ||
+                                point.getStudentName().toLowerCase().contains(lowercaseKey))
+                        .collect(Collectors.toList());
+            }
+
+            long total = listPoint.size();
+
+            int fromIndex = Math.min((page - 1) * size, listPoint.size());
+            int toIndex = Math.min(fromIndex + size, listPoint.size());
+            List<PointModel> pageContent = listPoint.subList(fromIndex, toIndex);
+
+            return new PageImpl<>(pageContent, PageRequest.of(page - 1, size), total);
+        } catch (NotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
