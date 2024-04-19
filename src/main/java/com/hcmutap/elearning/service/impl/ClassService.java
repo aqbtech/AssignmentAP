@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ClassService implements IClassService {
@@ -175,10 +176,31 @@ public class ClassService implements IClassService {
         List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
-                PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
-                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
-                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
-                pointService.update(pointUpdate);
+//                PointModel pointUpdate = new PointModel(item.getFirebaseId(), item.getId(), item.getStudentId(), item.getStudentName(),
+////                        item.getCourseId(), item.getCourseName(), item.getClassId(), item.getClassName(),item.getSemesterId(),
+////                        item.isState(),point.getPointBT(), point.getPointBTL(), point.getPointGK(),point.getPointCK());
+                PointModel pointModel = pointService.getPoint(studentId,item.getCourseId());
+                List<CourseModel> courseModels = courseDAO.findAll();
+                CourseModel courseModel = null;
+                for(CourseModel crs : courseModels){
+                    if(Objects.equals(crs.getCourseId(), item.getCourseId())){
+                        courseModel = crs;
+                        break;
+                    }
+                }
+                if(courseModel.getPercentBT()>0){
+                    pointModel.setPointBT(point.getPointBT());
+                }
+                if(courseModel.getPercentBTL()>0){
+                    pointModel.setPointBTL(point.getPointBTL());
+                }
+                if(courseModel.getPercentGK()>0){
+                    pointModel.setPointGK(point.getPointGK());
+                }
+                if(courseModel.getPercentCK()>0){
+                    pointModel.setPointCK(point.getPointCK());
+                }
+                pointService.update(pointModel);
                 return true;
             }
         }
