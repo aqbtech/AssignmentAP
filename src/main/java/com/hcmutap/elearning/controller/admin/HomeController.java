@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -298,14 +297,12 @@ public class HomeController {
 			throw new RuntimeException(e);
 		}
 	}
-	@Autowired
-	private SimpMessagingTemplate template;
 	@GetMapping("/admin-management/add-by-file")
 	public String addAccountByFile() {
 		return "admin/views/add-many-account";
 	}
 	@PostMapping(value = "/admin-management/add-by-file")
-	public String addAccount(@RequestParam("file") MultipartFile file) {
+	public String addAccount(@RequestParam("file") MultipartFile file, Model model) {
 		try {
 			ExcelService<RegisterDTO> excelService = new ExcelService<>();
 			Optional<List<RegisterDTO>> list = excelService.readAndConvert(file, RegisterDTO.class);
@@ -313,15 +310,11 @@ public class HomeController {
 			Map<String, String> failure = new HashMap<>();
 			if (list.isPresent()) {
 				for (RegisterDTO registerDTO : list.get()) {
-					template.convertAndSend("/topic/accounts",
-							"Adding account: " + registerDTO.getUsername());
 					Errors errors = new BeanPropertyBindingResult(registerDTO, "registerDTO");
 					registerDTOValidator.validate(registerDTO, errors);
 					if (errors.hasErrors()) {
 						failure.put(registerDTO.getUsername(),
 								"Failed to add account, message: " + errors.getAllErrors());
-						template.convertAndSend("/topic/accounts",
-								"Failed to add account: " + registerDTO.getUsername());
 					} else {
 						ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
 						String message = registerService.register(modelMap);
@@ -332,20 +325,19 @@ public class HomeController {
 							logger.error(message);
 						} else {
 							complete.put(registerDTO.getUsername(), "Success");
-							template.convertAndSend("/topic/accounts",
-									"New account added: " + registerDTO.getUsername());
 						}
 					}
 				}
-				template.convertAndSend("/topic/accounts", "Complete register process, " +
-						"complete: " + complete.size() + ", failure: " + failure.size());
 			} else {
 				logger.atDebug().log("List is empty");
 			}
+			String result = "Complete: " + complete.size() + " accounts\n" +
+					"Failure: " + failure.size() + " accounts\n";
+			model.addAttribute("message", result);
 			return "admin/views/add-many-account";
 		} catch (ConvertExcelToObjectException | NotFoundException e) {
 			logger.error("Can't add account because {}", e.getMessage());
-			template.convertAndSend("/topic/accounts", "Can't add account because " + e.getMessage());
+			model.addAttribute("message", e.getMessage());
 			return "admin/views/add-many-account";
 		}
 	}
