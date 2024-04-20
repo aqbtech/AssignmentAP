@@ -96,7 +96,7 @@ public class StudentService implements IStudentService {
 		try {
 			ClassModel classModel = classDAO.getClassInfo(classID);
 			if(courseDAO.findById(classModel.getCourseId()) == null){
-				return "Khong dang ky duoc vi khong co khoa hoc nay";
+				return "Không tìm thấy khóa học";
 			};
 			StudentModel studentModel = studentDAO.findById(studentId);
 
@@ -104,7 +104,7 @@ public class StudentService implements IStudentService {
 			List<ClassModel> timetable = classDAO.getTimeTableSV(studentModel.getId());
 			for (String e : studentModel.getCourses()){
 				if (e.equals(classModel.getCourseId())){
-					return "Dang ky khong thanh cong vi ban da dang ky mon nay";
+					return "Đăng ký không thành công vì bạn đang đăng ký môn này";
 				}
 			}
 			for(ClassModel e : timetable){
@@ -123,13 +123,13 @@ public class StudentService implements IStudentService {
 						break;
 					}
 					else {
-						return "Dang ki khong thanh cong vi trung thoi gian voi " + e.getClassName();
+						return "Đăng ký không thànhh công vì trùng thời gian với " + e.getClassName();
 					}
 				}
 			}
 			for (String e : finished_course){
 				if (e.equals(classModel.getCourseId())){
-					return "Dang ky khong thanh cong vi ban da hoc qua mon nay";
+					return "Đăng ký không thành công vì bạn đã học qua môn này";
 				}
 			}
 
@@ -238,7 +238,7 @@ public class StudentService implements IStudentService {
 			studentModel.getClasses().add(classModel.getClassId());
 			update(studentModel);
 			classService.addStudentToClass(studentId,classId);
-			return "Dang ky thanh cong";
+			return "Đăng ký thành công";
 		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
 			throw new RuntimeException(notFoundInDB);
 		}

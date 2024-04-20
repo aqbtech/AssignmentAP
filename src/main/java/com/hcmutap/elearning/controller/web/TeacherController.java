@@ -61,7 +61,7 @@ public class TeacherController {
 			List<Class_CourseDTO> class_course = new ArrayList<>();
 			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
 			if(!check.isTeacher_state()){
-				model.addAttribute("message", "Hien khong duoc dang ky");
+				model.addAttribute("message", "Hiện không được đăng ký");
 				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 				model.addAttribute("class_course", class_course);
 				return "web/views/teacher-service/registration";
