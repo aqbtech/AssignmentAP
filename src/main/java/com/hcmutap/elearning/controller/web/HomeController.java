@@ -13,8 +13,10 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -313,8 +315,19 @@ public class HomeController {
 		}
 	}
 
+	private void genePage(Model model, Page<?> page) {
+		model.addAttribute("listStudent", page.getContent());
+		model.addAttribute("currentPage", page.getNumber() + 1);
+		model.addAttribute("totalItems", page.getTotalElements());
+		model.addAttribute("totalPages", page.getTotalPages());
+		model.addAttribute("pageSize", page.getSize());
+	}
+
 	@GetMapping("/list-student")
-	public String viewStudents(@RequestParam String id, Principal principal, ModelMap model) {
+	public String viewStudents(@RequestParam String id, Principal principal, Model model,
+							   @RequestParam(required = false) String keyword,
+							   @RequestParam(defaultValue = "1") Integer page,
+							   @RequestParam(defaultValue = "3") Integer size) {
 		try{
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			if(infoDTO.getRole().equalsIgnoreCase("student")){
@@ -331,14 +344,13 @@ public class HomeController {
 			}
 			try {
 				List<PointModel> listTemp = pointService.getListStudentByClassId(id);
-				List<StudentModel> listStudent = new ArrayList<>();
-				for (PointModel tmp : listTemp) {
-					listStudent.add(studentService.findById(tmp.getStudentId()));
-				}
-				if(listStudent.isEmpty()) {
+				if(listTemp.isEmpty()) {
 					model.addAttribute("notHaveStudent","true");
+				}else{
+					Page<StudentModel> listStudent = studentService.getPageByClassId(keyword,id, page, size);
+					genePage(model, listStudent);
+					model.addAttribute("listStudent", listStudent);
 				}
-				model.addAttribute("listStudent", listStudent);
 			} catch (NotFoundException e) {
 				model.addAttribute("notHaveStudent",true);
 				model.addAttribute("listStudent", new ArrayList<>());

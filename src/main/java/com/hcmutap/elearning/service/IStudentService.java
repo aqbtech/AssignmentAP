@@ -23,4 +23,5 @@ public interface IStudentService extends IGenericAdminService<StudentModel>{
 	boolean isExistStudentInClass(String username, String classId) throws NotFoundException;
 	Page<StudentModel> getPage(String keyword, int page, int limit);
 	Page<StudentModel> getPage(int page, int limit);
+	Page<StudentModel> getPageByClassId(String key, String id, int page, int size);
 }
