@@ -173,11 +173,11 @@ public class TeacherService implements ITeacherService {
 
 			for (String e : teacherModel.getClasses()){
 				if(e.equals(classId)){
-					return "Dang day lop hoc nay";
+					return "Bạn đang dạy lớp này";
 				}
 			}
 
-			if (classModel.getTeacherId() != null) return "Da co giang vien dang ki";
+			if (classModel.getTeacherId() != null) return "Lớp đã có giảng viên đăng ký";
 
 			for(ClassModel e : timetable){
 				if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
@@ -195,7 +195,7 @@ public class TeacherService implements ITeacherService {
 						break;
 					}
 					else {
-						return "Dang ky khong thanh cong vi trung thoi gian voi " + e.getClassName();
+						return "Đăng ký không thành công vì trùng thời gian với " + e.getClassName();
 					}
 				}
 			}
@@ -206,7 +206,7 @@ public class TeacherService implements ITeacherService {
 			classModel.setTeacherName(teacherModel.getFullName());
 			classService.update(classModel);
 			update(teacherModel);
-			return "Dang ky thanh cong";
+			return "Đăng ký thành công";
 		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
 			throw new RuntimeException(notFoundInDB);
 		}

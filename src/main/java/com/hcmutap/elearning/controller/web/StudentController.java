@@ -74,7 +74,7 @@ public class StudentController{
             if(!check.isStudent_state()){
                 model.addAttribute("class_course_of_student", class_course_of_student);
                 model.addAttribute("class_course", class_course);
-                model.addAttribute("message", "Hien khong duoc dang ky");
+                model.addAttribute("message", "Hiện không được đăng ký");
                 return "web/views/student-service/registration";
             }
             if(!class_courseService.checkClass_Course(class_course_of_student)){
