@@ -2,9 +2,8 @@ package com.hcmutap.elearning.controller.web;
 
 
 import com.hcmutap.elearning.Singleton;
-import com.hcmutap.elearning.dto.Class_CourseDTO;
-import com.hcmutap.elearning.dto.InfoDTO;
-import com.hcmutap.elearning.dto.PointDTO;
+import com.hcmutap.elearning.dto.*;
+import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
@@ -13,7 +12,9 @@ import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.Class_CourseService;
 import com.hcmutap.elearning.service.impl.CourseService;
+import com.hcmutap.elearning.service.impl.ExcelService;
 import com.hcmutap.elearning.service.impl.UserService;
+import com.hcmutap.elearning.utils.MapperUtil;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +22,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/teacher")
@@ -218,29 +221,42 @@ public class TeacherController {
 			throw new RuntimeException(e);
 		}
 	}
-	@GetMapping(value = "/update_point")
-	public String listStudent(ModelMap modelMap, @RequestParam("courseId") String courseId,
-							  @RequestParam("classId") String classId, Principal principal){
+
+	@PostMapping(value = "/upload_Excel")
+
+	public String uploadExcel(@RequestParam("classId") String classId,
+							  @RequestParam("courseId") String courseId,
+							  @ModelAttribute MultipartFile file, Model model) {
 		try {
-			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			if (infoDTO.getRole().equalsIgnoreCase("student")) {
-				modelMap.addAttribute("message", "You are not a teacher");
-				return "login/404_page";
-			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
-				if (!teacherService.isExistTeacherInClass(principal.getName(), classId)) {
-					modelMap.addAttribute("message", "You are not in this class");
-					return "login/404_page";
+			ExcelService<PointExcelDTO> excelService = new ExcelService<>();
+			Optional<List<PointExcelDTO>> list = excelService.readAndConvert(file, PointExcelDTO.class);
+
+			List<PointModel> pointModels = pointService.getListStudentByClassId(classId);
+
+			Map<String, String> complete = new HashMap<>();
+			Map<String, String> failure = new HashMap<>();
+			if (list.isPresent()) {
+				for (PointExcelDTO pointExcelDTO : list.get()) {
+					for(PointModel pointModel : pointModels){
+						if(Objects.equals(pointModel.getStudentId(), pointExcelDTO.getStudentId())){
+							PointDTO pointDTO = new PointDTO(pointModel.getStudentId(), pointExcelDTO.getPointBT(), pointExcelDTO.getPointBTL(),
+									pointExcelDTO.getPointGK(), pointExcelDTO.getPointCK());
+							classService.NhapDiem(pointModel.getStudentId(), classId, pointDTO);
+						}
+					}
 				}
 			} else {
-				modelMap.addAttribute("message", "You are not a teacher");
-				return "login/404_page";
+				logger.atDebug().log("List is empty");
 			}
-			modelMap.addAttribute("name","Hiện không thể tìm thấy sinh viên ");
-			modelMap.addAttribute("classId",classId);
-			modelMap.addAttribute("courseId",courseId);
-			return "web/views/teacher-service/InputScore/UpdatePoint";
-		} catch(NotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
+			return "redirect:/teacher/update_student?classId=" + classId + "&courseId=" + courseId;
+		} catch (ConvertExcelToObjectException e) {
+			logger.error("Can't add account because {}", e.getMessage());
+			model.addAttribute("message", e.getMessage());
+			return "admin/views/add-many-account";
+		} catch (NotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

@@ -84,7 +84,7 @@
                                         <label class="input-group-text" for="pageSize">Items per page:</label>
                                     </div>
                                     <select form="searchFormCourse" name="size" th:value="${pageSize}" onchange="changePageSize()" class="size-select" id="pageSize">
-                                        <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                                        <option th:each="s : ${{3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
                                     </select>
                                 </div>
                                 <div class="col-md-3 mt-2">
@@ -193,8 +193,10 @@
             $("#searchFormCourse").submit();
         }
     </script>
+
     <div id="crsId" th:text="${courseId}" hidden></div>
     <div id="clsId" th:text="${classId}" hidden></div>
+
     <!--Modal chỉnh sửa điểm-->
     <div class="modal fade" id="updatePoint" tabindex="-1" aria-labelledby="updatePointLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -259,7 +261,9 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="formFileMultiple" class="form-label">Tải bảng điểm định dạng .xlsx</label>
-                        <form th:action="@{/upload_Excel}" enctype="multipart/form-data" id="uploadForm" method="post">
+                        <form th:action="@{/teacher/upload_Excel}" enctype="multipart/form-data" id="uploadForm" method="post">
+                            <input type="hidden" id="clId" name="classId" th:value="${classId}">
+                            <input type="hidden" id="coId" name="courseId" th:value="${courseId}">
                             <div class="form-group">
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" id="formFileMultiple" name="file" accept=".xlsx">
@@ -340,6 +344,7 @@
     </script>
 </div>
 </body>
+
 <div layout:fragment="custom-scripts">
     <script>
         $(document).ready(function () {
@@ -356,11 +361,11 @@
                 document.getElementById('upLoadAlert').style.display = 'block';
                 return;
             }
-            alert("Hello");
-        }document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            uploadFile();
-        });
+            document.getElementById("uploadForm").submit();
+        }
+        // document.querySelector('form').addEventListener('submit', function(event) {
+        //
+        // });
     </script>
 </div>
 </html>
