@@ -4,7 +4,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{web/layout/web-layout.html}">
 <head>
-    <title>Registration</title>
+    <title>Đăng ký dạy</title>
     <link th:href="@{/template/web/css/registration.css}" rel="stylesheet">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -19,7 +19,7 @@
         <div class="container mt-3">
             <div class="row">
                 <div class="col-sm-9">
-                    <h3>Registration</h3>
+                    <h3>Đăng ký dạy</h3>
                 </div>
             </div>
         </div>
@@ -29,7 +29,7 @@
         <div class="row">
 
             <div class="col-md-4 col-sm-6 m-4 box-search1">
-                <h4 class="mt-3">Registed</h4>
+                <h4 class="mt-3">Lớp đang dạy</h4>
                 <div class="ele1 mb-3" th:each="e : ${class_course_of_teacher}" style="overflow: auto" id="registed">
                     <div class="courseid">
                         <p th:text="${e.getCourse().getCourseId()}">Id</p>
@@ -53,15 +53,17 @@
 
                 <div class="box p-3 mb-4 d-flex align-items-center" >
                     <form style="width:100%; display: flex" method="get" id="my-search">
-                        <input style="" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId">
-                        <button type="submit" style="background: none; border: none"><span class="material-symbols-outlined">search</span></button>
+                        <input style="" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId" th:unless="${message=='Hiện không được đăng ký'}">
+                        <button th:unless="${message=='Hiện không được đăng ký'}" type="submit" style="background: none; border: none"><span class="material-symbols-outlined">search</span></button>
+                        <input style="" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId" th:if="${message=='Hiện không được đăng ký'}" disabled>
+                        <span th:if="${message=='Hiện không được đăng ký'}" class="material-symbols-outlined">search</span>
                     </form>
 
                 </div>
 
                 <div th:switch="${message}">
                     <div th:case="null" class="" th:text="${message}"></div>
-                    <div th:case="'Dang ky thanh cong'" class="alert alert-success" th:text="${message}"></div>
+                    <div th:case="'Đăng ký thành công'" class="alert alert-success" th:text="${message}"></div>
                     <div th:case="*" class="alert alert-danger" th:text="${message}"></div>
                 </div>
 
