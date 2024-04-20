@@ -13,9 +13,14 @@
 
         <div class="header">
             <div class="container mt-3">
-                <div class="row">
+                <div th:if="${type == 'student'}" class="row">
                     <div class="col-sm-9">
-                        <h3 th:text="${type.toUpperCase()} + ' SERVICE'">Service</h3>
+                        <h3>DỊCH VỤ SINH VIÊN</h3>
+                    </div>
+                </div>
+                <div th:if="${type == 'teacher'}" class="row">
+                    <div class="col-sm-9">
+                        <h3>DỊCH VỤ GIẢNG VIÊN</h3>
                     </div>
                 </div>
             </div>
@@ -33,9 +38,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/info}" class="no_underline">
-                                <h5 class = "mt-4 mb-0">Information</h5>
+                                <h5 class = "mt-4 mb-0">Thông tin</h5>
                             </a>
-                            <p>Information of student</p>
+                            <p>Thông tin sinh viên</p>
                         </div>
                     </div>
                 </div>
@@ -49,9 +54,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/score}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Score</h5>
+                                <h5 class="mb-0 mt-4">Bảng điểm</h5>
                             </a>
-                            <p mt>Score of student</p>
+                            <p mt>Xem bảng điểm</p>
                         </div>
                     </div>
                 </div>
@@ -65,9 +70,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/timetable}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Time Table</h5>
+                                <h5 class="mb-0 mt-4">Thời khóa biểu</h5>
                             </a>
-                            <p>Get Time Table</p>
+                            <p>Xem thời khóa biểu</p>
                         </div>
                     </div>
                 </div>
@@ -81,9 +86,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/learning-process}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Learning Process</h5>
+                                <h5 class="mb-0 mt-4">Tiến trình học tập</h5>
                             </a>
-                            <p>Get score of finished course</p>
+                            <p>Danh sách về kết quả các khóa học đã học</p>
                         </div>
                     </div>
                 </div>
@@ -97,9 +102,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/registration?courseId=}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Course Registration</h5>
+                                <h5 class="mb-0 mt-4">Đăng ký khóa học</h5>
                             </a>
-                            <p>Register study plan, register course</p>
+                            <p>Đăng ký lớp học của các khóa học</p>
                         </div>
                     </div>
                 </div>
@@ -116,9 +121,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/info}" class="no_underline">
-                                <h5 class = "mt-4 mb-0">Information</h5>
+                                <h5 class = "mt-4 mb-0">Thông tin</h5>
                             </a>
-                            <p>Information of teacher</p>
+                            <p>Thông tin giảng viên</p>
                         </div>
                     </div>
                 </div>
@@ -132,9 +137,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/teacher/timetable}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Time Table</h5>
+                                <h5 class="mb-0 mt-4">Thời khóa biểu</h5>
                             </a>
-                            <p>Get Time Table</p>
+                            <p>Xem thời khóa biểu</p>
                         </div>
                     </div>
                 </div>
@@ -148,9 +153,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/teacher/registration?courseId=}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Course Registration</h5>
+                                <h5 class="mb-0 mt-4">Đăng ký dạy học</h5>
                             </a>
-                            <p>Register study plan, register course</p>
+                            <p>Đăng ký dạy học</p>
                         </div>
                     </div>
                 </div>
@@ -164,9 +169,9 @@
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/teacher/inputscore}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Input Score</h5>
+                                <h5 class="mb-0 mt-4">Nhập điểm</h5>
                             </a>
-                            <p>Input Score</p>
+                            <p>Nhập điểm</p>
                         </div>
                     </div>
                 </div>
