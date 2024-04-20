@@ -6,6 +6,7 @@
 <head>
     <title>Danh sách sinh viên</title>
     <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/template/admin/css/custom-for-all-table.css}"/>
     <style>
         .nav-link {
             transition: background-color 0.3s ease;
@@ -46,27 +47,90 @@
                         </ul>
                     </div>
                 </div>
-                <table class="table table-bordered table-striped" style="overflow: auto">
-                    <thead>
-                    <tr style="text-align: center; color: white; background-color: black;">
-                        <th width = "15%">Mã sinh viên</th>
-                        <th width = "25%">Họ và tên</th>
-                        <th>Email</th>
-                        <th width = "10%">Xóa</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="student : ${listStudent}">
-                        <td th:text="${student.id}"></td>
-                        <td th:text="${student.fullName}"></td>
-                        <td th:text="${student.email}"></td>
-                        <td>
-                            <a class="btn btn-link delete-button" th:href="@{|/del-student?classId=${class.classId}&id=${student.id}|}">Xóa</a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <p th:if="${notHaveStudent}" class="blurred-text lead text-center">Lớp hiện chưa có sinh viên</p>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-table"></i>
+                        <span>Danh sách lớp học</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="my-3">
+                            <form th:action="@{/list-student}" id="searchFormCourse">
+                                <input type="hidden" name="id" th:value="${class.classId}">
+                                <div class="row d-flex">
+                                    <div class="col-md-6 mt-2">
+                                        <div class="search">
+                                            <i class="fa fa-search"></i>
+                                            <input id="keyword" type="search" name="keyword" th:value="${keyword}" class="form-control" placeholder="Enter keyword">
+                                            <button type="submit" class="btn btn-secondary">Search</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 input-group mt-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="pageSize">Items per page:</label>
+                                        </div>
+                                        <select form="searchFormCourse" name="size" th:value="${pageSize}" onchange="changePageSize()" class="size-select" id="pageSize">
+                                            <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mt-2">
+                                        <div class="d-flex">
+                                            <button id="btnClear" class="btn btn-danger" onclick="clearFunc()" style="margin-right: 10px;">Xoá</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th width = "15%">Mã sinh viên</th>
+                                    <th width = "25%">Họ và tên</th>
+                                    <th>Email</th>
+                                    <th width = "10%">Xóa</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="student : ${listStudent}">
+                                    <td th:text="${student.id}"></td>
+                                    <td th:text="${student.fullName}"></td>
+                                    <td th:text="${student.email}"></td>
+                                    <td>
+                                        <a class="btn btn-link delete-button" th:href="@{|/del-student?classId=${class.classId}&id=${student.id}|}">Xóa</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p th:if="${notHaveStudent}" class="text-center text-muted">Lớp hiện chưa có sinh viên</p>
+                    <nav aria-label="Pagination" th:if="${totalPages > 0}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent :: paging(1, '<<', 'First Page')}"></a>
+                            </li>
+                            <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent.html::paging(${currentPage -1}, 'Prev', 'Previos Page')}"></a>
+                            </li>
+                            <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                                <a class="page-link" href="#">...</a>
+                            </li>
+                            <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                                th:each="page : ${#numbers.sequence((currentPage > 2) ? (currentPage - 2) : 1,(currentPage + 2 < totalPages) ? (currentPage + 2) : totalPages)}">
+                                <a th:replace="~{web/fragments/paging_liststudent.html::paging(${page}, ${page}, 'Page ' + ${page})}"></a>
+                            </li>
+                            <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                                <a class="page-link" href="#">...</a>
+                            </li>
+                            <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent::paging(${currentPage + 1},'Next', 'Next Page')}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent.html::paging(${totalPages}, '>>', 'Last Page')}"></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
@@ -88,7 +152,7 @@
         </div>
     </div>
     <script>
-        window.addEventListener("load", function() {
+        window.addEventListener("load", function () {
             const message = document.getElementById("message").getAttribute("message");
             if (message) {
                 const modalBody = document.getElementById("modalBody");
@@ -98,6 +162,13 @@
                 $('#modal').modal('show');
             }
         });
+        function clearFunc() {
+            document.getElementById("keyword").value = "";
+            $("#searchFormCourse").submit();
+        }
+            function changePageSize() {
+            $("#searchFormCourse").submit();
+        }
     </script>
 </div>
 </body>
