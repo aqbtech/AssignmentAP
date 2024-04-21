@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -31,6 +33,7 @@ import java.util.Comparator;
 
 @Controller(value = "homeControllerOfWeb")
 public class HomeController {
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	@Resource
 	private IStudentService studentService;
 	@Resource

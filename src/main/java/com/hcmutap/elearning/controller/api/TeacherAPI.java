@@ -5,6 +5,8 @@ import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class TeacherAPI {
+	private static final Logger logger = LoggerFactory.getLogger(TeacherAPI.class);
 	@Resource(name="teacherService")
 	private ITeacherService teacherService;
 	@GetMapping("/teacher/findAll")
@@ -23,7 +26,9 @@ public class TeacherAPI {
 		try {
 			return teacherService.findById(id);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
+			return null;
 		}
 	}
 	@PostMapping("/teacher")
@@ -35,7 +40,8 @@ public class TeacherAPI {
 		try {
 			teacherService.update(teacherModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
 		}
 	}
 	@DeleteMapping("/teacher")
@@ -43,7 +49,8 @@ public class TeacherAPI {
 		try {
 			teacherService.delete(ids);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
 		}
 	}
 }

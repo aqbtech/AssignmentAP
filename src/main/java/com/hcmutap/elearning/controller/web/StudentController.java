@@ -8,6 +8,8 @@ import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 import com.hcmutap.elearning.service.impl.Class_CourseService;
 import com.hcmutap.elearning.service.impl.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

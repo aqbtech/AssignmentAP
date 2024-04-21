@@ -6,6 +6,8 @@ import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class StudentAPI {
+	private static final Logger logger = LoggerFactory.getLogger(StudentAPI.class);
 	@Autowired
 	private IStudentService studentService;
 	@PostMapping("/student")
@@ -26,7 +29,8 @@ public class StudentAPI {
 		try {
 			studentService.update(studentModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
 		}
 	}
 	@DeleteMapping("/student")
@@ -34,7 +38,8 @@ public class StudentAPI {
 		try {
 			studentService.delete(ids);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+//			throw new RuntimeException(e);
+			logger.error(String.valueOf(new RuntimeException(e)));
 		}
 
 	}
