@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org"
      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
-
 <body>
-    <nav th:fragment="admin-header" class="navbar navbar-expand navbar-dark bg-dark static-top">
-
+    <nav th:fragment="admin-header" class="navbar navbar-expand navbar-dark bg-dark static-top" >
+        <div style="height: 100%; width: auto;">
+            <img th:src="@{/images/common/favicon.ico}" alt="ĐHBK" class="img-fluid h-100" style="object-fit: contain;">
+        </div>
         <a class="navbar-brand mr-1" th:href="@{/admin-home}">ĐHBK</a>
 
         <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
@@ -20,7 +20,7 @@
 
         <!-- Navbar -->
         <ul class="navbar-nav ml-auto ml-md-0">
-            <li class="nav-item dropdown no-arrow">
+            <li class="nav-item d-flex align-items-center">
                 <a>
                     <span class="text-info">Xin chào, </span>
                     <span class="text-info" sec:authentication="principal.username"></span>
@@ -31,11 +31,8 @@
                     <i class="fas fa-user-circle fa-fw"></i>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                    <a class="dropdown-item" href="#">Settings</a>
-                    <a class="dropdown-item" href="#">Activity Log</a>
-                    <div class="dropdown-divider"></div>
                     <form id="logout" th:action="@{/logout}" method="post">
-                        <a class="dropdown-item" href="#" onclick="logout()" data-toggle="modal" data-target="#logoutModal">Logout</a>
+                        <a class="dropdown-item" href="#" onclick="logout()" data-toggle="modal" data-target="#logoutModal">Đăng xuất</a>
                     </form>
                     <script>
                         function logout() {

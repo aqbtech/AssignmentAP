@@ -158,7 +158,7 @@ public class TeacherController {
 							  @RequestParam("courseId") String courseId,
 							  @RequestParam(required = false) String keyword,
 							  @RequestParam(defaultValue = "1") Integer page,
-							  @RequestParam(defaultValue = "3") Integer size,
+							  @RequestParam(defaultValue = "6") Integer size,
 							  Principal principal, Model model){
 		try{
 			List<PointModel> check = pointService.getListStudentByClassId(classId);
@@ -241,19 +241,26 @@ public class TeacherController {
 						if(Objects.equals(pointModel.getStudentId(), pointExcelDTO.getStudentId())){
 							PointDTO pointDTO = new PointDTO(pointModel.getStudentId(), pointExcelDTO.getPointBT(), pointExcelDTO.getPointBTL(),
 									pointExcelDTO.getPointGK(), pointExcelDTO.getPointCK());
-							classService.NhapDiem(pointModel.getStudentId(), classId, pointDTO);
+							if(classService.NhapDiem(pointModel.getStudentId(), classId, pointDTO)) {
+								complete.put(pointModel.getStudentId(), pointModel.getStudentName());
+							} else {
+								failure.put(pointModel.getStudentId(), pointModel.getStudentName());
+							}
 						}
 					}
 				}
 			} else {
 				logger.atDebug().log("List is empty");
 			}
+			String result = "Upload complete" + complete.size() + " success, " + failure.size() + " failure";
+			model.addAttribute("message", result);
 			return "redirect:/teacher/update_student?classId=" + classId + "&courseId=" + courseId;
 		} catch (ConvertExcelToObjectException e) {
 			logger.error("Can't add account because {}", e.getMessage());
 			model.addAttribute("message", e.getMessage());
 			return "admin/views/add-many-account";
 		} catch (NotFoundException e) {
+			logger.error("Can't add account because NFE");
             throw new RuntimeException(e);
         }
     }

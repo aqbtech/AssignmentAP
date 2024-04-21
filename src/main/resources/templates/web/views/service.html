@@ -4,7 +4,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{web/layout/web-layout.html}">
 <head>
-    <title>Student Management System</title>
+    <title>Dịch vụ</title>
     <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
 </head>
 <body>
@@ -15,7 +15,8 @@
             <div class="container mt-3">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h3 th:text="${type.toUpperCase()} + ' SERVICE'">Service</h3>
+                        <h3 th:if="${type} == 'teacher'">Dịch vụ giáo viên</h3>
+                        <h3 th:if="${type} == 'student'">Dịch vụ sinh viên</h3>
                     </div>
                 </div>
             </div>
@@ -28,14 +29,15 @@
                     <div class = "row box-modify">
                         <div class="col-sm-4 ">
                             <a th:href="@{/info}" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/info}" class="no_underline">
-                                <h5 class = "mt-4 mb-0">Information</h5>
+                                <h5 class = "mt-4 mb-0">Thông tin</h5>
                             </a>
-                            <p>Information of student</p>
+                            <p>Thông tin sinh viên</p>
                         </div>
                     </div>
                 </div>
@@ -44,14 +46,15 @@
                     <div class="row box-modify">
                         <div class="col-sm-4">
                             <a th:href="@{/student/score}" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/score}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Score</h5>
+                                <h5 class="mb-0 mt-4">Điểm</h5>
                             </a>
-                            <p mt>Score of student</p>
+                            <p mt>Xem điểm</p>
                         </div>
                     </div>
                 </div>
@@ -60,14 +63,15 @@
                     <div class="row box-modify">
                         <div class="col-sm-4">
                             <a href="/student/timetable" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/timetable}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Time Table</h5>
+                                <h5 class="mb-0 mt-4">Thời khóa biểu</h5>
                             </a>
-                            <p>Get Time Table</p>
+                            <p>Xem thời khóa biểu</p>
                         </div>
                     </div>
                 </div>
@@ -76,14 +80,15 @@
                     <div class="row box-modify">
                         <div class="col-sm-4">
                             <a th:href="@{/student/learning-process}" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/learning-process}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Learning Process</h5>
+                                <h5 class="mb-0 mt-4">Tiến trnh học tập</h5>
                             </a>
-                            <p>Get score of finished course</p>
+                            <p>Xem điểm của các môn học đã hoàn thành</p>
                         </div>
                     </div>
                 </div>
@@ -92,14 +97,15 @@
                     <div class="row box-modify">
                         <div class="col-sm-4">
                             <a href="/student/registration?courseId=" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/student/registration?courseId=}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Course Registration</h5>
+                                <h5 class="mb-0 mt-4">Đăng ký môn học</h5>
                             </a>
-                            <p>Register study plan, register course</p>
+                            <p>Đăng ký kế hoạch học tập, đăng ký khóa học</p>
                         </div>
                     </div>
                 </div>
@@ -111,14 +117,15 @@
                     <div class = "row box-modify">
                         <div class="col-sm-4 ">
                             <a th:href="@{/info}" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/info}" class="no_underline">
-                                <h5 class = "mt-4 mb-0">Information</h5>
+                                <h5 class = "mt-4 mb-0">Thông tin</h5>
                             </a>
-                            <p>Information of teacher</p>
+                            <p>Thông tin giáo viên</p>
                         </div>
                     </div>
                 </div>
@@ -127,14 +134,15 @@
                     <div class="row box-modify">
                         <div class="col-sm-4">
                             <a th:href="@{/teacher/timetable}" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/teacher/timetable}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Time Table</h5>
+                                <h5 class="mb-0 mt-4">Lịch trình giảng dạy</h5>
                             </a>
-                            <p>Get Time Table</p>
+                            <p>Xem lịch trình giảng dạy của bạn</p>
                         </div>
                     </div>
                 </div>
@@ -143,14 +151,15 @@
                     <div class="row box-modify">
                         <div class="col-sm-4">
                             <a th:href="@{/teacher/registration?courseId=}" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/teacher/registration?courseId=}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Course Registration</h5>
+                                <h5 class="mb-0 mt-4">Đăng kí nhập lớp</h5>
                             </a>
-                            <p>Register study plan, register course</p>
+                            <p>Đăng kí lớp giảng dạy</p>
                         </div>
                     </div>
                 </div>
@@ -159,14 +168,15 @@
                     <div class="row box-modify">
                         <div class="col-sm-4">
                             <a th:href="@{/teacher/inputscore}" class="">
-                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">
+<!--                                <img src="https://gcs.tripi.vn/public-tripi/tripi-feed/img/474115CxK/anh-background-hinh-khoi_120715507.png" alt="" class="w-100">-->
+                                <img th:src="@{/images/common/service_background.png}" alt="" class="w-100">
                             </a>
                         </div>
                         <div class="col-sm-8">
                             <a th:href="@{/teacher/inputscore}" class="no_underline">
-                                <h5 class="mb-0 mt-4">Input Score</h5>
+                                <h5 class="mb-0 mt-4">Nhập điểm</h5>
                             </a>
-                            <p>Input Score</p>
+                            <p>Nhập điểm cho lớp học</p>
                         </div>
                     </div>
                 </div>
