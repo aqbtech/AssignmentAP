@@ -4,10 +4,7 @@ import com.hcmutap.elearning.constant.SystemConstant;
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.dto.StudentResDTO;
 import com.hcmutap.elearning.dto.TeacherResDTO;
-import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
-import com.hcmutap.elearning.exception.CustomRuntimeException;
-import com.hcmutap.elearning.exception.MappingException;
-import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.*;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
@@ -20,10 +17,13 @@ import com.hcmutap.elearning.utils.ModelBuilderUtil;
 import com.hcmutap.elearning.validator.RegisterDTOValidator;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -70,7 +70,7 @@ public class RegisterService implements IRegisterService {
 		}
 	}
 	@Override
-	public String register(ModelMap model) {
+	public String register(ModelMap model) throws MappingException {
 		if(Objects.equals((Objects.requireNonNull(model.getAttribute("role"))).toString().toLowerCase(), "teacher")) {
 			TeacherResDTO teacher = MapperUtil.getInstance().toModelFromModelMap(model, TeacherResDTO.class);
 			return registerTeacher(teacher);
@@ -86,35 +86,50 @@ public class RegisterService implements IRegisterService {
 	public void setRegisterDTOValidator(RegisterDTOValidator registerDTOValidator) {
 		this.registerDTOValidator = registerDTOValidator;
 	}
+	@Autowired
+	private MessageSource messageSource;
 	@Override
-	public Map<String, String> register(MultipartFile file) {
+	public Map<String, String> register(MultipartFile file) throws ConvertExcelToObjectException, MappingException {
 		Map<String,String> result = new HashMap<>();
-		try {
-			ExcelService<RegisterDTO> excelService = new ExcelService<>();
-			Optional<List<RegisterDTO>> list = excelService.readAndConvert(file, RegisterDTO.class);
-			Integer complete = 0;
-			if (list.isPresent()) {
-				for (RegisterDTO registerDTO : list.get()) {
-					Errors errors = new BeanPropertyBindingResult(registerDTO, "registerDTO");
-					registerDTOValidator.validate(registerDTO, errors);
-					if (errors.hasErrors()) {
-						result.put(registerDTO.getUsername(),
-								"Failed to add account, message: " + errors.getAllErrors());
-					} else {
-						ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
-						String message = register(modelMap);
-						if (!message.equals("Success")) {
-							if (!result.containsKey(registerDTO.getUsername())) {
-								result.put(registerDTO.getUsername(), "Failed to add account, message: " + message);
+		Optional<List<RegisterDTO>> list;
+		ExcelService<RegisterDTO> excelService = new ExcelService<>();
+		list = excelService.readAndConvert(file, RegisterDTO.class);
+		int complete = 0;
+		if (list.isPresent()) {
+			for (RegisterDTO registerDTO : list.get()) {
+				Errors errors = new BeanPropertyBindingResult(registerDTO, "registerForm");
+				registerDTOValidator.validate(registerDTO, errors);
+				if (errors.hasErrors()) {
+					for (ObjectError error : errors.getAllErrors()) {
+						for (String errorCode : Objects.requireNonNull(error.getCodes())) {
+							try {
+								String errorMessage = messageSource.getMessage(errorCode, error.getArguments(), Locale.getDefault());
+								result.put(registerDTO.getUsername(), "Failed to add account, message: " + errorMessage);
+							} catch (NoSuchMessageException e) {
+								// This error code does not exist in your properties file, continue with the next one
+								continue;
 							}
-						} else {
-							++complete;
 						}
+					}
+					// fixme : use this code instead of above code, above code to fix rare fault
+//					result.put(registerDTO.getUsername(),
+//							"Failed to add account, message: " + errors.getAllErrors());
+				} else {
+					ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
+					String message = register(modelMap);
+					if (!message.equals("Success")) {
+						if (!result.containsKey(registerDTO.getUsername())) {
+							result.put(registerDTO.getUsername(), "Failed to add account, message: " + message);
+						}
+					} else {
+						++complete;
 					}
 				}
 			}
-		} catch (ConvertExcelToObjectException | NotFoundException e) {
-			throw new CustomRuntimeException(e.getMessage(), "203");
+			result.put("Complete", Integer.toString(complete));
+			result.put("Error", Integer.toString(result.size() - complete));
+		} else {
+			result.put("Error", "No data in file");
 		}
 		return result;
 	}
@@ -161,6 +176,8 @@ public class RegisterService implements IRegisterService {
 			}
 		} catch (NotFoundException e) {
 			throw new CustomRuntimeException(e.getMessage(), "202");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(),"100");
 		}
 		return result.toString();
 	}
@@ -179,8 +196,10 @@ public class RegisterService implements IRegisterService {
 				studentService.update(student);
 				return "Cập nhật thông tin học sinh thành công!";
 			}
-		} catch (NotFoundException | MappingException e) {
-			throw new CustomRuntimeException(e.getMessage(), "202");
+		} catch (NotFoundException e) {
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (MappingException e) {
+			throw new CustomRuntimeException(e.getMessage(),"101");
 		}
 		return "";
 	}

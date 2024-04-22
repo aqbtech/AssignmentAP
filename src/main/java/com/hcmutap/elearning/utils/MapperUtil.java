@@ -24,16 +24,16 @@ public class MapperUtil {
 		}
 		return mapperUtil;
 	}
-	public <T> T toModelFromModelMap(ModelMap modelMap, Class<T> tClass) {
+	public <T> T toModelFromModelMap(ModelMap modelMap, Class<T> tClass) throws MappingException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			String jsonString = new ObjectMapper().writeValueAsString(modelMap);
 			return mapper.readValue(jsonString, tClass);
 		} catch (JsonProcessingException e) {
-			System.out.print(e.getMessage());
+			logger.error("Can not cast from model to ModelMap {}",e.getMessage());
+			throw new MappingException(e.getMessage());
 		}
-		return null;
 	}
 	public <T> void updateModelFromDto(T model, RegisterDTO dto) throws MappingException {
 		Field[] dtoFields = dto.getClass().getDeclaredFields();
@@ -46,62 +46,63 @@ public class MapperUtil {
 				if (dtoField.getName().equals(modelField.getName())) {
 					try {
 						Object value = dtoField.get(dto);
-						if (value != null && !StringUtils.hasText(value.toString())) {
+						if (value != null && StringUtils.hasText(value.toString())) {
 							modelField.set(model, value);
 						}
 					} catch (IllegalAccessException e) {
+						logger.error("Can not update model from dto {}",e.getMessage());
 						throw new MappingException(e.getMessage());
 					}
 				}
 			}
 		}
 	}
-	public <T> ModelMap toModelMapFromDTO(T dto) {
+	public <T> ModelMap toModelMapFromDTO(T dto) throws MappingException {
 		try {
 			Map<String, Object> map = new ObjectMapper().convertValue(dto, new TypeReference<>() {});
 			ModelMap modelMap = new ModelMap();
 			modelMap.addAllAttributes(map);
 			return modelMap;
 		} catch (Exception e) {
-			System.out.print(e.getMessage());
+			logger.error("Can not cast from DTO to ModelMap {}",e.getMessage());
+			throw new MappingException(e.getMessage());
 		}
-		return null;
 	}
-	public <T> T toDTOFromModel(Object object, Class<T> tClass) {
+	public <T> T toDTOFromModel(Object object, Class<T> tClass) throws MappingException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			String json = mapper.writeValueAsString(object);
 			return mapper.readValue(json, tClass);
 		} catch (Exception e) {
-			System.out.println("Error converting object to DTO: " + e.getMessage());
-			e.printStackTrace();
+			logger.error("Can not cast from model to DTO {}",e.getMessage());
+			throw new MappingException(e.getMessage());
 		}
-		return null;
 	}
 	public <T> T toModel(String value, Class<T> tClass) throws MappingException {
 		try {
 			return new ObjectMapper().readValue(value, tClass);
 		} catch (Exception e) {
+			logger.error("Can not cast from string to model {}",e.getMessage());
 			throw new MappingException(e.getMessage());
 		}
 	}
-	public String toJson(Object object) {
+	public String toJson(Object object) throws MappingException {
 		try {
 			return new ObjectMapper().writeValueAsString(object);
 		} catch (Exception e) {
-			System.out.print(e.getMessage());
+			logger.error("Can not cast from object to json {}",e.getMessage());
+			throw new MappingException(e.getMessage());
 		}
-		return null;
 	}
-	public Map<String,?> toMap(Object object) {
+	public Map<String,?> toMap(Object object) throws MappingException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			return mapper.convertValue(object, new TypeReference<Map<String, Object>>() {});
 		} catch (Exception e) {
-			System.out.print(e.getMessage());
+			logger.error("Can not cast from object to map {}",e.getMessage());
+			throw new MappingException(e.getMessage());
 		}
-		return null;
 	}
 }

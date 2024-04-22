@@ -4,7 +4,9 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.hcmutap.elearning.constant.SystemConstant;
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
+import com.hcmutap.elearning.exception.MappingException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.utils.MapperUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,20 +54,33 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		DocumentReference docRef = db.collection(collectionPath).document();
 		// Set the ID to the document reference ID before saving
 		ReflectionUtils.setField(documentId, t, docRef.getId());
-		docRef.set(t);
+		ApiFuture<WriteResult> apiFuture = docRef.set(t);
+		try {
+			apiFuture.get(); // wait for done
+		} catch (InterruptedException | ExecutionException e) {
+			throw new CustomRuntimeException("Error while saving document", "100");
+		}
 		return (ID) docRef.getId();
 	}
 
 	@Override
-	public T update(T t) {
+	public T update(T t) throws TransactionalException {
 		ReflectionUtils.makeAccessible(documentId);
 		ID id = (ID) ReflectionUtils.getField(documentId, t);
 		assert id != null : String.format("DocumentId of %s must not be null", documentClass.getSimpleName());
 		DocumentReference docRef = db.collection(collectionPath).document(id.toString());
-		Map<String, ?> test = MapperUtil.getInstance().toMap(t);
+		Map<String, ?> test = null;
+		try {
+			test = MapperUtil.getInstance().toMap(t);
+		} catch (MappingException e) {
+			throw new TransactionalException(e.getMessage());
+		}
 		ApiFuture<WriteResult> apiFuture = docRef.update(Map.copyOf(test));
-		apiFuture.isDone(); // wait for done
-		// TODO: need to return response model
+		try {
+			apiFuture.get(); // wait for done
+		} catch (InterruptedException | ExecutionException e) {
+			throw new TransactionalException("Error while updating document");
+		}
 		return t;
 	}
 	private List<String> findDocumentId(ID id) throws ExecutionException, InterruptedException {
@@ -76,7 +91,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 		return list.stream().map(DocumentSnapshot::getId).toList();
 	}
 	@Override
-	public void delete(ID id) {
+	public void delete(ID id) throws TransactionalException {
 		List<String> ids = null;
 		try {
 			ids = findDocumentId(id);
@@ -85,8 +100,7 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			apiFuture.isDone();
 		} catch (ExecutionException | InterruptedException e) {
 			logger.error("Error while deleting document with id: {}", id);
-			// implfunc throw an exception
-			// throw new NotFoundInDB(String.format("Document with id: %s not found", id));
+			throw new TransactionalException(String.format("Document with id: %s not found", id));
 		}
 	}
 
@@ -173,29 +187,29 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 	}
 
 	@Override
-	public T findByFirebaseId(String firebaseId) throws NotFoundInDB {
+	public T findByFirebaseId(String firebaseId) throws TransactionalException {
 		try {
 			return db.collection(collectionPath).document(firebaseId).get().get().toObject(documentClass);
 		} catch (ExecutionException | InterruptedException e) {
 			logger.error("Error while getting document by firebaseId: {}", firebaseId);
-			throw new NotFoundInDB(String.format("Document with firebaseId: %s not found", firebaseId));
+			throw new TransactionalException(String.format("Document with firebaseId: %s not found", firebaseId));
 		}
 	}
 
 	@Override
-	public T findById(ID id) throws NotFoundInDB {
+	public T findById(ID id) throws TransactionalException {
 		try {
 			String key = secondaryId.getName();
 			List<T> res = findBy(key, id.toString());
 			if (res.isEmpty()) {
-				throw new NotFoundInDB(String.format("Document with id: %s not found", id));
+				throw new TransactionalException(String.format("Document with id: %s not found", id));
 			} else {
 				return res.getFirst();
 			}
-		} catch (NotFoundInDB e) {
+		} catch (TransactionalException e) {
 			return findByFirebaseId(id.toString());
 		} catch (Throwable e) {
-			throw new NotFoundInDB(e.getMessage());
+			throw new TransactionalException(e.getMessage());
 		}
 	}
 }

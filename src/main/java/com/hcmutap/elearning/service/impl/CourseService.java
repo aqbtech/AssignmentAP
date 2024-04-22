@@ -3,7 +3,7 @@ package com.hcmutap.elearning.service.impl;
 import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.exception.NotFoundException;
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.PointModel;
@@ -43,7 +43,7 @@ public class CourseService implements ICourseService {
     public CourseModel findById(String courseId) throws NotFoundException {
 		try {
 			return courseDAO.findById(courseId);
-		} catch (NotFoundInDB e) {
+		} catch (TransactionalException e) {
 			throw new NotFoundException(e.getMessage());
 		}
 	}
@@ -54,7 +54,7 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public void update(CourseModel courseModel) {
+    public void update(CourseModel courseModel) throws TransactionalException {
         courseDAO.update(courseModel);
     }
 
@@ -64,7 +64,7 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public void delete(String courseId) {
+    public void delete(String courseId) throws TransactionalException {
         courseDAO.delete(courseId);
     }
 

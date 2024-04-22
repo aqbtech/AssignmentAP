@@ -3,8 +3,7 @@ package com.hcmutap.elearning.controller.web;
 
 import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.dto.*;
-import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
-import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.*;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
@@ -14,16 +13,13 @@ import com.hcmutap.elearning.service.impl.Class_CourseService;
 import com.hcmutap.elearning.service.impl.CourseService;
 import com.hcmutap.elearning.service.impl.ExcelService;
 import com.hcmutap.elearning.service.impl.UserService;
-import com.hcmutap.elearning.utils.MapperUtil;
-import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -35,32 +31,34 @@ import java.util.*;
 @RequestMapping(value = "/teacher")
 public class TeacherController {
 	private static final Logger logger = LoggerFactory.getLogger(TeacherController.class);
-	@Resource
-	private UserService userService;
-	@Resource
-	private IStudentService studentService;
-	@Resource
-	private IClassService classService;
-	@Resource
-	private ITeacherService teacherService;
-	@Resource
-	private IPointService pointService;
-	@Resource
-	private Class_CourseService class_courseService;
-	@Resource
-	private CourseService courseService;
+	private final UserService userService;
+	private final IClassService classService;
+	private final ITeacherService teacherService;
+	private final IPointService pointService;
+	private final Class_CourseService class_courseService;
+	private final CourseService courseService;
 
-	@GetMapping(value = "/course")
-	public String teacher(@RequestParam("id") int id) {
-		return "web/views/view_course_teacher";
+	@Autowired
+	public TeacherController(UserService userService, IClassService classService, ITeacherService teacherService, IPointService pointService, Class_CourseService class_courseService, CourseService courseService) {
+		this.userService = userService;
+		this.classService = classService;
+		this.teacherService = teacherService;
+		this.pointService = pointService;
+		this.class_courseService = class_courseService;
+		this.courseService = courseService;
 	}
+
+//	@GetMapping(value = "/course")
+//	public String teacher(@RequestParam("id") int id) {
+//		return "web/views/view_course_teacher";
+//	}
 
 	@GetMapping(value = "/registration")
 	public String regis(@RequestParam("courseId") String id, Principal principal, ModelMap model) {
 		try {
 			Singleton check = Singleton.getInstance();
-			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+//			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findByUsername(principal.getName());
 
 			List<Class_CourseDTO> class_course = new ArrayList<>();
 			List<Class_CourseDTO> class_course_of_teacher = class_courseService.getClass_Course(teacherModel.getUsername());
@@ -89,8 +87,8 @@ public class TeacherController {
 			model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 			model.addAttribute("class_course", class_course);
 			return "web/views/teacher-service/registration";
-		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+		} catch (NotFoundException | MappingException e) {
+			throw new CustomRuntimeException(e.getMessage(),"202");
 		}
 
 	}
@@ -100,8 +98,8 @@ public class TeacherController {
 							final RedirectAttributes redirectAttributes){
 
 		try {
-			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+//			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findByUsername(principal.getName());
 
 			String message = teacherService.Dangkilophoc(teacherModel.getId(), classId);
 
@@ -112,8 +110,8 @@ public class TeacherController {
 			modelMap.addAttribute("class_course_of_teacher", class_course_of_teacher);
 			modelMap.addAttribute("class_course", class_course);
 			return "redirect:/teacher/registration?courseId=";
-		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+		} catch (NotFoundException | MappingException e) {
+			throw new CustomRuntimeException(e.getMessage(), "202");
 		}
 
 	}
@@ -121,8 +119,8 @@ public class TeacherController {
 	@GetMapping(value = "/timetable")
 	public String timetable(Principal principal,ModelMap model){
 		try {
-			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+//			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findByUsername(principal.getName());
 			List<ClassModel> classes = teacherService.getAllClass(teacherModel.getUsername());
 			model.addAttribute("classes", classes);
 			return "web/views/teacher-service/time-table";
@@ -134,8 +132,8 @@ public class TeacherController {
 	@GetMapping(value = "/inputscore")
 	public String inputscore(Principal principal,ModelMap model){
 		try {
-			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			TeacherModel teacherModel = teacherService.findById(infoDTO.getId());
+//			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			TeacherModel teacherModel = teacherService.findByUsername(principal.getName());
 			List<ClassModel> classes = teacherService.getAllClass(teacherModel.getUsername());
 			model.addAttribute("classes", classes);
 			return "web/views/teacher-service/InputScore/inputscore";
@@ -160,24 +158,21 @@ public class TeacherController {
 							  @RequestParam(defaultValue = "1") Integer page,
 							  @RequestParam(defaultValue = "6") Integer size,
 							  Principal principal, Model model){
-		try{
+		try {
 			List<PointModel> check = pointService.getListStudentByClassId(classId);
-		}catch (NotFoundException e){
+		} catch (NotFoundException e) {
 			return "redirect:/teacher/update_point?classId="+classId+"&courseId="+courseId;
 		}
-		try{
+		try {
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
-			if(infoDTO.getRole().equalsIgnoreCase("student")){
-				model.addAttribute("message", "You are not a teacher");
-				return "login/404_page";
-			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
+			if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
 				if (!teacherService.isExistTeacherInClass(principal.getName(), classId)) {
 					model.addAttribute("message", "You are not in this class");
-					return "login/404_page";
+					return "login/access_denied";
 				}
 			} else {
 				model.addAttribute("message", "You are not a teacher");
-				return "login/404_page";
+				return "login/access_denied";
 			}
 			try {
 				CourseModel courseModel = courseService.getCourseInfo(courseId);
@@ -199,8 +194,9 @@ public class TeacherController {
 				logger.error("Error in update_student");
 				return "redirect:/teacher/update_point?classId="+classId+"&courseId="+courseId;
 			}
-		} catch(NotFoundException e) {
-			throw new RuntimeException(e);
+		} catch(NotFoundException | MappingException e) {
+			logger.error("Error in update_student, mapping exception");
+			throw new CustomRuntimeException(e.getMessage(), "500");
 		}
 	}
 
@@ -218,7 +214,9 @@ public class TeacherController {
 			classService.NhapDiem(studentId, classId, pointDTO);
 			return "redirect:/teacher/update_student?classId=" + classId + "&courseId=" + courseId;
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 
@@ -261,9 +259,9 @@ public class TeacherController {
 			return "admin/views/add-many-account";
 		} catch (NotFoundException e) {
 			logger.error("Can't add account because NFE");
-            throw new RuntimeException(e);
-        }
-    }
-
-
+            throw new CustomRuntimeException(e.getMessage(), "500");
+        } catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
+		}
+	}
 }

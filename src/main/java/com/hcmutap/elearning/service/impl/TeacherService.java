@@ -5,7 +5,7 @@ import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.dao.impl.TeacherDAO;
 import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.TeacherModel;
@@ -52,8 +52,8 @@ public class TeacherService implements ITeacherService {
 		TeacherModel teacherModel = null;
 		try {
 			teacherModel = teacherDAO.findById(id);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 		if (teacherModel != null){
 			return teacherModel;
@@ -72,16 +72,16 @@ public class TeacherService implements ITeacherService {
 		try {
 			TeacherModel teacherModels = teacherDAO.findById(teacherModel.getId());
 			teacherDAO.update(teacherModel);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new CustomRuntimeException(notFoundInDB.getMessage(), "404");
+		} catch (TransactionalException transactionalException) {
+			throw new CustomRuntimeException(transactionalException.getMessage(), "100");
 		}
 	}
 	private void delete(String id) {
 		try {
 			TeacherModel teacherModel = teacherDAO.findById(id);
 			teacherDAO.delete(id);
-		} catch (NotFoundInDB notFoundInDB) {
-			throw new CustomRuntimeException(notFoundInDB.getMessage(), "404");
+		} catch (TransactionalException transactionalException) {
+			throw new CustomRuntimeException(transactionalException.getMessage(), "100");
 		}
 	}
 	@Override
@@ -97,7 +97,7 @@ public class TeacherService implements ITeacherService {
 		if (teacherModels != null && !teacherModels.isEmpty()){
 			return teacherModels.getFirst();
 		} else {
-			throw new NotFoundException("Teacher with username " +username + "not found");
+			throw new NotFoundException("Teacher with username " + username + "not found");
 		}
 	}
 
@@ -106,8 +106,8 @@ public class TeacherService implements ITeacherService {
 		try {
 			TeacherModel teacherModel = teacherDAO.findById(id);
 			return teacherModel != null;
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new CustomRuntimeException(notFoundInDB.getMessage(), "404");
+		} catch (TransactionalException transactionalException) {
+			throw new CustomRuntimeException(transactionalException.getMessage(), "404");
 		}
 	}
 
@@ -141,8 +141,8 @@ public class TeacherService implements ITeacherService {
 			result.add(c);
 		}
 		return result;
-		} catch (NotFoundInDB | NotFoundException notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException | NotFoundException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 	}
 
@@ -199,8 +199,8 @@ public class TeacherService implements ITeacherService {
 			classService.update(classModel);
 			update(teacherModel);
 			return "Đăng ký thành công";
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 	}
 

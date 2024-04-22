@@ -4,7 +4,7 @@ import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.*;
 import com.hcmutap.elearning.dto.PointDTO;
 import com.hcmutap.elearning.exception.NotFoundException;
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +57,8 @@ public class ClassService implements IClassService {
     public ClassModel findById(String id) throws NotFoundException {
 		try {
 			return classDAO.findById(id);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 	}
     @Override
@@ -75,7 +75,7 @@ public class ClassService implements IClassService {
         return classDAO.save(classModel);
     }
     @Override
-    public void update(ClassModel classModel) {
+    public void update(ClassModel classModel) throws TransactionalException {
         classDAO.update(classModel);
     }
 
@@ -84,7 +84,7 @@ public class ClassService implements IClassService {
 
     }
     @Override
-    public void delete(String id) throws NotFoundException {
+    public void delete(String id) throws NotFoundException, TransactionalException {
         List<ClassModel> cls = findBy("firebaseId", id);
         if (!cls.isEmpty()) {
             ClassModel classModel = cls.getFirst();
@@ -98,7 +98,7 @@ public class ClassService implements IClassService {
     public ClassModel getClassInfo(String classId) throws NotFoundException {
 		try {
 			return classDAO.getClassInfo(classId);
-		} catch (NotFoundInDB e) {
+		} catch (TransactionalException e) {
 			throw new NotFoundException(e.toString());
 		}
 	}
@@ -150,20 +150,20 @@ public class ClassService implements IClassService {
             tmp.setPointCK(15);
             pointService.save(tmp);
             return true;
-        } catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-            throw new NotFoundException(notFoundInDB.getMessage());
+        } catch (TransactionalException transactionalException) {
+            throw new NotFoundException(transactionalException.getMessage());
         }
     }
 
-    public boolean addTeacherToClass(String teacherId, String classId) throws NotFoundException {
+    public boolean addTeacherToClass(String teacherId, String classId) throws NotFoundException, TransactionalException {
         ClassModel classModel = findById(classId);
         if(classModel.getTeacherId() != null)
             return false;
 		TeacherModel teacher = null;
 		try {
 			teacher = teacherDAO.findById(teacherId);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 		classModel.setTeacherId(teacher.getId());
         classModel.setTeacherName(teacher.getFullName());
@@ -172,7 +172,7 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public boolean NhapDiem(String studentId, String classId, PointDTO point) throws NotFoundException {
+    public boolean NhapDiem(String studentId, String classId, PointDTO point) throws NotFoundException, TransactionalException {
         List<PointModel> listPoint = pointDAO.findBy("studentId", studentId);
         for (PointModel item : listPoint) {
             if (item.getClassId().equals(classId)) {
@@ -188,6 +188,8 @@ public class ClassService implements IClassService {
                         break;
                     }
                 }
+                if (courseModel == null)
+                    throw new NotFoundException("Course not found");
                 if(courseModel.getPercentBT()>0){
                     pointModel.setPointBT(point.getPointBT());
                 }
@@ -208,7 +210,7 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public void NhapDiemCaLop(String classId, List<PointDTO> listPoint) throws NotFoundException {
+    public void NhapDiemCaLop(String classId, List<PointDTO> listPoint) throws NotFoundException, TransactionalException {
         List<PointModel> listPointClass = pointDAO.findBy("classId", classId);
         for(PointModel item: listPointClass){
             for(PointDTO point: listPoint){
@@ -227,37 +229,37 @@ public class ClassService implements IClassService {
     }
 
     @Override
-    public boolean updateTileOfDoc(String classId, Document docCurrent, String newTitle) throws NotFoundException {
+    public boolean updateTileOfDoc(String classId, Document docCurrent, String newTitle) throws NotFoundException, TransactionalException {
         ClassModel classModel = findById(classId);
         return infoService.updateTile(classModel.getInfoId(), docCurrent, newTitle);
     }
 
     @Override
-    public boolean addFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException {
+    public boolean addFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException, TransactionalException {
         ClassModel classModel = findById(classId);
         return infoService.addFile(classModel.getInfoId(), docCurrent, file);
     }
 
     @Override
-    public boolean deleteFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException {
+    public boolean deleteFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException, TransactionalException {
         ClassModel classModel = findById(classId);
         return infoService.deleteFile(classModel.getInfoId(), docCurrent, file);
     }
 
     @Override
-    public boolean addNewDoc(String classId) throws NotFoundException {
+    public boolean addNewDoc(String classId) throws NotFoundException, TransactionalException {
         ClassModel classModel = findById(classId);
         return infoService.addNewDoc(classModel.getInfoId());
     }
 
     @Override
-    public boolean addDoc(String classId, Document doc) throws NotFoundException {
+    public boolean addDoc(String classId, Document doc) throws NotFoundException, TransactionalException {
         ClassModel classModel = findById(classId);
         return infoService.addDoc(classModel.getInfoId(), doc);
     }
 
     @Override
-    public boolean deleteDoc(String classId, Document doc) throws NotFoundException {
+    public boolean deleteDoc(String classId, Document doc) throws NotFoundException, TransactionalException {
         ClassModel classModel = findById(classId);
         return infoService.deleteDoc(classModel.getInfoId(), doc);
     }

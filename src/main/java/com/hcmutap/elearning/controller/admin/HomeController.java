@@ -1,18 +1,20 @@
 package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.Singleton;
+import com.hcmutap.elearning.constant.SystemConstant;
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
 import com.hcmutap.elearning.exception.CustomRuntimeException;
+import com.hcmutap.elearning.exception.MappingException;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
 
-import com.hcmutap.elearning.service.impl.ExcelService;
 import com.hcmutap.elearning.service.impl.RegisterService;
 import com.hcmutap.elearning.service.impl.SemesterService;
 import com.hcmutap.elearning.utils.MapperUtil;
 import com.hcmutap.elearning.validator.RegisterDTOValidator;
+import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -137,11 +137,12 @@ public class HomeController {
 	@PostMapping("/admin-management/view-info")
 	public String updateAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type,
-								@ModelAttribute("form") RegisterDTO form, ModelMap model) {
+								@ModelAttribute("form") RegisterDTO form,
+								RedirectAttributes redirectAttributes) {
 		form.setId(id);
 		String message = registerService.updateAccount(form, type);
-		model.addAttribute("message", message);
-		return "admin/views/update-account";
+		redirectAttributes.addFlashAttribute("message", message);
+		return "redirect:/admin-management/view-info?id=" + id + "&type=" + type;
 	}
 
 	@GetMapping("/admin-management/registration")
@@ -177,17 +178,17 @@ public class HomeController {
 						   @RequestParam("type") String type,
 						   Model model) {
 		try {
-			if (type.equals("student")) {
+			if (SystemConstant.ROLE_STUDENT.equalsIgnoreCase(type)) {
 				model.addAttribute("user", studentService.findById(id));
 				model.addAttribute("type", "student");
-			} else if (type.equals("teacher")) {
+			} else if (SystemConstant.ROLE_TEACHER.equalsIgnoreCase(type)) {
 				model.addAttribute("type", "teacher");
 				model.addAttribute("user", teacherService.findById(id));
 			}
 			model.addAttribute("form", new RegisterDTO());
 			return "admin/views/update-account";
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
 		}
 	}
 
@@ -216,11 +217,11 @@ public class HomeController {
 							 @ModelAttribute("registerForm") @Validated RegisterDTO registerDTO,
 							 BindingResult result,
 							 final RedirectAttributes redirectAttributes) {
-
-			if (result.hasErrors()) {
-				model.addAttribute("message", "Failed to add account");
-				return "admin/views/createAccount";
-			}
+		if (result.hasErrors()) {
+			model.addAttribute("message", "Failed to add account");
+			return "admin/views/createAccount";
+		}
+		try {
 			ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
 			String message = registerService.register(modelMap);
 			if (message.equals("Success")) {
@@ -229,7 +230,11 @@ public class HomeController {
 				redirectAttributes.addFlashAttribute("message", message);
 				return "redirect:/admin-management/add-account";
 			}
-
+		} catch (MappingException e) {
+			logger.error("Can't add account because mapping error {}", e.getMessage());
+			model.addAttribute("message", "Không thể thêm tài khoản do lỗi dữ liệu nhập vào");
+			return "admin/views/createAccount";
+		}
 	}
 	@GetMapping("/admin-management/add-by-file")
 	public String addAccountByFile() {
@@ -238,40 +243,26 @@ public class HomeController {
 	@PostMapping(value = "/admin-management/add-by-file")
 	public String addAccount(@RequestParam("file") MultipartFile file, Model model) {
 		try {
-			ExcelService<RegisterDTO> excelService = new ExcelService<>();
-			Optional<List<RegisterDTO>> list = excelService.readAndConvert(file, RegisterDTO.class);
-			Map<String, String> complete = new HashMap<>();
-			Map<String, String> failure = new HashMap<>();
-			if (list.isPresent()) {
-				for (RegisterDTO registerDTO : list.get()) {
-					Errors errors = new BeanPropertyBindingResult(registerDTO, "registerDTO");
-					registerDTOValidator.validate(registerDTO, errors);
-					if (errors.hasErrors()) {
-						failure.put(registerDTO.getUsername(),
-								"Failed to add account, message: " + errors.getAllErrors());
-					} else {
-						ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
-						String message = registerService.register(modelMap);
-						if (!message.equals("Success")) {
-							if (!failure.containsKey(registerDTO.getUsername())) {
-								failure.put(registerDTO.getUsername(), "Failed to add account, message: " + message);
-							}
-							logger.error(message);
-						} else {
-							complete.put(registerDTO.getUsername(), "Success");
-						}
-					}
-				}
+			Map<String, String> result = registerService.register(file);
+			String message;
+			List<String> listError = new ArrayList<>();
+			if(!result.containsKey("Complete")) {
+				message = "Failed to add account, message: " + result.get("Error");
 			} else {
-				logger.atDebug().log("List is empty");
+				message = "Complete: " + result.get("Complete") + " accounts\n";
+				message += "Error: " + result.get("Error") + " accounts\n";
+				result.forEach((key, value) -> {
+					if (!key.equals("Complete") && !key.equals("Error")) {
+						listError.add(key + ": " + value);
+					}
+				});
 			}
-			String result = "Complete: " + complete.size() + " accounts\n" +
-					"Failure: " + failure.size() + " accounts\n";
-			model.addAttribute("message", result);
+			model.addAttribute("message", message);
+			model.addAttribute("listError", listError);
 			return "admin/views/add-many-account";
-		} catch (ConvertExcelToObjectException e) {
-			logger.error("Can't add account because {}", e.getMessage());
-			model.addAttribute("message", e.getMessage());
+		} catch (ConvertExcelToObjectException | MappingException e) {
+			logger.error("Cant add account because mapping error {}", e.getMessage());
+			model.addAttribute("message", "Không thể thêm tài khoản do lỗi dữ liệu nhập vào");
 			return "admin/views/add-many-account";
 		}
 	}

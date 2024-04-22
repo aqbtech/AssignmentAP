@@ -1,7 +1,9 @@
 package com.hcmutap.elearning.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.UserModel;
 import com.hcmutap.elearning.service.IUserService;
 import com.hcmutap.elearning.utils.HttpUtil;
@@ -31,7 +33,9 @@ public class UserAPI {
 		try {
 			userService.update(userModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 		mapper.writeValue(response.getOutputStream(), userModel);
 	}
@@ -44,7 +48,9 @@ public class UserAPI {
 		try {
 			userService.delete(userModel.getFirebaseId());
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 		mapper.writeValue(response.getOutputStream(), "{}");
 	}

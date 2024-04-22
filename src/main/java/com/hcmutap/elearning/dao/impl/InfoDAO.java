@@ -2,6 +2,7 @@ package com.hcmutap.elearning.dao.impl;
 
 import com.hcmutap.elearning.dao.firebase.DefaultFirebaseDatabase;
 import com.hcmutap.elearning.dao.firebase.Options;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.Document;
 import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.model.InfoClassModel;
@@ -16,7 +17,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         return findBy("classId", classId, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
     }
 
-    public boolean updateTile(String idClassInfo, Document docCurrent, String newTitle) {
+    public boolean updateTile(String idClassInfo, Document docCurrent, String newTitle) throws TransactionalException {
         InfoClassModel info;
         try{
             info = findById(idClassInfo);
@@ -33,7 +34,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         return false;
     }
 
-    public boolean addFile(String idClassInfo, Document docCurrent, FileInfo file) {
+    public boolean addFile(String idClassInfo, Document docCurrent, FileInfo file) throws TransactionalException {
         InfoClassModel info;
         try{
             info = findById(idClassInfo);
@@ -50,7 +51,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         return false;
     }
 
-    public boolean deleteFile(String idClassInfo, Document docCurrent, FileInfo file) {
+    public boolean deleteFile(String idClassInfo, Document docCurrent, FileInfo file) throws TransactionalException {
         InfoClassModel info;
         try{
             info = findById(idClassInfo);
@@ -71,7 +72,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         return false;
     }
 
-    public boolean addDoc(String idClassInfo) {
+    public boolean addDoc(String idClassInfo) throws TransactionalException {
         InfoClassModel info;
         try{
             info = findById(idClassInfo);
@@ -82,7 +83,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         update(info);
         return true;
     }
-    public boolean addDoc (String idClassInfo, Document doc) {
+    public boolean addDoc (String idClassInfo, Document doc) throws TransactionalException {
         InfoClassModel info;
         try{
             info = findById(idClassInfo);
@@ -94,7 +95,7 @@ public class InfoDAO extends DefaultFirebaseDatabase<InfoClassModel, String>{
         return true;
     }
 
-    public boolean deleteDoc (String idClassInfo, Document doc) {
+    public boolean deleteDoc (String idClassInfo, Document doc) throws TransactionalException {
         InfoClassModel info;
         try{
             info = findById(idClassInfo);

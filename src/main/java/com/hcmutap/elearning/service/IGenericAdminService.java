@@ -2,6 +2,7 @@ package com.hcmutap.elearning.service;
 
 
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 
 import java.util.List;
 
@@ -34,12 +35,12 @@ public interface IGenericAdminService<T> {
 	 * Update object
 	 * @param object object model to update
 	 */
-	void update(T object) throws NotFoundException;
+	void update(T object) throws NotFoundException, TransactionalException;
 
 	/**
 	 * Delete object by id
 	 * @param ids list of id need to delete
 	 */
-	void delete(List<String> ids) throws NotFoundException;
+	void delete(List<String> ids) throws NotFoundException, TransactionalException;
 
 }

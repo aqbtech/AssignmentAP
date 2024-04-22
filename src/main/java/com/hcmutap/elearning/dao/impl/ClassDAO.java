@@ -2,7 +2,7 @@ package com.hcmutap.elearning.dao.impl;
 
 import com.hcmutap.elearning.dao.firebase.DefaultFirebaseDatabase;
 import com.hcmutap.elearning.dao.firebase.Options;
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.service.IPointService;
 import jakarta.annotation.Resource;
@@ -17,10 +17,10 @@ public class ClassDAO extends DefaultFirebaseDatabase<ClassModel, String> {
 
 	@Autowired
 	private StudentDAO studentDAO;
-    public ClassModel getClassInfo(String classId) throws NotFoundInDB {
+    public ClassModel getClassInfo(String classId) throws TransactionalException {
         List<ClassModel> classModels =  findBy("classId", classId, Options.OptionBuilder.Builder().setEqual().build());
         if (classModels.isEmpty()) {
-            throw new NotFoundInDB("Error when receive in database, class with id: " + classId);
+            throw new TransactionalException("Error when receive in database, class with id: " + classId);
         }
         return classModels.getFirst();
     }
@@ -37,15 +37,15 @@ public class ClassDAO extends DefaultFirebaseDatabase<ClassModel, String> {
         List<String> listClassId = null;
         try {
             listClassId = studentDAO.findById(studentId).getClasses();
-        } catch (NotFoundInDB notFoundInDB) {
-            throw new RuntimeException(notFoundInDB);
+        } catch (TransactionalException transactionalException) {
+            throw new RuntimeException(transactionalException);
         }
         for(String classId : listClassId) {
             ClassModel classModel = null;
             try {
                 classModel = findById(classId);
-            } catch (NotFoundInDB notFoundInDB) {
-                throw new RuntimeException(notFoundInDB);
+            } catch (TransactionalException transactionalException) {
+                throw new RuntimeException(transactionalException);
             }
             if(classModel != null) {
                 TimeTableList.add(classModel);

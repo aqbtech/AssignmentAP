@@ -3,7 +3,9 @@ package com.hcmutap.elearning.service.impl;
 import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.UserDAO;
 import com.hcmutap.elearning.dto.InfoDTO;
+import com.hcmutap.elearning.exception.MappingException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.model.UserModel;
@@ -65,7 +67,7 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public void update(UserModel userModel) throws NotFoundException {
+	public void update(UserModel userModel) throws NotFoundException, TransactionalException {
 		List<UserModel> userModels = userDAO.findBy("username", userModel.getUsername());
 		if (userModels.isEmpty()) {
 			throw new NotFoundException("Username not found");
@@ -75,14 +77,14 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public void delete(List<String> ids) throws NotFoundException {
+	public void delete(List<String> ids) throws NotFoundException, TransactionalException {
 		for (String id : ids) {
 			userDAO.delete(id);
 		}
 	}
 
 	@Override
-	public void delete(String username) throws NotFoundException {
+	public void delete(String username) throws NotFoundException, TransactionalException {
 		List<UserModel> userModels = userDAO.findBy("username", username);
 		if (!userModels.isEmpty()) {
 			userDAO.delete(userModels.getFirst().getFirebaseId());
@@ -106,7 +108,7 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public InfoDTO getInfo(String username) throws NotFoundException {
+	public InfoDTO getInfo(String username) throws NotFoundException, MappingException {
 		List<UserModel> userModels = userDAO.findBy("username", username, Options.OptionBuilder.Builder().setEqual().build());
 		if (!userModels.isEmpty()) {
 			UserModel userModel = userModels.getFirst();

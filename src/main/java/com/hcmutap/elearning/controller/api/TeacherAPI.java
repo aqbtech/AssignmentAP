@@ -1,7 +1,9 @@
 package com.hcmutap.elearning.controller.api;
 
 
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
 import jakarta.annotation.Resource;
@@ -35,7 +37,9 @@ public class TeacherAPI {
 		try {
 			teacherService.update(teacherModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 	@DeleteMapping("/teacher")
@@ -43,7 +47,9 @@ public class TeacherAPI {
 		try {
 			teacherService.delete(ids);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 }

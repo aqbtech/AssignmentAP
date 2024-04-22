@@ -1,6 +1,8 @@
 package com.hcmutap.elearning.controller.api;
 
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.IPointService;
 import jakarta.annotation.Resource;
@@ -34,7 +36,9 @@ public class PointAPI {
 		try {
 			pointService.update(pointModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
     @DeleteMapping("/points")
@@ -42,7 +46,9 @@ public class PointAPI {
 		try {
 			pointService.delete(ids);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(),"404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 }

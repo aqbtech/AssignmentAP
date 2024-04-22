@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>403 page</title>
+    <title>Từ chối truy cập</title>
+    <link rel="icon" th:href="@{/images/common/favicon.ico}" type="image/x-icon">
     <link rel="stylesheet" th:href="@{/template/login/403_style.css}">
 </head>
 <body>
 <div class="wrapper">
     <div class="box">
         <h1>403</h1>
-        <p>Sorry, it's not allowed to go beyond this point!</p>
-        <p><a href="/">Please, go back this way.</a></p>
+        <p>Xin lỗi, bạn không được phép đi xa hơn điểm này!</p>
+        <p class="alert alert-danger" th:if="${message}" th:text="${message}"></p>
+        <p><a href="/">Vui lòng, quay lại theo cách này.</a></p>
     </div>
 </div>
 </body>

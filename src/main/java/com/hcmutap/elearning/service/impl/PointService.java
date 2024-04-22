@@ -4,8 +4,7 @@ import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
 import com.hcmutap.elearning.exception.NotFoundException;
-import com.hcmutap.elearning.exception.NotFoundInDB;
-import com.hcmutap.elearning.model.ClassModel;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.IPointService;
@@ -53,7 +52,7 @@ public class PointService implements IPointService {
         else {
 			try {
 				return pointDAO.findById(id);
-			} catch (NotFoundInDB e) {
+			} catch (TransactionalException e) {
 				throw new NotFoundException(e.getMessage());
 			}
 		}
@@ -69,7 +68,7 @@ public class PointService implements IPointService {
 		try {
 			pointDAO.findById(pointModel.getFirebaseId());
             pointDAO.update(pointModel);
-		} catch (NotFoundInDB e) {
+		} catch (TransactionalException e) {
 			throw new NotFoundException(e.getMessage());
 		}
     }
@@ -83,7 +82,7 @@ public class PointService implements IPointService {
                     throw new NotFoundException("Not found point with id: " + id);
                 }
                 pointDAO.delete(id);
-            } catch (NotFoundInDB e) {
+            } catch (TransactionalException e) {
                 throw new NotFoundException(e.getMessage());
             }
         }
@@ -117,7 +116,7 @@ public class PointService implements IPointService {
                     + pointModel.getPointGK() * courseModel.getPercentGK()
                     + pointModel.getPointCK() * courseModel.getPercentCK();
             return (averagePoint / 100);
-        } catch (NotFoundInDB e) {
+        } catch (TransactionalException e) {
             throw new RuntimeException(e);
         }
     }

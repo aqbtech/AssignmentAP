@@ -3,7 +3,7 @@ package com.hcmutap.elearning.service.impl;
 import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.SemesterDAO;
 import com.hcmutap.elearning.exception.NotFoundException;
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.SemesterModel;
 import com.hcmutap.elearning.service.ISemesterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class SemesterService implements ISemesterService {
 	public SemesterModel findById(String id) throws NotFoundException {
 		try {
 			return semesterDAO.findById(id);
-		} catch (NotFoundInDB e) {
+		} catch (TransactionalException e) {
 			throw new NotFoundException(e.getMessage());
 		}
 	}
@@ -51,7 +51,7 @@ public class SemesterService implements ISemesterService {
 	}
 
 	@Override
-	public void update(SemesterModel object) throws NotFoundException {
+	public void update(SemesterModel object) throws NotFoundException, TransactionalException {
 		List<SemesterModel> semesters = semesterDAO.findBy("id", object.getId(), Options.OptionBuilder.Builder().setEqual().build());
 		if (semesters.isEmpty()) {
 			throw new NotFoundException("Semester not found");
@@ -66,7 +66,7 @@ public class SemesterService implements ISemesterService {
 			try {
 				semesterDAO.findById(id);
 				semesterDAO.delete(id);
-			} catch (NotFoundInDB e) {
+			} catch (TransactionalException e) {
 				throw new NotFoundException(e.getMessage());
 			}
 		}

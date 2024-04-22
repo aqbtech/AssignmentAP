@@ -1,6 +1,6 @@
 package com.hcmutap.elearning.dao.firebase;
 
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.TransactionalException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -22,12 +22,12 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 * @param t Model to update
 	 * @return Updated model
 	 */
-	T update(T t);
+	T update(T t) throws TransactionalException;
 	/**
 	 * Delete a model by ID field in model
 	 * @param id ID of model
 	 */
-	void delete(ID id);
+	void delete(ID id) throws TransactionalException;
 	/**
 	 * Find all model in database
 	 * @return List of model
@@ -66,11 +66,11 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 * @param firebaseId ID of model
 	 * @return Model
 	 */
-	T findByFirebaseId(String firebaseId) throws NotFoundInDB;
+	T findByFirebaseId(String firebaseId) throws TransactionalException;
 	/**
 	 * Find model by ID
 	 * @param id ID of model
 	 * @return Model
 	 */
-	T findById(ID id) throws NotFoundInDB;
+	T findById(ID id) throws TransactionalException;
 }

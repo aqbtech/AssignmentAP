@@ -1,7 +1,9 @@
 package com.hcmutap.elearning.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.service.ICourseService;
 import com.hcmutap.elearning.utils.HttpUtil;
@@ -41,11 +43,19 @@ public class CourseAPI {
 		try {
 			courseService.update(courseModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
     @DeleteMapping("/courses")
     public void delete(@RequestBody List<String> ids) {
-        ids.forEach(id -> courseService.delete(id));
+        ids.forEach(id -> {
+			try {
+				courseService.delete(id);
+			} catch (TransactionalException e) {
+				throw new CustomRuntimeException(e.getMessage(), "100");
+			}
+		});
     }
 }

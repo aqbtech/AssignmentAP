@@ -5,7 +5,9 @@ import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.dao.impl.CourseDAO;
 import com.hcmutap.elearning.dao.impl.StudentDAO;
 import com.hcmutap.elearning.dao.impl.PointDAO;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.model.StudentModel;
@@ -68,12 +70,22 @@ public class StudentService implements IStudentService {
 		if (!isExist(studentModel.getId())) {
 			throw new NotFoundException("Student not found");
 		}
-		studentDAO.update(studentModel);
+		try {
+			studentDAO.update(studentModel);
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
+		}
 	}
 
 	@Override
 	public void delete(List<String> ids) {
-		ids.forEach(id -> studentDAO.delete(id));
+		ids.forEach(id -> {
+			try {
+				studentDAO.delete(id);
+			} catch (TransactionalException e) {
+				throw new CustomRuntimeException(e.getMessage(), "100");
+			}
+		});
 	}
 
 	@Override
@@ -136,8 +148,8 @@ public class StudentService implements IStudentService {
 			}
 
 			return add_class_to_student(studentId, classID);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 	}
 
@@ -168,8 +180,8 @@ public class StudentService implements IStudentService {
 		StudentModel studentModel = null;
 		try {
 			studentModel = studentDAO.findById(studentId);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 		List<String> classes = studentModel.getClasses();
 		List<ClassModel> result = new ArrayList<>();
@@ -185,8 +197,8 @@ public class StudentService implements IStudentService {
 		StudentModel studentModel = null;
 		try {
 			studentModel = studentDAO.findById(studentId);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 		List<String> finished_courses = studentModel.getFinished_courses();
 		List<PointModel> result = new ArrayList<>();
@@ -200,8 +212,8 @@ public class StudentService implements IStudentService {
 	public List<PointModel> getPointById(String studentId) throws NotFoundException {
 		try {
 			StudentModel studentModel = studentDAO.findById(studentId);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 		List<PointModel> point = new ArrayList<>();
 		point = pointDAO.findPoint(studentId);
@@ -213,8 +225,8 @@ public class StudentService implements IStudentService {
 		StudentModel studentModel = null;
 		try {
 			studentModel = studentDAO.findById(studentId);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 		List<CourseModel> result = new ArrayList<>();
 		List<String> courses = studentModel.getCourses();
@@ -239,10 +251,13 @@ public class StudentService implements IStudentService {
 			studentModel.getCourses().add(courseModel.getCourseId());
 			studentModel.getClasses().add(classModel.getClassId());
 			update(studentModel);
-			classService.addStudentToClass(studentId,classId);
-			return "Đăng ký thành công";
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+			boolean flag = classService.addStudentToClass(studentId,classId);
+			if(flag) {
+				return "Đăng ký thành công";
+			}
+			return "Đăng ký không thành công";
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 	}
 
@@ -260,8 +275,8 @@ public class StudentService implements IStudentService {
 	public boolean isExist(String id) {
 		try {
 			return studentDAO.findById(id) != null;
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+		} catch (TransactionalException transactionalException) {
+			throw new RuntimeException(transactionalException);
 		}
 	}
 	@Override

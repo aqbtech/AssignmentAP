@@ -2,7 +2,10 @@ package com.hcmutap.elearning.controller.web;
 
 import com.hcmutap.elearning.dto.InfoDTO;
 
+import com.hcmutap.elearning.exception.CustomRuntimeException;
+import com.hcmutap.elearning.exception.MappingException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.model.ClassModel;
 
@@ -11,6 +14,7 @@ import com.hcmutap.elearning.service.*;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -240,7 +244,11 @@ public class HomeController {
 						   @RequestParam("classId") String classId,
 						   @RequestParam("infoId") String infoId) {
 		Document document = new Document(title, new ArrayList<>());
-		infoService.addDoc(infoId,document);
+		try {
+			infoService.addDoc(infoId,document);
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
+		}
 		return "redirect:/course?id=" + classId;
 	}
 	@PostMapping("/deleteGroup")
@@ -328,7 +336,7 @@ public class HomeController {
 							   @RequestParam(required = false) String keyword,
 							   @RequestParam(defaultValue = "1") Integer page,
 							   @RequestParam(defaultValue = "3") Integer size) {
-		try{
+		try {
 			InfoDTO infoDTO = userService.getInfo(principal.getName());
 			if(infoDTO.getRole().equalsIgnoreCase("student")){
 				model.addAttribute("message", "You are not a teacher");
@@ -359,7 +367,9 @@ public class HomeController {
 			model.addAttribute("class", classModel);
 			return "web/views/list_student";
 		} catch(NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (MappingException e) {
+			throw new CustomRuntimeException(e.getMessage(), "101");
 		}
 	}
 
@@ -389,7 +399,9 @@ public class HomeController {
 			redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + student.getId() + " ra khỏi lớp thành công!");
 			return "redirect:/list-student?id=" + classId;
 		} catch(NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 

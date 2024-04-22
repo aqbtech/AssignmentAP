@@ -1,7 +1,9 @@
 package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.dto.ClassResDTO;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.SemesterModel;
@@ -13,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -72,7 +73,6 @@ public class AdminCourseController {
 			return "admin/views/view-table-class";
 		} catch (Exception e) {
 			logger.error("Error in updateCourse {}", id);
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Hiện không thể tìm thấy khóa học " + id);
 			return "redirect:/admin-management?type=course";
 		}
@@ -87,7 +87,9 @@ public class AdminCourseController {
 	}
 
 	@PostMapping("/admin-management/update-course")
-	public String updateCourse(@RequestParam("id") String id, @ModelAttribute("course") CourseModel courseModel, ModelMap model, final RedirectAttributes redirectAttributes){
+	public String updateCourse(@RequestParam("id") String id,
+							   @ModelAttribute("course") CourseModel courseModel,
+							   final RedirectAttributes redirectAttributes){
 		courseModel.setCourseId(id);
 		try {
 			CourseModel course = courseService.findById(id);
@@ -97,9 +99,10 @@ public class AdminCourseController {
 			return "redirect:/admin-management/update-course?id=" + id;
 		} catch (NotFoundException e) {
 			logger.error("Error in updateCourse Postmethod");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Hiện không thể tìm thấy khóa học " + id);
 			return "redirect:/admin-management?type=course";
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 
@@ -118,9 +121,10 @@ public class AdminCourseController {
 			return "redirect:/admin-management?type=course";
 		} catch (NotFoundException e) {
 			logger.error("Error in deleteCourse");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Xóa không thành công, không thể tìm thấy khóa học " + id);
 			return "redirect:/admin-management?type=course";
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 
@@ -197,7 +201,8 @@ public class AdminCourseController {
 	}
 
 	@GetMapping("/admin-management/update-class")
-	public String updateClass (@RequestParam("id") String id, ModelMap model, final RedirectAttributes redirectAttributes) {
+	public String updateClass (@RequestParam("id") String id, ModelMap model,
+							   final RedirectAttributes redirectAttributes) {
 		try {
 			ClassModel classModel = classService.findById(id);
 			ClassResDTO classRes = new ClassResDTO();
@@ -214,7 +219,6 @@ public class AdminCourseController {
 			return "admin/views/updateClass";
 		} catch (NotFoundException e) {
 			logger.error("Error in updateClass");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Không tìm thế lớp học " + id);
 			String[] parts = id.split("-");
 			return "redirect:/admin-management/update-course?id=" + parts[0];
@@ -250,10 +254,11 @@ public class AdminCourseController {
 			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 		} catch (NotFoundException e) {
 			logger.error("Error in updateClass Postmethod");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Chỉnh sửa không thành công, không tìm thế lớp học " + id);
 			String[] parts = id.split("-");
 			return "redirect:/admin-management/update-course?id=" + parts[0];
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 	@GetMapping("/admin-management/delete-class")
@@ -285,10 +290,11 @@ public class AdminCourseController {
 			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 		} catch (NotFoundException e) {
 			logger.error("Error in deleteClass");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Xóa không thành công, không tìm thế lớp học " + id);
 			String[] parts = id.split("-");
 			return "redirect:/admin-management/update-course?id=" + parts[0];
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 
@@ -315,11 +321,12 @@ public class AdminCourseController {
 			}
 			return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
 		} catch (NotFoundException e) {
-			logger.error("Error in deleteClass");
-			// implFunc to redirect to error page and message
+			logger.error("Error in deleteClass GET method");
 			redirectAttributes.addFlashAttribute("message", "Xóa không thành công, không tìm thế lớp học " + id);
 			String[] parts = id.split("-");
 			return "redirect:/admin-management/update-course?id=" + parts[0];
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 
@@ -399,7 +406,6 @@ public class AdminCourseController {
 			return "admin/views/updateSemester";
 		} catch (NotFoundException e) {
 			logger.error("Error in updateSemester");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
 			return "redirect:/admin-management?type=semester";
 		}
@@ -417,9 +423,10 @@ public class AdminCourseController {
 			return "redirect:/admin-management?type=semester";
 		} catch (NotFoundException e) {
 			logger.error("Error in updateSemester Postmethod");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
 			return "redirect:/admin-management?type=semester";
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 	@GetMapping("/admin-management/change-semester")
@@ -452,9 +459,10 @@ public class AdminCourseController {
 
 		} catch(NotFoundException e) {
 			logger.error("Error in changeSemester");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
 			return "redirect:/admin-management?type=semester";
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 
@@ -484,9 +492,10 @@ public class AdminCourseController {
 			}
 		} catch(NotFoundException e) {
 			logger.error("Error in deleteSemester");
-			// implFunc to redirect to error page and message
 			redirectAttributes.addFlashAttribute("message", "Không tìm thấy học kì " + id);
 			return "redirect:/admin-management?type=semester";
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 

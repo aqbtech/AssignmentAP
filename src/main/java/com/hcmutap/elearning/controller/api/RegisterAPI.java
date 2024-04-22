@@ -1,5 +1,6 @@
 package com.hcmutap.elearning.controller.api;
 
+import com.hcmutap.elearning.exception.MappingException;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.service.IRegisterService;
 
@@ -17,7 +18,7 @@ public class RegisterAPI {
 	public void register(@RequestBody ModelMap model) {
 		try {
 			registerService.register(model);
-		} catch (NotFoundException e) {
+		} catch (NotFoundException | MappingException e) {
 			throw new RuntimeException(e);
 		}
 	}

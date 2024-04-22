@@ -1,8 +1,9 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.dao.impl.InfoDAO;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
-import com.hcmutap.elearning.exception.NotFoundInDB;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.Document;
 import com.hcmutap.elearning.model.FileInfo;
 import com.hcmutap.elearning.model.InfoClassModel;
@@ -35,7 +36,7 @@ public class InfoService implements IInfoService {
     public InfoClassModel findById(String id) throws NotFoundException {
 		try {
 			return infoDAO.findById(id);
-		} catch (NotFoundInDB e) {
+		} catch (TransactionalException e) {
 			throw new NotFoundException(e.getMessage());
 		}
 	}
@@ -46,18 +47,18 @@ public class InfoService implements IInfoService {
     }
 
     @Override
-    public void update(InfoClassModel infoClass) {
+    public void update(InfoClassModel infoClass) throws TransactionalException {
         infoDAO.update(infoClass);
     }
 
     @Override
-    public void delete(List<String> ids) {
+    public void delete(List<String> ids) throws TransactionalException {
         for(String id : ids)
             infoDAO.delete((id));
     }
 
     @Override
-    public void delete(String infoId) {
+    public void delete(String infoId) throws TransactionalException {
         infoDAO.delete(infoId);
     }
 
@@ -67,31 +68,31 @@ public class InfoService implements IInfoService {
     }
 
     @Override
-    public boolean updateTile(String idClassInfo, Document docCurrent, String newTitle) {
+    public boolean updateTile(String idClassInfo, Document docCurrent, String newTitle) throws TransactionalException {
         return infoDAO.updateTile(idClassInfo, docCurrent, newTitle);
     }
 
     @Override
-    public boolean addFile(String idClassInfo, Document docCurrent, FileInfo file) {
+    public boolean addFile(String idClassInfo, Document docCurrent, FileInfo file) throws TransactionalException {
         return infoDAO.addFile(idClassInfo, docCurrent, file);
     }
 
     @Override
-    public boolean deleteFile(String idClassInfo, Document docCurrent, FileInfo file) {
+    public boolean deleteFile(String idClassInfo, Document docCurrent, FileInfo file) throws TransactionalException {
         return infoDAO.deleteFile(idClassInfo, docCurrent, file);
     }
 
     @Override
-    public boolean addNewDoc(String idClassInfo) {
+    public boolean addNewDoc(String idClassInfo) throws TransactionalException {
         return infoDAO.addDoc(idClassInfo);
     }
 
     @Override
-    public boolean addDoc(String idClassInfo, Document doc) {
+    public boolean addDoc(String idClassInfo, Document doc) throws TransactionalException {
         return infoDAO.addDoc(idClassInfo, doc);
     }
     @Override
-    public boolean deleteDoc(String idClassInfo, Document doc) {
+    public boolean deleteDoc(String idClassInfo, Document doc) throws TransactionalException {
         return infoDAO.deleteDoc(idClassInfo, doc);
     }
 }

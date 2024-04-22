@@ -1,7 +1,9 @@
 package com.hcmutap.elearning.controller.api;
 
 
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.exception.TransactionalException;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +28,9 @@ public class StudentAPI {
 		try {
 			studentService.update(studentModel);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
 	@DeleteMapping("/student")
@@ -34,7 +38,9 @@ public class StudentAPI {
 		try {
 			studentService.delete(ids);
 		} catch (NotFoundException e) {
-			throw new RuntimeException(e);
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (TransactionalException e) {
+			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 
 	}
