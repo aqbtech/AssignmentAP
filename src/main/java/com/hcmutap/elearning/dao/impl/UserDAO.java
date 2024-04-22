@@ -6,7 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class UserDAO extends DefaultFirebaseDatabase<UserModel, String> {
-	public UserModel findByUsername(String username) {
-		return findBy("username", username).getFirst();
-	}
 }

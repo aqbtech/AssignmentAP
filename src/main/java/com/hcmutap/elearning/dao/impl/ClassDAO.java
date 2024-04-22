@@ -29,9 +29,6 @@ public class ClassDAO extends DefaultFirebaseDatabase<ClassModel, String> {
         return findBy("courseId", courseId, Options.OptionBuilder.Builder().setEqual().build());
     }
 
-
-    @Resource
-    private IPointService pointService;
     public List<ClassModel> getTimeTableSV(String studentId) {
         List<ClassModel> TimeTableList = new ArrayList<>();
         List<String> listClassId = null;
