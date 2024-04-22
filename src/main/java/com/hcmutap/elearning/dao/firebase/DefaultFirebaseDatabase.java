@@ -85,6 +85,8 @@ public class DefaultFirebaseDatabase<T, ID> implements IDefaultFirebaseDatabase<
 			apiFuture.isDone();
 		} catch (ExecutionException | InterruptedException e) {
 			logger.error("Error while deleting document with id: {}", id);
+			// implfunc throw an exception
+			// throw new NotFoundInDB(String.format("Document with id: %s not found", id));
 		}
 	}
 

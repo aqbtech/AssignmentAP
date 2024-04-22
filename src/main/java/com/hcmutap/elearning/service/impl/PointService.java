@@ -123,14 +123,8 @@ public class PointService implements IPointService {
     }
 
     @Override
-    public  List<PointModel> getListPointByStudentId(String studentId) throws NotFoundException{
-        List<PointModel> pointModelList = pointDAO.findBy("studentId", studentId, Options.OptionBuilder.Builder().setEqual().build());
-        if (pointModelList.isEmpty()) {
-            throw new NotFoundException("Not found point of student with id: " + studentId);
-        }
-        else {
-            return pointModelList;
-        }
+    public  List<PointModel> getListPointByStudentId(String studentId) {
+        return pointDAO.findBy("studentId", studentId, Options.OptionBuilder.Builder().setEqual().build());
     }
 
     @Override

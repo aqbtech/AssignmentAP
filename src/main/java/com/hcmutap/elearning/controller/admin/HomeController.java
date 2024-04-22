@@ -3,6 +3,7 @@ package com.hcmutap.elearning.controller.admin;
 import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.*;
 import com.hcmutap.elearning.service.*;
@@ -12,7 +13,6 @@ import com.hcmutap.elearning.service.impl.RegisterService;
 import com.hcmutap.elearning.service.impl.SemesterService;
 import com.hcmutap.elearning.utils.MapperUtil;
 import com.hcmutap.elearning.validator.RegisterDTOValidator;
-import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,27 +36,24 @@ import java.util.*;
 public class HomeController {
 	// logger
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-	@Resource
-	private IStudentService studentService;
-	@Resource
-	private ITeacherService teacherService;
-	@Resource
-	private IUserService userService;
-	@Resource
-	private IPointService pointService;
-	private RegisterService registerService;
+	private final IStudentService studentService;
+	private final ITeacherService teacherService;
+	private final IUserService userService;
+	private final RegisterService registerService;
+	private final RegisterDTOValidator registerDTOValidator;
+	private final ICourseService courseService;
+	private final SemesterService semesterService;
 	@Autowired
-	private RegisterDTOValidator registerDTOValidator;
-	private ICourseService courseService;
-	@Autowired
-	private SemesterService semesterService;
-
-	@Autowired
-	public void setCourseService(ICourseService courseService) {
+	public HomeController( IStudentService studentService, ITeacherService teacherService,
+						   IUserService userService, RegisterDTOValidator registerDTOValidator,
+						   SemesterService semesterService, ICourseService courseService,
+						   RegisterService registerService) {
+		this.studentService = studentService;
+		this.teacherService = teacherService;
+		this.userService = userService;
+		this.registerDTOValidator = registerDTOValidator;
+		this.semesterService = semesterService;
 		this.courseService = courseService;
-	}
-	@Autowired
-	public void setRegisterService(RegisterService registerService) {
 		this.registerService = registerService;
 	}
 	@GetMapping("/admin-home")
@@ -75,7 +72,7 @@ public class HomeController {
 	public String viewAll(Model model, @RequestParam("type") String type,
 						  @RequestParam(required = false) String keyword,
 						  @RequestParam(defaultValue = "1") int page,
-						  @RequestParam(defaultValue = "3") int size) {
+						  @RequestParam(defaultValue = "6") int size) {
 		Page<?> pageResult;
 		switch (type) {
 			case "student":
@@ -108,7 +105,7 @@ public class HomeController {
 				break;
 			default:
 				logger.error("Type not found");
-				return "redirect:/admin-home"; // TODO: redirect to error page
+				throw new CustomRuntimeException("Type not found", "404");
 		}
 		genePage(model, pageResult);
 		return "admin/views/view-all-table";
@@ -125,44 +122,10 @@ public class HomeController {
 	@GetMapping("/admin-management/deleteAccount")
 	public String deleteAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type,
-								final RedirectAttributes redirectAttributes) {
-		try {
-			if (type.equals("teacher")) {
-				TeacherModel teacher = teacherService.findById(id);
-				if (teacher.getClasses().isEmpty()) {
-					List<String> del = new ArrayList<>();
-					del.add(teacher.getFirebaseId());
-					teacherService.delete(del);
-					userService.delete(teacher.getUsername());
-					redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
-				} else {
-					StringBuilder message = new StringBuilder("Giáo viên vẫn còn dạy các lớp");
-					for (String classId : teacher.getClasses()) {
-						message.append(" ").append(classId);
-					}
-					message.append(" nên chưa thể xóa!");
-					redirectAttributes.addFlashAttribute("message", message.toString());
-				}
-			} else {
-				StudentModel student = studentService.findById(id);
-				List<String> del = new ArrayList<>();
-				del.add(student.getFirebaseId());
-				studentService.delete(del);
-				userService.delete(student.getUsername());
-				// implfunc need to change exception
-				List<PointModel> points = pointService.getListPointByStudentId(student.getId());
-				List<String> delPoint = new ArrayList<>();
-				for (PointModel point : points) {
-					delPoint.add(point.getFirebaseId());
-				}
-				pointService.delete(delPoint);
-				redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + student.getFullName() + " thành công!");
-			}
-			return "redirect:/admin-management?type=" + type;
-		} catch (NotFoundException e) {
-			logger.error("Can't delete account because not found {}", e.getMessage());
-			return "redirect:/404";
-		}
+								RedirectAttributes model) {
+		String message = registerService.deleteAccount(id, type);
+		model.addFlashAttribute("message", message);
+		return "redirect:/admin-management?type=" + type;
 	}
 
 	@GetMapping("/admin-management/update")
@@ -175,32 +138,10 @@ public class HomeController {
 	public String updateAccount(@RequestParam("id") String id,
 								@RequestParam("type") String type,
 								@ModelAttribute("form") RegisterDTO form, ModelMap model) {
-		try {
-			if (type.equals("teacher")) {
-				TeacherModel teacherModel = teacherService.findById(id);
-				teacherModel.setFullName(form.getFullName());
-				teacherModel.setAge(form.getAge());
-				teacherModel.setAge(form.getAge());
-				teacherModel.setDegree(form.getDegree());
-				teacherService.update(teacherModel);
-				model.addAttribute("type", "teacher");
-				model.addAttribute("user", teacherModel);
-			} else {
-				StudentModel studentModel = studentService.findById(id);
-				studentModel.setFullName(form.getFullName());
-				studentModel.setAge(form.getAge());
-				studentModel.setAge(form.getAge());
-				studentModel.setMajor(form.getMajor());
-				studentService.update(studentModel);
-				model.addAttribute("type", "student");
-				model.addAttribute("user", studentModel);
-			}
-			model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
-			return "admin/views/update-account";
-		} catch (NotFoundException e) {
-			// TODO: redirect to error page
-			throw new RuntimeException(e);
-		}
+		form.setId(id);
+		String message = registerService.updateAccount(form, type);
+		model.addAttribute("message", message);
+		return "admin/views/update-account";
 	}
 
 	@GetMapping("/admin-management/registration")
@@ -275,7 +216,7 @@ public class HomeController {
 							 @ModelAttribute("registerForm") @Validated RegisterDTO registerDTO,
 							 BindingResult result,
 							 final RedirectAttributes redirectAttributes) {
-		try {
+
 			if (result.hasErrors()) {
 				model.addAttribute("message", "Failed to add account");
 				return "admin/views/createAccount";
@@ -288,9 +229,7 @@ public class HomeController {
 				redirectAttributes.addFlashAttribute("message", message);
 				return "redirect:/admin-management/add-account";
 			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+
 	}
 	@GetMapping("/admin-management/add-by-file")
 	public String addAccountByFile() {
@@ -330,7 +269,7 @@ public class HomeController {
 					"Failure: " + failure.size() + " accounts\n";
 			model.addAttribute("message", result);
 			return "admin/views/add-many-account";
-		} catch (ConvertExcelToObjectException | NotFoundException e) {
+		} catch (ConvertExcelToObjectException e) {
 			logger.error("Can't add account because {}", e.getMessage());
 			model.addAttribute("message", e.getMessage());
 			return "admin/views/add-many-account";

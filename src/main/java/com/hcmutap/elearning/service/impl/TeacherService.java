@@ -3,6 +3,7 @@ package com.hcmutap.elearning.service.impl;
 import com.hcmutap.elearning.dao.firebase.Options;
 import com.hcmutap.elearning.dao.impl.ClassDAO;
 import com.hcmutap.elearning.dao.impl.TeacherDAO;
+import com.hcmutap.elearning.exception.CustomRuntimeException;
 import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.exception.NotFoundInDB;
 import com.hcmutap.elearning.model.ClassModel;
@@ -68,31 +69,23 @@ public class TeacherService implements ITeacherService {
 
 	@Override
 	public void update(TeacherModel teacherModel) throws NotFoundException {
-		TeacherModel teacherModels = null;
 		try {
-			teacherModels = teacherDAO.findById(teacherModel.getId());
+			TeacherModel teacherModels = teacherDAO.findById(teacherModel.getId());
+			teacherDAO.update(teacherModel);
 		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+			throw new CustomRuntimeException(notFoundInDB.getMessage(), "404");
 		}
-		if (teacherModels == null){
-			throw new NotFoundException("Teacher not found");
-		}
-		teacherDAO.update(teacherModel);
 	}
-	private void delete(String id) throws NotFoundException {
-		TeacherModel teacherModel = null;
+	private void delete(String id) {
 		try {
-			teacherModel = teacherDAO.findById(id);
-		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+			TeacherModel teacherModel = teacherDAO.findById(id);
+			teacherDAO.delete(id);
+		} catch (NotFoundInDB notFoundInDB) {
+			throw new CustomRuntimeException(notFoundInDB.getMessage(), "404");
 		}
-		if (teacherModel == null){
-			throw new NotFoundException("Teacher not found id: " + id);
-		}
-		teacherDAO.delete(id);
 	}
 	@Override
-	public void delete(List<String> ids) throws NotFoundException {
+	public void delete(List<String> ids) {
 		for(String id : ids){
 			delete(id);
 		}
@@ -110,13 +103,12 @@ public class TeacherService implements ITeacherService {
 
 	@Override
 	public boolean isExist(String id) {
-		TeacherModel teacherModel = null;
 		try {
-			teacherModel = teacherDAO.findById(id);
+			TeacherModel teacherModel = teacherDAO.findById(id);
+			return teacherModel != null;
 		} catch (com.hcmutap.elearning.exception.NotFoundInDB notFoundInDB) {
-			throw new RuntimeException(notFoundInDB);
+			throw new CustomRuntimeException(notFoundInDB.getMessage(), "404");
 		}
-		return teacherModel != null;
 	}
 
 	@Override

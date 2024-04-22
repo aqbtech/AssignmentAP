@@ -3,14 +3,19 @@ package com.hcmutap.elearning.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmutap.elearning.exception.MappingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
+import com.hcmutap.elearning.dto.RegisterDTO;
+import java.lang.reflect.Field;
 
 import java.util.Map;
 
 public class MapperUtil {
+	private final Logger logger = LoggerFactory.getLogger(MapperUtil.class);
 	private static MapperUtil mapperUtil = null;
 
 	public static MapperUtil getInstance() {
@@ -30,9 +35,30 @@ public class MapperUtil {
 		}
 		return null;
 	}
+	public <T> void updateModelFromDto(T model, RegisterDTO dto) throws MappingException {
+		Field[] dtoFields = dto.getClass().getDeclaredFields();
+		Field[] modelFields = model.getClass().getDeclaredFields();
+
+		for (Field dtoField : dtoFields) {
+			dtoField.setAccessible(true);
+			for (Field modelField : modelFields) {
+				modelField.setAccessible(true);
+				if (dtoField.getName().equals(modelField.getName())) {
+					try {
+						Object value = dtoField.get(dto);
+						if (value != null && !StringUtils.hasText(value.toString())) {
+							modelField.set(model, value);
+						}
+					} catch (IllegalAccessException e) {
+						throw new MappingException(e.getMessage());
+					}
+				}
+			}
+		}
+	}
 	public <T> ModelMap toModelMapFromDTO(T dto) {
 		try {
-			Map<String, Object> map = new ObjectMapper().convertValue(dto, new TypeReference<Map<String, Object>>() {});
+			Map<String, Object> map = new ObjectMapper().convertValue(dto, new TypeReference<>() {});
 			ModelMap modelMap = new ModelMap();
 			modelMap.addAllAttributes(map);
 			return modelMap;
