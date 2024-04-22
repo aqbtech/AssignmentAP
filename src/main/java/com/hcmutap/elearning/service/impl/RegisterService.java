@@ -104,10 +104,9 @@ public class RegisterService implements IRegisterService {
 						for (String errorCode : Objects.requireNonNull(error.getCodes())) {
 							try {
 								String errorMessage = messageSource.getMessage(errorCode, error.getArguments(), Locale.getDefault());
-								result.put(registerDTO.getUsername(), "Failed to add account, message: " + errorMessage);
+								result.put(registerDTO.getUsername(), "Không thể thêm tài khoản, lý do: " + errorMessage);
 							} catch (NoSuchMessageException e) {
 								// This error code does not exist in your properties file, continue with the next one
-								continue;
 							}
 						}
 					}

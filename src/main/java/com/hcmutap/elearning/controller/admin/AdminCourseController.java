@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -169,7 +170,8 @@ public class AdminCourseController {
 		classModel.setTimeEnd(convertTime(classRes.getTimeStart(), classRes.getTimeStudy()));
 		classModel.setRoom(classRes.getRoom());
 		classModel.setSemesterId(classRes.getSemesterId());
-
+		classModel.setTeacherId("");
+		classModel.setTeacherName("");
 		boolean notSave = false;
 		List<ClassModel> listClass = classService.findAll();
 		for(ClassModel cls : listClass) {
@@ -231,6 +233,11 @@ public class AdminCourseController {
 							   final RedirectAttributes redirectAttributes) {
 		try {
 			ClassModel classModel = classService.findById(id);
+			if(StringUtils.hasText(classModel.getTeacherId())) {
+				String message = "Lớp " + classModel.getClassName() + " đã có giáo viên, không thể chỉnh sửa!";
+				redirectAttributes.addFlashAttribute("message", message);
+				return "redirect:/admin-management/update-course?id=" + classModel.getCourseId();
+			}
 			classModel.setDayOfWeek(classRes.getDayOfWeek());
 			classModel.setTimeStart(classRes.getTimeStart());
 			classModel.setTimeEnd(convertTime(classRes.getTimeStart(), classRes.getTimeStudy()));
@@ -378,7 +385,7 @@ public class AdminCourseController {
 	@PostMapping("/admin-management/add-semester")
 	public String addSemester(@ModelAttribute("semester") SemesterModel semesterModel, ModelMap model,
 							  final RedirectAttributes redirectAttributes) {
-		try{
+		try {
 			if(semesterService.findById(semesterModel.getSemesterName()) != null) {
 				model.addAttribute("message", "Không thành công! Học kì đã được tạo trước đó!");
 				semesterModel.setId(semesterModel.getSemesterName());

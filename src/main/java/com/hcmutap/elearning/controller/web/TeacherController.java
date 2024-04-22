@@ -72,7 +72,7 @@ public class TeacherController {
 				return "login/Rare_fault";
 			}
 
-			if(id.isEmpty()){
+			if(id.isEmpty()) {
 				model.addAttribute("class_course_of_teacher", class_course_of_teacher);
 				model.addAttribute("class_course", class_course);
 				return "web/views/teacher-service/registration";
@@ -219,9 +219,34 @@ public class TeacherController {
 			throw new CustomRuntimeException(e.getMessage(), "100");
 		}
 	}
-
+	@GetMapping(value = "/update_point")
+	public String listStudent(ModelMap modelMap, @RequestParam("courseId") String courseId,
+							  @RequestParam("classId") String classId, Principal principal){
+		try {
+			InfoDTO infoDTO = userService.getInfo(principal.getName());
+			if (infoDTO.getRole().equalsIgnoreCase("student")) {
+				modelMap.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
+			} else if (infoDTO.getRole().equalsIgnoreCase("teacher")) {
+				if (!teacherService.isExistTeacherInClass(principal.getName(), classId)) {
+					modelMap.addAttribute("message", "You are not in this class");
+					return "login/404_page";
+				}
+			} else {
+				modelMap.addAttribute("message", "You are not a teacher");
+				return "login/404_page";
+			}
+			modelMap.addAttribute("name","Hiện không thể tìm thấy sinh viên ");
+			modelMap.addAttribute("classId",classId);
+			modelMap.addAttribute("courseId",courseId);
+			return "web/views/teacher-service/InputScore/UpdatePoint";
+		} catch(NotFoundException e) {
+			throw new CustomRuntimeException(e.getMessage(), "404");
+		} catch (MappingException e) {
+			throw new CustomRuntimeException(e.getMessage(), "101");
+		}
+	}
 	@PostMapping(value = "/upload_Excel")
-
 	public String uploadExcel(@RequestParam("classId") String classId,
 							  @RequestParam("courseId") String courseId,
 							  @ModelAttribute MultipartFile file, Model model) {

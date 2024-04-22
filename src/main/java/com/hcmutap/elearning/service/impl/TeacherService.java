@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -169,7 +170,8 @@ public class TeacherService implements ITeacherService {
 				}
 			}
 
-			if (classModel.getTeacherId() != null) return "Lớp đã có giảng viên đăng ký";
+			if (StringUtils.hasText(classModel.getTeacherId()))
+				return "Lớp đã có giảng viên đăng ký";
 
 			for(ClassModel e : timetable){
 				if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){

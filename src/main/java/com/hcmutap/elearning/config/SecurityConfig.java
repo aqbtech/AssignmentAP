@@ -31,13 +31,13 @@ public class SecurityConfig {
 				.authorizeHttpRequests(
 						authorizeRequests
 								-> authorizeRequests
-								.requestMatchers("/", "/trang-chu/**", "/api/**", "/login", "/logout", "static/**", "templates/**","template/**")
+								.requestMatchers("/", "/trang-chu/**", "/api/**", "/login", "/logout", "static/**", "templates/**","template/**","/about", "/contact")
 								.permitAll()
 								.requestMatchers("/admin-**/**")
 //								.requestMatchers("/admin-**")
 								.hasAuthority("ADMIN")
-//								.requestMatchers("/edit")
-//								.hasAnyRole("ADMIN", "TEACHER")
+								.requestMatchers("/teacher/**")
+								.hasAuthority("TEACHER")
 								.anyRequest()
 								.authenticated()
 //								.permitAll() // TODO: authenticate but allow static resources to use thymeleaf
