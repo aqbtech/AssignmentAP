@@ -10,6 +10,7 @@ import com.hcmutap.elearning.model.ClassModel;
 import com.hcmutap.elearning.model.CourseModel;
 import com.hcmutap.elearning.model.TeacherModel;
 import com.hcmutap.elearning.service.ITeacherService;
+import com.hcmutap.elearning.utils.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -174,23 +175,8 @@ public class TeacherService implements ITeacherService {
 				return "Lớp đã có giảng viên đăng ký";
 
 			for(ClassModel e : timetable){
-				if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
-					continue;
-				}
-				else {
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
-					LocalTime time_start = LocalTime.parse(e.getTimeStart(), formatter);
-					LocalTime time_end = LocalTime.parse(e.getTimeEnd(), formatter);
-					LocalTime time_start_new_class = LocalTime.parse(classModel.getTimeStart(), formatter);
-					LocalTime time_end_new_class = LocalTime.parse(classModel.getTimeEnd(), formatter);
-					if(time_end.isBefore(time_start_new_class)){
-						break;
-					} else if (time_end_new_class.isBefore(time_start)) {
-						break;
-					}
-					else {
-						return "Đăng ký không thành công vì trùng thời gian với " + e.getClassName();
-					}
+				if (TimeUtils.isSameTime(e, classModel)){
+					return "Đăng ký không thành công vì trùng thời gian với " + e.getClassName();
 				}
 			}
 			CourseModel courseModel = courseService.getCourseInfo(classModel.getCourseId());

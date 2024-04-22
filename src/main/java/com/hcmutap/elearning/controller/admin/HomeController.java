@@ -2,6 +2,7 @@ package com.hcmutap.elearning.controller.admin;
 
 import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.constant.SystemConstant;
+import com.hcmutap.elearning.dto.Details;
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
 import com.hcmutap.elearning.exception.CustomRuntimeException;
@@ -14,7 +15,6 @@ import com.hcmutap.elearning.service.impl.RegisterService;
 import com.hcmutap.elearning.service.impl.SemesterService;
 import com.hcmutap.elearning.utils.MapperUtil;
 import com.hcmutap.elearning.validator.RegisterDTOValidator;
-import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,20 +243,9 @@ public class HomeController {
 	@PostMapping(value = "/admin-management/add-by-file")
 	public String addAccount(@RequestParam("file") MultipartFile file, Model model) {
 		try {
-			Map<String, String> result = registerService.register(file);
-			String message;
-			List<String> listError = new ArrayList<>();
-			if(!result.containsKey("Complete")) {
-				message = "Failed to add account, message: " + result.get("Error");
-			} else {
-				message = "Complete: " + result.get("Complete") + " accounts\n";
-				message += "Error: " + result.get("Error") + " accounts\n";
-				result.forEach((key, value) -> {
-					if (!key.equals("Complete") && !key.equals("Error")) {
-						listError.add(key + ": " + value);
-					}
-				});
-			}
+			Details result = registerService.register(file);
+			String message = result.getMessages();
+			List<String> listError = result.toList();
 			model.addAttribute("message", message);
 			model.addAttribute("listError", listError);
 			return "admin/views/add-many-account";

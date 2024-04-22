@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.service.impl;
 
 import com.hcmutap.elearning.constant.SystemConstant;
+import com.hcmutap.elearning.dto.Details;
 import com.hcmutap.elearning.dto.RegisterDTO;
 import com.hcmutap.elearning.dto.StudentResDTO;
 import com.hcmutap.elearning.dto.TeacherResDTO;
@@ -89,13 +90,12 @@ public class RegisterService implements IRegisterService {
 	@Autowired
 	private MessageSource messageSource;
 	@Override
-	public Map<String, String> register(MultipartFile file) throws ConvertExcelToObjectException, MappingException {
-		Map<String,String> result = new HashMap<>();
+	public Details register(MultipartFile file) throws ConvertExcelToObjectException, MappingException {
 		Optional<List<RegisterDTO>> list;
 		ExcelService<RegisterDTO> excelService = new ExcelService<>();
 		list = excelService.readAndConvert(file, RegisterDTO.class);
-		int complete = 0;
-		if (list.isPresent()) {
+		Details details = new Details();
+		if (list.isPresent() && !list.get().isEmpty()) {
 			for (RegisterDTO registerDTO : list.get()) {
 				Errors errors = new BeanPropertyBindingResult(registerDTO, "registerForm");
 				registerDTOValidator.validate(registerDTO, errors);
@@ -104,33 +104,29 @@ public class RegisterService implements IRegisterService {
 						for (String errorCode : Objects.requireNonNull(error.getCodes())) {
 							try {
 								String errorMessage = messageSource.getMessage(errorCode, error.getArguments(), Locale.getDefault());
-								result.put(registerDTO.getUsername(), "Không thể thêm tài khoản, lý do: " + errorMessage);
+								details.addError(registerDTO.getUsername(), "Không thể thêm tài khoản, lý do: " + errorMessage);
 							} catch (NoSuchMessageException e) {
 								// This error code does not exist in your properties file, continue with the next one
 							}
 						}
 					}
 					// fixme : use this code instead of above code, above code to fix rare fault
-//					result.put(registerDTO.getUsername(),
-//							"Failed to add account, message: " + errors.getAllErrors());
 				} else {
 					ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
 					String message = register(modelMap);
 					if (!message.equals("Success")) {
-						if (!result.containsKey(registerDTO.getUsername())) {
-							result.put(registerDTO.getUsername(), "Failed to add account, message: " + message);
+						if (!details.hasUsername(registerDTO.getUsername())) {
+							details.addError(registerDTO.getUsername(), "Không thể thêm tài khoản, lý do: " + message);
 						}
 					} else {
-						++complete;
+						details.addCompleted();
 					}
 				}
 			}
-			result.put("Complete", Integer.toString(complete));
-			result.put("Error", Integer.toString(result.size() - complete));
 		} else {
-			result.put("Error", "No data in file");
+			details.addError("File", "Không có dữ liệu trong file");
 		}
-		return result;
+		return details;
 	}
 	private IPointService pointService;
 	@Autowired

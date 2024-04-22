@@ -16,6 +16,7 @@ import com.hcmutap.elearning.service.IClassService;
 import com.hcmutap.elearning.service.ICourseService;
 import com.hcmutap.elearning.service.IPointService;
 import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.utils.TimeUtils;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -121,24 +122,9 @@ public class StudentService implements IStudentService {
 					return "Đăng ký không thành công vì bạn đang đăng ký môn này";
 				}
 			}
-			for(ClassModel e : timetable){
-				if(!e.getDayOfWeek().equals(classModel.getDayOfWeek())){
-					continue;
-				}
-				else {
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
-					LocalTime time_start = LocalTime.parse(e.getTimeStart(), formatter);
-					LocalTime time_end = LocalTime.parse(e.getTimeEnd(), formatter);
-					LocalTime time_start_new_class = LocalTime.parse(classModel.getTimeStart(), formatter);
-					LocalTime time_end_new_class = LocalTime.parse(classModel.getTimeEnd(), formatter);
-					if(time_end.isBefore(time_start_new_class)){
-						break;
-					} else if (time_end_new_class.isBefore(time_start)) {
-						break;
-					}
-					else {
-						return "Đăng ký không thànhh công vì trùng thời gian với " + e.getClassName();
-					}
+			for(ClassModel e : timetable) {
+				if (TimeUtils.isSameTime(e, classModel)){
+					return "Đăng ký không thành công vì trùng thời gian với " + e.getClassName();
 				}
 			}
 			for (String e : finished_course){
@@ -151,28 +137,6 @@ public class StudentService implements IStudentService {
 		} catch (TransactionalException transactionalException) {
 			throw new RuntimeException(transactionalException);
 		}
-	}
-
-	public static Comparator<ClassModel> getDateTimeComparator() {
-		return new Comparator<ClassModel>() {
-			@Override
-			public int compare(ClassModel entry1, ClassModel entry2) {
-
-				DayOfWeek day1 = DayOfWeek.valueOf(entry1.getDayOfWeek().toUpperCase());
-				DayOfWeek day2 = DayOfWeek.valueOf(entry2.getDayOfWeek().toUpperCase());
-
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
-				LocalTime time_start_1 = LocalTime.parse(entry1.getTimeStart(), formatter);
-				LocalTime time_start_2 = LocalTime.parse(entry2.getTimeStart(), formatter);
-
-				int dateComparison = day1.compareTo(day2);
-				if (!day1.equals(day2)) {
-					return dateComparison;
-				}
-
-				return time_start_1.compareTo(time_start_2);
-			}
-		};
 	}
 
 	@Override
