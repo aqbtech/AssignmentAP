@@ -9,10 +9,109 @@
 <div layout:fragment="content">
     <!-- Page Content -->
     <div class="container">
-        <h1></h1>
+        <h1>Tạo khóa học</h1>
         <hr>
-        <p>Xin chào</p>
+        <div class="alert alert-danger" id="errorMessage" style="display: none;">
+            Tổng tỉ lệ điểm phải bằng 100%
+        </div>
+        <form name="data-form" th:action="@{/admin-management/add-course}" th:object="${course}" method="post" id="myForm" class="form-group">
+            <div class="row">
+                <div class="col">
+                    <label for="courseId">Mã khóa học:</label>
+                    <input type="text" id="courseId" name="courseId" class="form-control"
+                           th:value="${course.courseId}"required><br>
+                </div>
+                <div class="col">
+                    <label for="courseName">Tên khóa học:</label>
+                    <input type="text" id="courseName" name="courseName" class="form-control"
+                           th:value="${course.courseName}" required><br>
+                </div>
+                <div class="col">
+                    <label for="credit">Tín chỉ:</label>
+                    <input type="number" id="credit" name="credit" class="form-control" min="0"
+                           th:value="${course.credit}" required><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="percentBT">Tỉ lệ điểm BT (%):</label>
+                    <input type="number" id="percentBT" name="percentBT" class="form-control" min="0" max="100"
+                           th:value="${course.percentBT}" required><br>
+                </div>
+                <div class="col">
+                    <label for="percentBTL">Tỉ lệ điểm BTL (%):</label>
+                    <input type="number" id="percentBTL" name="percentBTL" class="form-control" min="0" max="100"
+                           th:value="${course.percentBTL}" required><br>
+                </div>
+                <div class="col">
+                    <label for="percentGK">Tỉ lệ điểm GK (%):</label>
+                    <input type="number" id="percentGK" name="percentGK" class="form-control" min="0" max="100"
+                           th:value="${course.percentGK}" required><br>
+                </div>
+                <div class="col">
+                    <label for="percentCK">Tỉ lệ điểm CK (%):</label>
+                    <input type="number" id="percentCK" name="percentCK" class="form-control" min="0" max="100"
+                           th:value="${course.percentCK}" required><br>
+                </div>
+            </div>
+            <input type="submit" value="Submit" class="btn btn-primary float-right">
+        </form>
     </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div th:id="error" style="display: none;" th:attr="message=${error}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let num1 = parseInt(document.getElementById("percentBT").value);
+            let num2 = parseInt(document.getElementById("percentBTL").value);
+            let num3 = parseInt(document.getElementById("percentGK").value);
+            let num4 = parseInt(document.getElementById("percentCK").value);
+            let sum = num1 + num2 + num3 + num4;
+            if(sum === 100) {
+                document.getElementById("errorMessage").style.display = "none";
+                this.submit();
+            } else {
+                document.getElementById("errorMessage").style.display = "block";
+            }
+        });
+
+        window.addEventListener("load", function(){
+            let message = document.getElementById("message").getAttribute("message");
+            if(message) {
+                let modalBody = document.getElementById("modalBody");
+                let modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            }
+            let error = document.getElementById("error").getAttribute("message");
+            if (!error){
+                document.getElementById("courseId").value = "";
+                document.getElementById("courseName").value = "";
+                document.getElementById("credit").value = "";
+                document.getElementById("percentBT").value = "";
+                document.getElementById("percentBTL").value = "";
+                document.getElementById("percentGK").value = "";
+                document.getElementById("percentCK").value = "";
+            }
+        });
+    </script>
     <!-- /.container -->
 </div>
 </body>

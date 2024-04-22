@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <title>Trang quản trị</title>
+    <link rel="stylesheet" th:href="@{/template/admin/css/custom-for-all-table.css}"/>
+</head>
+    <body>
+        <div layout:fragment="content">
+            <!-- Page Content -->
+            <div class="container">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-table"></i>
+                        <span>Bảng khóa học</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="my-3">
+                            <form th:action="@{/admin-management-course}" id="searchFormCourse">
+                                <div class="row d-flex">
+                                    <div class="col-md-6 mt-2">
+                                        <div class="search">
+                                            <i class="fa fa-search"></i>
+                                            <input id="keyword" type="search" name="keyword" th:value="${keyword}" class="form-control"
+                                                   placeholder="Enter keyword">
+                                            <button type="submit" class="btn btn-secondary">Search</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 input-group mt-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="pageSize">Items per page:</label>
+                                        </div>
+                                        <select form="searchFormCourse" name="size" th:value="${pageSize}" onchange="changePageSize()" class="size-select"
+                                                id="pageSize">
+                                            <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-1 mt-2">
+                                        <button id="btnClear" class="btn btn-info" onclick="clearFunc()">Clear</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th>Mã khóa học</th>
+                                    <th>Khóa học</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="model : ${models}">
+                                    <td th:text="${model.courseId}"></td>
+                                    <td th:text="${model.courseName}"></td>
+                                    <td>
+                                        <a th:href="@{|/admin-management/update-course?id=${model.courseId}|}" title="Edit this tutorial"
+                                           class="fas fa-edit"></a>
+                                        &nbsp;
+                                        <a th:href="@{|/admin-management/deleteCourse?id=${model.courseId}|}" th:tutorialTitle="${model.courseName}" id="btnDelete"
+                                           title="Delete this tutorial" class="fas fa-trash icon-delete btn-delete"></a>
+                                    </td>
+<!--                                    &lt;!&ndash; Update button &ndash;&gt;-->
+<!--                                    <td>-->
+<!--                                        <a class="btn btn-link update-button" th:href="@{|/admin-management/update-course?id=${model.courseId}|}">Chỉnh sửa</a>-->
+<!--                                    </td>-->
+<!--                                    &lt;!&ndash; Delete button &ndash;&gt;-->
+<!--                                    <td>-->
+<!--                                        <a class="btn btn-link delete-button" th:href="@{|/admin-management/deleteCourse?id=${model.courseId}|}">Xóa</a>-->
+<!--                                    </td>-->
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <nav aria-label="Pagination" th:if="${totalPages > 0}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging :: paging(1, '<<', 'First Page')}"></a>
+                        </li>
+                        <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging.html::paging(${currentPage -1}, 'Prev', 'Previos Page')}"></a>
+                        </li>
+                        <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                            th:each="page : ${#numbers.sequence((currentPage > 2) ? (currentPage - 2) : 1,(currentPage + 2 < totalPages) ? (currentPage + 2) : totalPages)}">
+                            <a th:replace="~{admin/fragments/paging.html::paging(${page}, ${page}, 'Page ' + ${page})}"></a>
+                        </li>
+                        <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                        <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging::paging(${currentPage + 1},'Next', 'Next Page')}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a th:replace="~{admin/fragments/paging.html::paging(${totalPages}, '>>', 'Last Page')}"></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div><!-- /.container -->
+            <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+                    </div>
+                </div>
+            </div>
+            <script>
+                window.addEventListener("load", function() {
+                    let message = document.getElementById("message").getAttribute("message");
+                    if (message) {
+                        let modalBody = document.getElementById("modalBody");
+                        let modalExit = document.getElementById("modalExit");
+                        modalBody.innerText = message;
+                        modalExit.innerText = "Đóng";
+                        $('#modal').modal('show');
+                    }
+                });
+                function clearFunc() {
+                    document.getElementById("keyword").value = "";
+                    $("#searchFormCourse").submit();
+                }
+                function changePageSize() {
+                    $("#searchFormCourse").submit();
+                }
+            </script>
+        </div><!-- /.content -->
+    </body>
+<!-- Demo scripts for this page-->
+<script th:src="@{/template/admin/js/demo/datatables-demo.js}"></script>
+</html>

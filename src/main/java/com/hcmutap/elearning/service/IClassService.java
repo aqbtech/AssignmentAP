@@ -1,19 +1,28 @@
 package com.hcmutap.elearning.service;
 
-import com.hcmutap.elearning.model.ClassModel;
-import com.hcmutap.elearning.model.PointModel;
+import com.hcmutap.elearning.dto.PointDTO;
+import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.model.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface IClassService {
-    List<ClassModel> findAll();
-    ClassModel findById(String id);
-    String save(ClassModel classModel);
-    void update(ClassModel classModel);
-    void delete(String id);
-    ClassModel getClassInfo(String classId);
-    List<ClassModel> getClassOfCourse(String courseId);
-    List<PointModel> getListStudentOfClass(String classId);
-    List<ClassModel> getTimeTableSV(String studentId);
-    List<ClassModel> getTimeTableGV(String teacherId);
+public interface IClassService extends IGenericAdminService<ClassModel> {
+    void delete(String id) throws NotFoundException;
+    ClassModel getClassInfo(String classId) throws NotFoundException;
+    List<ClassModel> getClassOfCourse(String courseId) throws NotFoundException;
+    List<PointModel> getListStudentOfClass(String classId) throws NotFoundException;
+    List<ClassModel> getTimeTableSV(String studentId) throws NotFoundException;
+    List<ClassModel> getTimeTableGV(String teacherId) throws NotFoundException;
+    boolean addStudentToClass(String studentId, String classId) throws NotFoundException;
+    boolean NhapDiem(String studentId, String classId, PointDTO point) throws NotFoundException;
+    void NhapDiemCaLop(String classId, List<PointDTO> listPoint) throws NotFoundException;
+    InfoClassModel getClassDocs(String classId) throws NotFoundException;
+    boolean updateTileOfDoc(String classId, Document docCurrent, String newTitle) throws NotFoundException;
+    boolean addFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException;
+    boolean deleteFileOfDoc(String classId, Document docCurrent, FileInfo file) throws NotFoundException;
+    boolean addNewDoc(String classId) throws NotFoundException;
+    boolean addDoc(String classId, Document doc) throws NotFoundException;
+    boolean deleteDoc(String classId, Document doc) throws NotFoundException;
+    Page<ClassModel> getPage(String key, String id, int page, int size);
 }

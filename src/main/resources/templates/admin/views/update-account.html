@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <title>Chỉnh sửa thông tin</title>
+</head>
+    <body>
+        <div layout:fragment="content">
+            <!-- Page Content -->
+            <div class="container">
+                <section style="background-color: #eee;">
+                    <div class="container py-5">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="card mb-3">
+                                    <div class="card-body text-center">
+                                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+                                             class="rounded-circle img-fluid" style="width: 150px;">
+                                        <h5 class="my-3">
+                                            <span th:text="${user.fullName}"></span></h5>
+                                        <div th:if="${type == 'teacher'}">
+                                            <p class="text-muted mb-1">
+                                                Trình độ:
+                                                <span th:text="${user.degree}"></span>
+                                            </p>
+                                        </div>
+                                        <div th:if="${type == 'student'}">
+                                            <p class="text-muted mb-1">
+                                                Ngành học:
+                                                <span th:text="${user.major}"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="card mb-4">
+                                    <form name="data-form" th:action="@{|/admin-management/view-info?id=${user.id}&type=${type}|}" th:object="${form}" method="post" id="myForm" class="form-group">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <label for="fullName" class="mb-0 float-left">Họ tên</label>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <p class="text-muted mb-0">
+                                                    <input type="text" id="fullName" name="fullName" class="form-control"
+                                                           th:value="${user.fullName}" required disabled>
+                                                </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <label for="gender" class="mb-0">Giới tính</label>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="text-muted mb-0">
+                                                    <select type="text" id="gender" name="gender" class="form-control" required disabled>
+                                                        <option value="Nam" th:selected="${user.gender} == 'Nam'">Nam</option>
+                                                        <option value="Nu" th:selected="${user.gender} == 'Nu'">Nữ</option>
+                                                    </select>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <label for="email" class="mb-0">Email</label>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <p class="text-muted mb-0">
+                                                    <input type="text" id="email" name="email" class="form-control"
+                                                           th:value="${user.email}" required disabled>
+                                                </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <label for="age" class="mb-0">Tuổi</label>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="text-muted mb-0">
+                                                    <input type="number" id="age" name="age" class="form-control" min="0" max="100"
+                                                           th:value="${user.age}" required disabled>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div th:if="${type == 'teacher'}">
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <label for="degree" class="mb-0">Trình độ</label>
+                                                </div>
+                                                <div class="col-sm-5">
+                                                    <p class="text-muted mb-0">
+                                                        <input type="text" id="degree" name="degree" class="form-control"
+                                                               th:value="${user.degree}" required disabled>
+                                                    </p>
+                                                </div>
+                                            </div><br>
+                                        </div>
+                                        <div th:if="${type == 'student'}">
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <label for="major" class="mb-0">Ngành học </label>
+                                                </div>
+                                                <div class="col-sm-5">
+                                                    <p class="text-muted mb-0">
+                                                        <input type="text" id="major" name="major" class="form-control"
+                                                               th:value="${user.major}" required disabled>
+                                                    </p>
+                                                </div>
+                                            </div><br>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-9">
+                                                <p class="text-muted mb-0">
+                                                    <div class="custom-control custom-switch float-right">
+                                                        <input type="checkbox" class="custom-control-input" id="switch1" onclick="toggleInput()">
+                                                        <label class="custom-control-label" for="switch1">Chỉnh sửa</label>
+                                                    </div>
+                                                </p>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <input type="submit" value="Submit" class="btn btn-primary float-right" id="submitButton" disabled><br>
+                                            </div><br>
+                                        </div>
+                                    </div>
+                                    </form>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4 mb-md-0">
+                                            <div class="card-body">
+                                                <p class="mb-4"><span class="text-primary font-italic me-1">assigment</span> Project Status
+                                                </p>
+                                                <p class="mb-1" style="font-size: .77rem;">Web Design</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">Website Markup</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 72%" aria-valuenow="72"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">One Page</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 89%" aria-valuenow="89"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">Mobile Template</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">Backend API</p>
+                                                <div class="progress rounded mb-2" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card mb-4 mb-md-0">
+                                            <div class="card-body">
+                                                <p class="mb-4"><span class="text-primary font-italic me-1">assigment</span> Project Status
+                                                </p>
+                                                <p class="mb-1" style="font-size: .77rem;">Web Design</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">Website Markup</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 72%" aria-valuenow="72"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">One Page</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 89%" aria-valuenow="89"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">Mobile Template</p>
+                                                <div class="progress rounded" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <p class="mt-4 mb-1" style="font-size: .77rem;">Backend API</p>
+                                                <div class="progress rounded mb-2" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div><!-- /.container -->
+            <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function toggleInput() {
+                    let button = document.getElementById("switch1");
+                    if(button.checked === false) {
+                        document.getElementById('fullName').disabled = true;
+                        document.getElementById('gender').disabled = true;
+                        document.getElementById('age').disabled = true;
+                        document.getElementById('submitButton').disabled = true;
+                        if(document.getElementById('degree'))
+                            document.getElementById('degree').disabled = true;
+                        if(document.getElementById('major'))
+                            document.getElementById('major').disabled = true;
+                    } else {
+                        document.getElementById('fullName').disabled = false;
+                        document.getElementById('gender').disabled = false;
+                        document.getElementById('age').disabled = false;
+                        document.getElementById('submitButton').disabled = false;
+                        if(document.getElementById('degree'))
+                            document.getElementById('degree').disabled = false;
+                        if(document.getElementById('major'))
+                            document.getElementById('major').disabled = false;
+                    }
+                }
+
+                window.addEventListener("load", function(){
+                    let message = document.getElementById("message").getAttribute("message");
+                    if(message) {
+                        let modalBody = document.getElementById("modalBody");
+                        let modalExit = document.getElementById("modalExit");
+                        modalBody.innerText = message;
+                        modalExit.innerText = "Đóng";
+                        $('#modal').modal('show');
+                    }
+                });
+            </script>
+        </div>
+    </body>
+</html>

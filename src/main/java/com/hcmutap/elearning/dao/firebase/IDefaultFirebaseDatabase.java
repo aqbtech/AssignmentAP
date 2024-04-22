@@ -1,5 +1,9 @@
 package com.hcmutap.elearning.dao.firebase;
 
+import com.hcmutap.elearning.exception.NotFoundInDB;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 /**
  * Interface for default Firebase database operations
@@ -30,6 +34,21 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 */
 	List<T> findAll();
 	/**
+	 * find model for pagination
+	 * @param pageable Pageable object
+	 *                 @see org.springframework.data.domain.Pageable
+	 * @return Page of model
+	 */
+	Page<T> findAll(Pageable pageable);
+	/**
+	 * search model by keyword to pagination
+	 * @param keyword keyword to search
+	 * @param pageable Pageable object
+	 *                 @see org.springframework.data.domain.Pageable
+	 * @return Page of model
+	 */
+	Page<T> search(String keyword, Pageable pageable);
+	/**
 	 * Find model by key and value
 	 * @param key attribute name of model
 	 * @param value Value of attribute
@@ -37,4 +56,21 @@ public interface IDefaultFirebaseDatabase<T, ID> {
 	 */
 	List<T> findBy(String key, String value); // need Filter class for more complex query
 	List<T> findBy(String key, String value, Options options);
+	/**
+	 * Get number of model in database
+	 * @return size of model
+	 */
+	Long size();
+	/**
+	 * Find model by firebaseId
+	 * @param firebaseId ID of model
+	 * @return Model
+	 */
+	T findByFirebaseId(String firebaseId) throws NotFoundInDB;
+	/**
+	 * Find model by ID
+	 * @param id ID of model
+	 * @return Model
+	 */
+	T findById(ID id) throws NotFoundInDB;
 }

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Nhập điểm sinh viên</title>
+    <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/template/admin/css/custom-for-all-table.css}"/>
+    <style>
+        body {font-family: Arial, Helvetica, sans-serif;}
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+    <div class="header">
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3 th:if="${points!=null}" th:text="${name}"></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="border-top border-bottom" style="margin-bottom: 20px;">
+            <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="'/course?id=' + ${classId}" style="color: #6c757d">Khoá học</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="'/list-student?id=' + ${classId}" style="color: #6c757d">Danh sách lớp</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="'/teacher/update_student?classId=' + ${classId} + '&courseId=' + ${courseId}">Nhập điểm</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fas fa-table"></i>
+                <span>Bảng điểm lớp học</span>
+            </div>
+            <div class="card-body">
+                <div class="my-3">
+                    <form th:action="@{/teacher/update_student}" id="searchFormCourse">
+                        <input type="hidden" name="classId" th:value="${classId}">
+                        <input type="hidden" name="courseId" th:value="${courseId}">
+                        <div class="row d-flex">
+                                <div class="col-md-6 mt-2">
+                                    <div class="search">
+                                        <i class="fa fa-search"></i>
+                                        <input id="keyword" type="search" name="keyword" th:value="${keyword}" class="form-control" placeholder="Enter keyword">
+                                        <button type="submit" class="btn btn-secondary">Search</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 input-group mt-2">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="pageSize">Items per page:</label>
+                                    </div>
+                                    <select form="searchFormCourse" name="size" th:value="${pageSize}" onchange="changePageSize()" class="size-select" id="pageSize">
+                                        <option th:each="s : ${{3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <div class="d-flex">
+                                        <button id="btnClear" class="btn btn-danger" onclick="clearFunc()" style="margin-right: 10px;">Xoá</button>
+                                        <button type="button" class="btn btn-success" id="upLoadExcelButton"  data-toggle="modal" data-target="#upLoadExcelModal">
+                                            Nhập điểm Excel
+                                        </button>
+                                    </div>
+                                </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th width="50px">MSSV</th>
+                            <th width="300px">Họ và tên</th>
+                            <th width="50px" th:if="${course.getPercentBT()>0}">Điểm BT</th>
+                            <th width="50px" th:if="${course.getPercentBTL()>0}">Điểm BTL</th>
+                            <th width="50px" th:if="${course.getPercentGK()>0}">Điểm GK</th>
+                            <th width="50px" th:if="${course.getPercentCK()>0}">Điểm CK</th>
+                            <th width="50px">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="point : ${points}">
+                            <td th:text="${point.getStudentId()}"></td>
+                            <td th:text="${point.getStudentName()}"></td>
+                            <td th:if="${point.getPointBT() >= 0 && course.getPercentBT() > 0}"
+                                th:text="${point.getPointBT() == 15 ? '' : point.getPointBT()}"></td>
+                            <td th:if="${point.getPointBTL() >= 0 && course.getPercentBTL() > 0}"
+                                th:text="${point.getPointBTL() == 15 ? '' : point.getPointBTL()}"></td>
+                            <td th:if="${point.getPointGK() >= 0 && course.getPercentGK() > 0}"
+                                th:text="${point.getPointGK() == 15 ? '' : point.getPointGK()}"></td>
+                            <td th:if="${point.getPointCK() >= 0 && course.getPercentCK() > 0}"
+                                th:text="${point.getPointCK() == 15 ? '' : point.getPointCK()}"></td>
+                            <td style="text-align: center;"><a class="update-link" th:data-studentId="${point.getStudentId()}" th:data-studentName="${point.getStudentName()}" href="javascript:;" role="button" style="color: #007bff; text-decoration: none;">Cập nhật</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <nav aria-label="Pagination" th:if="${totalPages > 0}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                        <a th:replace="~{web/fragments/paging :: paging(1, '<<', 'First Page')}"></a>
+                    </li>
+                    <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+                        <a th:replace="~{web/fragments/paging.html::paging(${currentPage -1}, 'Prev', 'Previos Page')}"></a>
+                    </li>
+                    <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                        <a class="page-link" href="#">...</a>
+                    </li>
+                    <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                        th:each="page : ${#numbers.sequence((currentPage > 2) ? (currentPage - 2) : 1,(currentPage + 2 < totalPages) ? (currentPage + 2) : totalPages)}">
+                        <a th:replace="~{web/fragments/paging.html::paging(${page}, ${page}, 'Page ' + ${page})}"></a>
+                    </li>
+                    <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                        <a class="page-link" href="#">...</a>
+                    </li>
+                    <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                        <a th:replace="~{web/fragments/paging::paging(${currentPage + 1},'Next', 'Next Page')}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                        <a th:replace="~{web/fragments/paging.html::paging(${totalPages}, '>>', 'Last Page')}"></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener("load", function() {
+            let message = document.getElementById("message").getAttribute("message");
+            if (message) {
+                let modalBody = document.getElementById("modalBody");
+                let modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            }
+        });
+        function clearFunc() {
+            document.getElementById("keyword").value = "";
+            $("#searchFormCourse").submit();
+        }
+        function changePageSize() {
+            $("#searchFormCourse").submit();
+        }
+    </script>
+
+    <div id="crsId" th:text="${courseId}" hidden></div>
+    <div id="clsId" th:text="${classId}" hidden></div>
+
+    <!--Modal chỉnh sửa điểm-->
+    <div class="modal fade" id="updatePoint" tabindex="-1" aria-labelledby="updatePointLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePointLabel">Cập nhật điểm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <form th:action="@{/teacher/update_point}" id="updatePointForm" method="post" class="form-group">
+                            <input type="hidden" id="studentId" name="studentId">
+                            <input type="hidden" id="studentName" name="studentName">
+                            <input type="hidden" id="classId" name="classId">
+                            <input type="hidden" id="courseId" name="courseId">
+                            <div class="row">
+                                <div th:if="${course.getPercentBT() > 0}" class="col-md-6">
+                                    <label for="pointBT">Điểm bài tập:</label>
+                                    <input type="number" step="any" min="0" name="pointBT" id="pointBT" class="form-control" style="margin-bottom: 10px;" required>
+                                </div>
+                                <div th:if="${course.getPercentBTL() > 0 || course.getPercentGK() > 0}" class="col-md-6">
+                                    <div class="row">
+                                        <div th:if="${course.getPercentBTL() > 0}" class="col-12">
+                                            <label for="pointBTL">Điểm bài tập lớn:</label>
+                                            <input type="number" step="any" min="0" name="pointBTL" id="pointBTL" class="form-control" style="margin-bottom: 10px;" required>
+                                        </div>
+                                        <div th:if="${course.getPercentGK() > 0}" class="col-12">
+                                            <label for="pointGK">Điểm giữa kì:</label>
+                                            <input type="number" step="any" min="0" name="pointGK" id="pointGK" class="form-control" style="margin-bottom: 10px;" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div th:if="${course.getPercentCK() > 0}" class="col-md-6">
+                                    <label for="pointCK">Điểm cuối kì:</label>
+                                    <input type="number" step="any" min="0" name="pointCK" id="pointCK" class="form-control" style="margin-bottom: 10px;" required>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="error-message" style="color: red; margin-top: 10px; display: none;"></div>
+                        <div id="success-message" style="color: #1e7e34; margin-top: 10px; display: none;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thoát</button>
+                    <button type="button" class="btn btn-primary" onclick="updatePoint()">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Modal upload Excel-->
+    <div class="modal fade" id="upLoadExcelModal" tabindex="-1" aria-labelledby="upLoadExcelLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="upLoadExcelLabel">Tải lên bảng điểm Excel</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="formFileMultiple" class="form-label">Tải bảng điểm định dạng .xlsx</label>
+                        <form th:action="@{/teacher/upload_Excel}" enctype="multipart/form-data" id="uploadForm" method="post">
+                            <input type="hidden" id="clId" name="classId" th:value="${classId}">
+                            <input type="hidden" id="coId" name="courseId" th:value="${courseId}">
+                            <div class="form-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="formFileMultiple" name="file" accept=".xlsx">
+                                    <label class="custom-file-label" for="formFileMultiple">Chọn file...</label>
+                                </div>
+                                <label for="formFileMultiple" class="form-label" id="selected-file" style="margin-top: 10px; margin-left: 10px; color: #007bff"></label>
+                            </div>
+                        </form>
+                        <div id="upLoadAlert" class="alert alert-danger mt-2" style="display: none;">Vui lòng chọn file.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thoát</button>
+                    <button type="button" class="btn btn-primary" onclick="uploadFile()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End modal-->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var updateLinks = document.querySelectorAll(".update-link");
+            updateLinks.forEach(function(link) {
+                link.addEventListener("click", function() {
+                    var modal = document.getElementById("updatePoint");
+                    if (modal) {
+                        $(modal).modal("show");
+                        var studentId = link.getAttribute("data-studentId");
+                        var studentName = link.getAttribute("data-studentName");
+                        document.getElementById("studentId").value = studentId;
+                        document.getElementById("studentName").value = studentName;
+                        document.getElementById("classId").value = '[[${classId}]]';
+                        document.getElementById("courseId").value = '[[${courseId}]]';
+                    }
+                });
+            });
+        });
+
+        function updatePoint() {
+            var errorMessage = document.getElementById("error-message");
+            var isValid = true;
+            function showError(message) {
+                errorMessage.innerText = message;
+                errorMessage.style.display = "block";
+                isValid = false;
+            }
+            function validatePointInput(pointElement, errorMessageText) {
+                var pointValue = pointElement.value.trim();
+                if (pointValue === '') {
+                    showError(errorMessageText);
+                } else if (isNaN(pointValue) || parseFloat(pointValue) < 0 || parseFloat(pointValue) > 10) {
+                    showError("Điểm không hợp lệ");
+                }
+            }
+            var pointBTElement = document.getElementById("pointBT");
+            if (pointBTElement) {
+                validatePointInput(pointBTElement, "Vui lòng điền điểm bài tập");
+            }
+            var pointBTLElement = document.getElementById("pointBTL");
+            if (pointBTLElement) {
+                validatePointInput(pointBTLElement, "Vui lòng điền điểm bài tập lớn");
+            }
+            var pointGKElement = document.getElementById("pointGK");
+            if (pointGKElement) {
+                validatePointInput(pointGKElement, "Vui lòng điền điểm giữa kì");
+            }
+            var pointCKElement = document.getElementById("pointCK");
+            if (pointCKElement) {
+                validatePointInput(pointCKElement, "Vui lòng điền điểm cuối kì");
+            }
+            if (isValid) {
+                document.getElementById("error-message").style.display = "none";
+                document.getElementById("success-message").innerText = "Cập nhật điểm thành công";
+                document.getElementById("success-message").style.display = "block";
+                document.getElementById("updatePointForm").submit();
+            }
+        }
+    </script>
+</div>
+</body>
+
+<div layout:fragment="custom-scripts">
+    <script>
+        $(document).ready(function () {
+            $('.custom-file-input').on('change', function() {
+                let numberOfFiles = $(this)[0].files.length;
+                let fileLabel = numberOfFiles > 1 ? numberOfFiles + ' files selected' : $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileLabel);
+                $('#selected-file').html(fileLabel);
+            });
+        });
+        function uploadFile() {
+            var fileInput = document.getElementById('formFileMultiple');
+            if (!fileInput.value) {
+                document.getElementById('upLoadAlert').style.display = 'block';
+                return;
+            }
+            document.getElementById("uploadForm").submit();
+        }
+        // document.querySelector('form').addEventListener('submit', function(event) {
+        //
+        // });
+    </script>
+</div>
+</html>

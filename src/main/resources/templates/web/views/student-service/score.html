@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Student Management System</title>
+    <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div class="header">
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3>Bảng Điểm</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <style>
+        .table-container {
+            display: block; /* Ẩn tất cả các bảng ban đầu */
+        }
+    </style>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 mt-3">
+                <div>
+                   <label for="selectTable">Chọn học kỳ: </label>
+                   <select name="semesters" id="selectTable" onchange="displayTable()">
+                       <option value="all">All</option>
+                       <option th:each="semester:${semesters}" th:value="${semester.getSemesterName()}" th:text="${semester.getSemesterName()}"></option>
+                   </select>
+
+                    <div th:each="semester:${semesters}" th:id="table">
+                            <div th:id="${semester.getSemesterName()}" class="table-container">
+                                <p style="color: #b21f2d;font-weight: bold" th:text="'Học kỳ '+${semester.getSemesterName()}"></p>
+                            <table class="table table-bordered table-striped" style="overflow: auto">
+                                <thead>
+                                <tr style="text-align: center; color: white; background-color: black;">
+                                    <th width = "100px">Mã khóa học</th>
+                                    <th width = "200px">Tên khóa học</th>
+                                    <th width = "200px">Điểm thành phần</th>
+                                    <th width = "100px">Điểm thi</th>
+                                    <th width = "100px">Điểm tổng kết</th>
+                                </tr>
+                                </thead>
+                                <tbody style="text-align: center">
+                                <tr th:if="${point.getSemesterId() == semester.getSemesterName()}" th:each="point, iterp: ${points}">
+                                    <div th:each="course, iterc: ${courses}" th:if="${course.getCourseId()==point.getCourseId()}">
+                                        <td th:if="${point.getCourseId() != ''}" th:text="${point.getCourseId()}"></td>
+                                        <td th:if="${point.getCourseName() != ''}" th:text="${point.getCourseName()}"></td>
+                                        <td>
+                                            <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${course.getPercentBT()>0}" th:text="${'BT: '+point.getPointBT()}"></div>
+                                            <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${course.getPercentBTL()>0}" th:text="${' BTL: '+point.getPointBTL()}"></div>
+                                            <div style="display: inline-block; font-size: initial; margin: 0; padding: 0;" th:if="${course.getPercentGK()>0}" th:text="${' GK: '+point.getPointGK()}"></div>
+                                        </td>
+                                        <td th:if="${course.getPercentCK()>0}" th:text="${point.getPointCK()}"></td>
+                                        <div th:each="result,iterr : ${results}" th:if="${iterr.index} == ${iterp.index}">
+                                            <td th:if="${point.getPointCK()!=15}" th:text="${result}"></td>
+                                        </div>
+                                    </div>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                   </div>
+
+                    <script>
+                        function displayTable() {
+                            var selectBox = document.getElementById("selectTable");
+                            var selectedValue = selectBox.value;
+
+                            var tables = document.querySelectorAll(".table-container");
+                            tables.forEach(function(table) {
+                                table.style.display = "none";
+                            });
+
+                            // Hiển thị bảng tương ứng với lựa chọn của người dùng
+                            var selectedTable = document.getElementById(selectedValue);
+                            if(selectedValue === "all"){
+                                var tables = document.querySelectorAll(".table-container");
+                                tables.forEach(function(table) {
+                                    table.style.display = "block";
+                                });
+                            }
+                            else if (selectedTable) {
+                                selectedTable.style.display= "block";
+                            }
+                        }
+                    </script>
+                </div>
+
+
+
+                <div>
+                    <hr>
+                    <h4>Lưu ý:</h4>
+                    <table class="table table-bordered table-striped" style="overflow: auto">
+                        <thead>
+                        <tr style="text-align: center; color: white; background-color: black;">
+                            <th width = "100px">Loại điểm</th>
+                            <th width = "30px">Điểm thi</th>
+                            <th width = "200px">Ghi chú</th>
+                        </tr>
+                        </thead>
+                        <tbody style="text-align: left">
+                        <tr>
+                            <td>Cấm thi</td>
+                            <td style="text-align: center">11</td>
+                            <td>Được tính như điểm 0</td>
+                        </tr>
+                        <tr>
+                            <td>Miễn học, miễn thi</td>
+                            <td style="text-align: center">12</td>
+                            <td>Đạt nhưng không tính vào ĐTB</td>
+                        </tr>
+                        <tr>
+                            <td>Vắng thi</td>
+                            <td style="text-align: center">13</td>
+                            <td>Được tính như điểm 0</td>
+                        </tr>
+                        <tr>
+                            <td>Hoãn thi, được phép thi sau</td>
+                            <td style="text-align: center">14</td>
+                            <td>Không đạt và không tính vào ĐTB Được thỏa điều kiện môn học trước</td>
+                        </tr>
+                        <tr>
+                            <td>Chưa có điểm</td>
+                            <td style="text-align: center">15</td>
+                            <td>Chưa tính số TCTL và ĐTB</td>
+                        </tr>
+                        <tr>
+                            <td>Rút môn học</td>
+                            <td style="text-align: center">17</td>
+                            <td>Không ghi vào bảng điểm</td>
+                        </tr>
+                        <tr>
+                            <td>Không đạt</td>
+                            <td style="text-align: center">20</td>
+                            <td>Được tính như điểm 0</td>
+                        </tr>
+                        <tr>
+                            <td>Đạt</td>
+                            <td style="text-align: center">21</td>
+                            <td>Đạt nhưng không tính vào ĐTB</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

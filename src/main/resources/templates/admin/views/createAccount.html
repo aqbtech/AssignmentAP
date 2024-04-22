@@ -1,41 +1,149 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
       layout:decorate="~{admin/layout/admin-layout.html}">
     <head>
         <title>Tạo tài khoản</title>
     </head>
     <body>
-    <div layout:fragment="content">
-        <!-- Page Content -->
-        <div class="container">
-            <h1></h1>
-            <hr>
-            <form name="data-form" th:action="@{/admin-management/add}" method="post" id="myForm" class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" class="form-control"><br>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" class="form-control"><br>
-                <label for="role">Role:</label>
-                <select id="role" name="role" class="form-control">
-                    <option value="TEACHER">Teacher</option>
-                    <option value="STUDENT">Student</option>
-                    <!-- Add more options as needed -->
-                </select><br>
-                <label for="fullName">Full Name:</label>
-                <input type="text" id="fullName" name="fullName" class="form-control"><br>
-                <label for="id">ID:</label>
-                <input type="text" id="id" name="id" class="form-control"><br>
-                <label for="age">Age:</label>
-                <input type="number" id="age" name="age" class="form-control"><br>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" class="form-control"><br>
-                <label for="degree">Degree:</label>
-                <input type="text" id="degree" name="degree" class="form-control"><br>
-                <input type="submit" value="Submit" class="btn btn-primary">
-            </form>
+        <div layout:fragment="content">
+            <!-- Page Content -->
+            <div class="container">
+                <div th:if="${message}" class="alert alert-danger" th:text="${message}"></div>
+                <h1></h1>
+                <hr>
+                <form name="data-form" th:action="@{/admin-management/add}" th:object="${registerForm}" method="POST" id="myForm" class="form-group">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="id">ID:</label>
+                            <input type="text" id="id" th:field="*{id}" name="id"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('id')}? 'is-invalid' : ''"
+                                   required>
+                            <div th:if="${#fields.hasErrors('id')}"
+                                 th:each="e : *{#fields.errors('id')}"
+                                 id="idValidationServerFeedback" class="invalid-feedback">
+                                <span th:text="${e}"> </span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="fullName">Họ tên:</label>
+                            <input type="text" id="fullName" th:field="*{fullName}" name="fullName"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('fullName')}? 'is-invalid' : ''"
+                                   required>
+                            <div th:each="e : ${#fields.errors('fullName')}" th:text="${e}"
+                                 id="fullNameValidationServerFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="gender">Giới tính:</label>
+                            <select id="gender" name="gender" th:field="*{gender}" class="form-control"
+                                    th:classappend="${#fields.hasErrors('gender')}?'is-invalid':''"
+                                    required>
+                                <option value="" selected disabled>Giới tính</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nu">Nữ</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="age">Tuổi:</label>
+                            <input type="number" id="age" th:field="*{age}" name="age"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('age')}? 'is-invalid' : ''"
+                                   required>
+                            <div th:each="e : ${#fields.errors('age')}" th:text="${e}"
+                                 id="ageValidationServerFeedback" class="invalid-feedback"></div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="role" th:field="*{role}">Role:</label>
+                            <select id="role" name="role" class="form-control"
+                                    th:classappend="${#fields.hasErrors('role')}?'is-invalid':''" required>
+                                <option value="" selected disabled>Role</option>
+                                <option value="TEACHER">Teacher</option>
+                                <option value="STUDENT">Student</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                            <div th:each="e : ${#fields.errors('role')}" th:text="${e}"
+                                 id="roleValidationServerFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="username">Username:</label>
+                            <input type="text" id="username" th:field="*{username}" name="username"
+                                   class="form-control" required
+                                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                            <div th:if="${#fields.hasErrors('username')}"
+                                 th:each="e : *{#fields.errors('username')}"
+                                 id="usernameValidationServerFeedback" class="invalid-feedback">
+                                <span th:text="${e}"> </span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" th:field="*{password}" name="password"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('password')}? 'is-invalid' : ''"
+                                   required>
+                            <div th:each="e : ${#fields.errors('password')}" th:text="${e}"
+                                 id="passwordValidationServerFeedback" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" th:field="*{email}" name="email"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('email')}? 'is-invalid' : ''"
+                               required>
+                        <div th:each="e : ${#fields.errors('email')}" th:text="${e}"
+                             id="emailValidationServerFeedback" class="invalid-feedback"></div>
+                    </div>
+
+                    <div id="teacherDiv" class="form-group" style="display: none;">
+                        <label for="degree" id="degreeLabel">Bằng cấp:</label>
+                        <input type="text" id="degree" th:field="*{degree}" name="degree"
+                               th:classappend="${#fields.hasErrors('degree')}? 'is-invalid' : ''"
+                               class="form-control">
+                        <div th:each="e : ${#fields.errors('degree')}" th:text="${e}"
+                            id="degreeValidationServerFeedback" class="invalid-feedback"></div>
+                    </div>
+
+                    <div id="studentDiv" class="form-group" style="display: none;">
+                        <label for="major" id="majorLabel">Ngành học :</label>
+                        <input type="text" id="major" th:field="*{major}" name="major"
+                               th:classappend="${#fields.hasErrors('major')}? 'is-invalid' : ''"
+                               class="form-control">
+                        <div th:each="e : ${#fields.errors('major')}" th:text="${e}"
+                            id="majorValidationServerFeedback" class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-row">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+                <script>
+                    document.getElementById('role').addEventListener('change', function() {
+                        var role = this.value;
+                        var teacherInput = document.getElementById('degree');
+                        var studentInput = document.getElementById('major');
+
+                        if (role === 'TEACHER') {
+                            document.getElementById('teacherDiv').style.display = 'block';
+                            document.getElementById('studentDiv').style.display = 'none';
+                            teacherInput.required = true;
+                            studentInput.required = false;
+                        } else if (role === 'STUDENT') {
+                            document.getElementById('teacherDiv').style.display = 'none';
+                            document.getElementById('studentDiv').style.display = 'block';
+                            teacherInput.required = false;
+                            studentInput.required = true;
+                        }
+                    });
+                </script>
+            </div><!-- /.container -->
         </div>
-        <!-- /.container -->
-    </div>
     </body>
 </html>

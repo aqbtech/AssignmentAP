@@ -2,8 +2,8 @@ package com.hcmutap.elearning.dao.impl;
 
 import com.hcmutap.elearning.dao.firebase.DefaultFirebaseDatabase;
 import com.hcmutap.elearning.dao.firebase.Options;
+import com.hcmutap.elearning.exception.NotFoundInDB;
 import com.hcmutap.elearning.model.ClassModel;
-import com.hcmutap.elearning.model.PointModel;
 import com.hcmutap.elearning.service.IPointService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,52 +11,18 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Repository
-public class ClassDAO extends DefaultFirebaseDatabase<ClassModel, String>{
-//    public List<ClassModel> findAll() {
-//        List<ClassModel> classModelList = null;
-//        try {
-//            classModelList = query("classes", ClassModel.class);
-//        } catch (ExecutionException | InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        return classModelList;
-//    }
-//
-//    public String save(ClassModel classModel) {
-//        return create("classes", classModel);
-//    }
-//
-//    public ClassModel update(ClassModel classModel) {
-//        List<String> ids = null;
-//        try {
-//            ids = findDocument("classes", "id", classModel.getId());
-//        } catch (ExecutionException | InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        assert ids != null; // handle not found exception
-//        return update("classes", ids.getFirst(), classModel);
-//    }
-//
-//    public void delete(String id) {
-//        List<String> ids = null;
-//        try {
-//            ids = findDocument("classes", "id", id);
-//        } catch (ExecutionException | InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        assert ids != null; // handle not found exception
-//        delete("classes", ids.getFirst());
-//    }
-//
-    public ClassModel findById(String id) {
-        return findBy("classId", id, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
-    }
+public class ClassDAO extends DefaultFirebaseDatabase<ClassModel, String> {
 
-    public ClassModel getClassInfo(String classId) {
-        return findBy("classId", classId, Options.OptionBuilder.Builder().setEqual().build()).getFirst();
+	@Autowired
+	private StudentDAO studentDAO;
+    public ClassModel getClassInfo(String classId) throws NotFoundInDB {
+        List<ClassModel> classModels =  findBy("classId", classId, Options.OptionBuilder.Builder().setEqual().build());
+        if (classModels.isEmpty()) {
+            throw new NotFoundInDB("Error when receive in database, class with id: " + classId);
+        }
+        return classModels.getFirst();
     }
 
     public List<ClassModel> getClassOfCourse(String courseId) {
@@ -68,12 +34,22 @@ public class ClassDAO extends DefaultFirebaseDatabase<ClassModel, String>{
     private IPointService pointService;
     public List<ClassModel> getTimeTableSV(String studentId) {
         List<ClassModel> TimeTableList = new ArrayList<>();
-        List<PointModel> listClass = pointService.getListPointOfStudent(studentId);
-        for (PointModel course : listClass) {
-            String classId = course.getClassId();
-//            ClassModel tmp = queryBy("classes", "classId", classId, ClassModel.class).getFirst();
-            ClassModel tmp = findById(classId);
-            TimeTableList.add(tmp);
+        List<String> listClassId = null;
+        try {
+            listClassId = studentDAO.findById(studentId).getClasses();
+        } catch (NotFoundInDB notFoundInDB) {
+            throw new RuntimeException(notFoundInDB);
+        }
+        for(String classId : listClassId) {
+            ClassModel classModel = null;
+            try {
+                classModel = findById(classId);
+            } catch (NotFoundInDB notFoundInDB) {
+                throw new RuntimeException(notFoundInDB);
+            }
+            if(classModel != null) {
+                TimeTableList.add(classModel);
+            }
         }
         return TimeTableList;
     }

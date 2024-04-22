@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <link rel="icon" th:href="@{/images/common/favicon.ico}" type="image/x-icon">
 
     <title>Default title of admin</title>
     <!-- Custom fonts for this template-->
@@ -24,10 +25,10 @@
 </head>
 
     <body id="page-top" >
-        <div th:replace="~{admin/framents/header::admin-header}"></div>
+        <div th:replace="~{admin/fragments/header::admin-header}"></div>
         <div id="wrapper">
             <!-- Sidebar -->
-            <div th:replace="~{admin/framents/nav::nav}"></div>
+            <div th:replace="~{admin/fragments/nav::nav}"></div>
             <!-- End of Sidebar -->
             <div id="content-wrapper">
 
@@ -50,7 +51,7 @@
                 <!-- /.container-fluid -->
 
                 <!-- Footer -->
-                <div th:replace="~{admin/framents/footer::admin-footer}"></div>
+                <div th:replace="~{admin/fragments/footer::admin-footer}"></div>
 
             </div>
             <!-- /.content-wrapper -->

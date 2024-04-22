@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Danh sách sinh viên</title>
+    <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/template/admin/css/custom-for-all-table.css}"/>
+    <style>
+        .nav-link {
+            transition: background-color 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: rgba(0, 123, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="header">
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3 th:text="'Lớp '+ ${class.classId} +'_HK'+ ${class.semesterId} + ' - Danh sách sinh viên'"></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 mt-3">
+                <div class="border-top border-bottom" style="margin-bottom: 20px;">
+                    <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link active" th:href="'/course?id=' + ${class.classId}" style="color: #6c757d">Khoá học</a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasAuthority('TEACHER')">
+                                <a class="nav-link" th:href="'/list-student?id=' + ${class.classId}">Danh sách lớp</a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasAuthority('TEACHER')">
+                                <a class="nav-link" th:href="'/teacher/update_student?classId=' + ${class.classId} + '&courseId=' + ${class.courseId}" style="color: #6c757d">Nhập điểm</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-table"></i>
+                        <span>Danh sách lớp học</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="my-3">
+                            <form th:action="@{/list-student}" id="searchFormCourse">
+                                <input type="hidden" name="id" th:value="${class.classId}">
+                                <div class="row d-flex">
+                                    <div class="col-md-6 mt-2">
+                                        <div class="search">
+                                            <i class="fa fa-search"></i>
+                                            <input id="keyword" type="search" name="keyword" th:value="${keyword}" class="form-control" placeholder="Enter keyword">
+                                            <button type="submit" class="btn btn-secondary">Search</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 input-group mt-2">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text" for="pageSize">Items per page:</label>
+                                        </div>
+                                        <select form="searchFormCourse" name="size" th:value="${pageSize}" onchange="changePageSize()" class="size-select" id="pageSize">
+                                            <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mt-2">
+                                        <div class="d-flex">
+                                            <button id="btnClear" class="btn btn-danger" onclick="clearFunc()" style="margin-right: 10px;">Xoá</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th width = "15%">Mã sinh viên</th>
+                                    <th width = "25%">Họ và tên</th>
+                                    <th>Email</th>
+                                    <th width = "10%">Xóa</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="student : ${listStudent}">
+                                    <td th:text="${student.id}"></td>
+                                    <td th:text="${student.fullName}"></td>
+                                    <td th:text="${student.email}"></td>
+                                    <td>
+                                        <a class="btn btn-link delete-button" th:href="@{|/del-student?classId=${class.classId}&id=${student.id}|}">Xóa</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p th:if="${notHaveStudent}" class="text-center text-muted">Lớp hiện chưa có sinh viên</p>
+                    <nav aria-label="Pagination" th:if="${totalPages > 0}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent :: paging(1, '<<', 'First Page')}"></a>
+                            </li>
+                            <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent.html::paging(${currentPage -1}, 'Prev', 'Previos Page')}"></a>
+                            </li>
+                            <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                                <a class="page-link" href="#">...</a>
+                            </li>
+                            <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                                th:each="page : ${#numbers.sequence((currentPage > 2) ? (currentPage - 2) : 1,(currentPage + 2 < totalPages) ? (currentPage + 2) : totalPages)}">
+                                <a th:replace="~{web/fragments/paging_liststudent.html::paging(${page}, ${page}, 'Page ' + ${page})}"></a>
+                            </li>
+                            <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                                <a class="page-link" href="#">...</a>
+                            </li>
+                            <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent::paging(${currentPage + 1},'Next', 'Next Page')}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                <a th:replace="~{web/fragments/paging_liststudent.html::paging(${totalPages}, '>>', 'Last Page')}"></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener("load", function () {
+            const message = document.getElementById("message").getAttribute("message");
+            if (message) {
+                const modalBody = document.getElementById("modalBody");
+                const modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            }
+        });
+        function clearFunc() {
+            document.getElementById("keyword").value = "";
+            $("#searchFormCourse").submit();
+        }
+            function changePageSize() {
+            $("#searchFormCourse").submit();
+        }
+    </script>
+</div>
+</body>
+</html>

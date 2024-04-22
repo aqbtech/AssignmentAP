@@ -1,57 +1,339 @@
 package com.hcmutap.elearning.controller.admin;
 
+import com.hcmutap.elearning.Singleton;
 import com.hcmutap.elearning.dto.RegisterDTO;
-import com.hcmutap.elearning.model.UserModel;
-import com.hcmutap.elearning.service.IStudentService;
+import com.hcmutap.elearning.exception.ConvertExcelToObjectException;
+import com.hcmutap.elearning.exception.NotFoundException;
+import com.hcmutap.elearning.model.*;
+import com.hcmutap.elearning.service.*;
 
-import com.hcmutap.elearning.service.ITeacherService;
-import com.hcmutap.elearning.service.IUserService;
+import com.hcmutap.elearning.service.impl.ExcelService;
+import com.hcmutap.elearning.service.impl.RegisterService;
+import com.hcmutap.elearning.service.impl.SemesterService;
 import com.hcmutap.elearning.utils.MapperUtil;
+import com.hcmutap.elearning.validator.RegisterDTOValidator;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.*;
 
 @Controller(value = "homeControllerOfAdmin")
 public class HomeController {
+	// logger
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	@Resource
 	private IStudentService studentService;
 	@Resource
 	private ITeacherService teacherService;
 	@Resource
 	private IUserService userService;
+	@Resource
+	private IPointService pointService;
+	private RegisterService registerService;
+	@Autowired
+	private RegisterDTOValidator registerDTOValidator;
+	private ICourseService courseService;
+	@Autowired
+	private SemesterService semesterService;
+
+	@Autowired
+	public void setCourseService(ICourseService courseService) {
+		this.courseService = courseService;
+	}
+	@Autowired
+	public void setRegisterService(RegisterService registerService) {
+		this.registerService = registerService;
+	}
 	@GetMapping("/admin-home")
 	public String index(Principal principal, ModelMap model) {
-		UserModel userModel = userService.findByUsername(principal.getName()).getFirst();
-		model.addAttribute("user", userModel);
-		return "admin/views/home";
-	}
-	@GetMapping("/admin-management")
-	public String viewAll(ModelMap model, @RequestParam("type") String type){
-		if (type.equals("student")) {
-			model.addAttribute("models", studentService.findAll());
-			model.addAttribute("type", "student");
-		}
-		else if (type.equals("teacher")) {
-			model.addAttribute("models", teacherService.findAll());
-			model.addAttribute("type", "teacher");
-		}
-		return "admin/views/view-all-table";
-	}
-	@GetMapping("/admin-management/add")
-	public String addAccount(@RequestParam("type") String type){
-		if (type.equals("course")){
-			return "admin/views/createCourse";
-		} else {
-			return "admin/views/createAccount";
+		try {
+			UserModel userModel = userService.findByUsername(principal.getName());
+			model.addAttribute("user", userModel);
+			return "admin/views/home";
+		} catch (NotFoundException e) {
+			logger.error("User not found");
+			return "redirect:/login";
 		}
 
 	}
-	@PostMapping("/admin-management/add")
-	public String addAccount(@ModelAttribute RegisterDTO registerDTO){
-		ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
-		return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
+	@GetMapping("/admin-management")
+	public String viewAll(Model model, @RequestParam("type") String type,
+						  @RequestParam(required = false) String keyword,
+						  @RequestParam(defaultValue = "1") int page,
+						  @RequestParam(defaultValue = "3") int size) {
+		Page<?> pageResult;
+		switch (type) {
+			case "student":
+				pageResult = studentService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update");
+				model.addAttribute("deleteLink", "admin-management/deleteAccount");
+				model.addAttribute("href", "/admin-management?type=student");
+				model.addAttribute("type", "student");
+				break;
+			case "teacher":
+				pageResult = teacherService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update");
+				model.addAttribute("deleteLink", "admin-management/deleteAccount");
+				model.addAttribute("href", "/admin-management?type=teacher");
+				model.addAttribute("type", "teacher");
+				break;
+			case "course":
+				pageResult = courseService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update-course");
+				model.addAttribute("deleteLink", "admin-management/deleteCourse");
+				model.addAttribute("href", "/admin-management?type=course");
+				model.addAttribute("type", "course");
+				break;
+			case "semester":
+				pageResult = semesterService.getPage(keyword, page, size);
+				model.addAttribute("updateLink", "admin-management/update-semester");
+				model.addAttribute("deleteLink", "admin-management/delete-semester");
+				model.addAttribute("href", "/admin-management?type=semester");
+				model.addAttribute("type", "semester");
+				break;
+			default:
+				logger.error("Type not found");
+				return "redirect:/admin-home"; // TODO: redirect to error page
+		}
+		genePage(model, pageResult);
+		return "admin/views/view-all-table";
+	}
+
+	private void genePage(Model model, Page<?> page) {
+		model.addAttribute("models", page.getContent());
+		model.addAttribute("currentPage", page.getNumber() + 1);
+		model.addAttribute("totalItems", page.getTotalElements());
+		model.addAttribute("totalPages", page.getTotalPages());
+		model.addAttribute("pageSize", page.getSize());
+	}
+
+	@GetMapping("/admin-management/deleteAccount")
+	public String deleteAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type,
+								final RedirectAttributes redirectAttributes) {
+		try {
+			if (type.equals("teacher")) {
+				TeacherModel teacher = teacherService.findById(id);
+				if (teacher.getClasses().isEmpty()) {
+					List<String> del = new ArrayList<>();
+					del.add(teacher.getFirebaseId());
+					teacherService.delete(del);
+					userService.delete(teacher.getUsername());
+					redirectAttributes.addFlashAttribute("message", "Xóa giáo viên " + id + " thành công!");
+				} else {
+					StringBuilder message = new StringBuilder("Giáo viên vẫn còn dạy các lớp");
+					for (String classId : teacher.getClasses()) {
+						message.append(" ").append(classId);
+					}
+					message.append(" nên chưa thể xóa!");
+					redirectAttributes.addFlashAttribute("message", message.toString());
+				}
+			} else {
+				StudentModel student = studentService.findById(id);
+				List<String> del = new ArrayList<>();
+				del.add(student.getFirebaseId());
+				studentService.delete(del);
+				userService.delete(student.getUsername());
+				// implfunc need to change exception
+				List<PointModel> points = pointService.getListPointByStudentId(student.getId());
+				List<String> delPoint = new ArrayList<>();
+				for (PointModel point : points) {
+					delPoint.add(point.getFirebaseId());
+				}
+				pointService.delete(delPoint);
+				redirectAttributes.addFlashAttribute("message", "Xóa sinh viên " + student.getFullName() + " thành công!");
+			}
+			return "redirect:/admin-management?type=" + type;
+		} catch (NotFoundException e) {
+			logger.error("Can't delete account because not found {}", e.getMessage());
+			return "redirect:/404";
+		}
+	}
+
+	@GetMapping("/admin-management/update")
+	public String updateAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type) {
+		return "redirect:/admin-management/view-info?id=" + id + "&type=" + type;
+	}
+
+	@PostMapping("/admin-management/view-info")
+	public String updateAccount(@RequestParam("id") String id,
+								@RequestParam("type") String type,
+								@ModelAttribute("form") RegisterDTO form, ModelMap model) {
+		try {
+			if (type.equals("teacher")) {
+				TeacherModel teacherModel = teacherService.findById(id);
+				teacherModel.setFullName(form.getFullName());
+				teacherModel.setAge(form.getAge());
+				teacherModel.setAge(form.getAge());
+				teacherModel.setDegree(form.getDegree());
+				teacherService.update(teacherModel);
+				model.addAttribute("type", "teacher");
+				model.addAttribute("user", teacherModel);
+			} else {
+				StudentModel studentModel = studentService.findById(id);
+				studentModel.setFullName(form.getFullName());
+				studentModel.setAge(form.getAge());
+				studentModel.setAge(form.getAge());
+				studentModel.setMajor(form.getMajor());
+				studentService.update(studentModel);
+				model.addAttribute("type", "student");
+				model.addAttribute("user", studentModel);
+			}
+			model.addAttribute("message", "Thông tin được chỉnh sửa thành công");
+			return "admin/views/update-account";
+		} catch (NotFoundException e) {
+			// TODO: redirect to error page
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GetMapping("/admin-management/registration")
+	public String regis_manage(ModelMap modelMap){
+		Singleton check = Singleton.getInstance();
+		boolean student_check = check.isStudent_state();
+		boolean teacher_check = check.isTeacher_state();
+		modelMap.addAttribute("student", student_check);
+		modelMap.addAttribute("teacher", teacher_check);
+		return "admin/views/manage_course_registration";
+	}
+	@PostMapping("/admin-management/registration")
+	public String regis_manage(@RequestParam("teacher") String teacher,
+							   @RequestParam("student") String student){
+		Singleton check = Singleton.getInstance();
+		if(teacher.equals("Close")){
+			check.setTeacher_state(false);
+		}
+		if(teacher.equals("Open")){
+			check.setTeacher_state(true);
+		}
+		if (student.equals("Close")){
+			check.setStudent_state(false);
+		}
+		if (student.equals("Open")){
+			check.setStudent_state(true);
+		}
+		return "redirect:/admin-management/registration";
+	}
+
+	@GetMapping("/admin-management/view-info")
+	public String viewInfo(@RequestParam("id") String id,
+						   @RequestParam("type") String type,
+						   Model model) {
+		try {
+			if (type.equals("student")) {
+				model.addAttribute("user", studentService.findById(id));
+				model.addAttribute("type", "student");
+			} else if (type.equals("teacher")) {
+				model.addAttribute("type", "teacher");
+				model.addAttribute("user", teacherService.findById(id));
+			}
+			model.addAttribute("form", new RegisterDTO());
+			return "admin/views/update-account";
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@InitBinder("registerForm")
+	protected void initBinder(WebDataBinder dataBinder) {
+		dataBinder.addValidators(registerDTOValidator);
+//		Object target = dataBinder.getTarget();
+//		if (target == null) {
+//			return;
+//		}
+//		System.out.println("Target=" + target);
+//		if (target.getClass() == RegisterDTO.class) {
+//			dataBinder.setValidator(registerDTOValidator);
+//		}
+	}
+
+	@RequestMapping(value = "/admin-management/add-account", method = RequestMethod.GET)
+	public String addAccount(Model model) {
+		RegisterDTO form = new RegisterDTO();
+		model.addAttribute("registerForm", form);
+		return "admin/views/createAccount";
+	}
+
+	@RequestMapping(value = "/admin-management/add", method = RequestMethod.POST)
+	public String addAccount(Model model,
+							 @ModelAttribute("registerForm") @Validated RegisterDTO registerDTO,
+							 BindingResult result,
+							 final RedirectAttributes redirectAttributes) {
+		try {
+			if (result.hasErrors()) {
+				model.addAttribute("message", "Failed to add account");
+				return "admin/views/createAccount";
+			}
+			ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
+			String message = registerService.register(modelMap);
+			if (message.equals("Success")) {
+				return "redirect:/admin-management?type=" + registerDTO.getRole().toLowerCase();
+			} else {
+				redirectAttributes.addFlashAttribute("message", message);
+				return "redirect:/admin-management/add-account";
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	@GetMapping("/admin-management/add-by-file")
+	public String addAccountByFile() {
+		return "admin/views/add-many-account";
+	}
+	@PostMapping(value = "/admin-management/add-by-file")
+	public String addAccount(@RequestParam("file") MultipartFile file, Model model) {
+		try {
+			ExcelService<RegisterDTO> excelService = new ExcelService<>();
+			Optional<List<RegisterDTO>> list = excelService.readAndConvert(file, RegisterDTO.class);
+			Map<String, String> complete = new HashMap<>();
+			Map<String, String> failure = new HashMap<>();
+			if (list.isPresent()) {
+				for (RegisterDTO registerDTO : list.get()) {
+					Errors errors = new BeanPropertyBindingResult(registerDTO, "registerDTO");
+					registerDTOValidator.validate(registerDTO, errors);
+					if (errors.hasErrors()) {
+						failure.put(registerDTO.getUsername(),
+								"Failed to add account, message: " + errors.getAllErrors());
+					} else {
+						ModelMap modelMap = MapperUtil.getInstance().toModelMapFromDTO(registerDTO);
+						String message = registerService.register(modelMap);
+						if (!message.equals("Success")) {
+							if (!failure.containsKey(registerDTO.getUsername())) {
+								failure.put(registerDTO.getUsername(), "Failed to add account, message: " + message);
+							}
+							logger.error(message);
+						} else {
+							complete.put(registerDTO.getUsername(), "Success");
+						}
+					}
+				}
+			} else {
+				logger.atDebug().log("List is empty");
+			}
+			String result = "Complete: " + complete.size() + " accounts\n" +
+					"Failure: " + failure.size() + " accounts\n";
+			model.addAttribute("message", result);
+			return "admin/views/add-many-account";
+		} catch (ConvertExcelToObjectException | NotFoundException e) {
+			logger.error("Can't add account because {}", e.getMessage());
+			model.addAttribute("message", e.getMessage());
+			return "admin/views/add-many-account";
+		}
 	}
 }

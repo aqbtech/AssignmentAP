@@ -2,6 +2,7 @@ package com.hcmutap.elearning.model;
 
 import com.hcmutap.elearning.dao.firebase.DocumentId;
 import com.hcmutap.elearning.dao.firebase.FirebaseCollection;
+import com.hcmutap.elearning.dao.firebase.SecondaryId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,14 +16,16 @@ import java.util.List;
 @AllArgsConstructor
 @FirebaseCollection("teachers")
 public class TeacherModel {
-	// foreign key of user for get data in users collection
 	@DocumentId
+	private String firebaseId;
+	@SecondaryId
 	private String id;
 	private String fullName;
+	private String gender;
 	private Long age;
 	private String username;
 	private String email;
 	private String degree;
-	private TimetableModel timetable;
-	private List<String> courses; // save id of courses
+	private List<String> classes;
+	private List<String> courses;
 }

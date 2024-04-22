@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+  <title>Thời khóa biểu</title>
+  <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+</head>
+<body>
+      <div layout:fragment="content">
+
+          <div class="header">
+              <div class="container mt-3">
+                 <div class="row">
+                    <div class="col-sm-9">
+                        <h3>Thời khóa biểu</h3>
+                    </div>
+                 </div>
+              </div>
+          </div>
+          <hr>
+
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-12 mt-3">
+              <table class="table table-bordered table-striped" style="overflow: auto">
+                  <thead>
+                  <tr style="text-align: center; color: white; background-color: black;">
+                    <th width = "100px">Mã khóa học</th>
+                    <th width = "35%">Tên khóa học</th>
+                    <th width = "15%">Mã lớp học</th>
+                    <th>Ngày học</th>
+                    <th width = "15%">Thời gian học</th>
+                    <th width = "9%">Phòng học</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                          <tr th:each="class: ${classes}">
+                            <td th:if="${class.getCourseId() != ''}" th:text="${class.getCourseId()}"> Course </td>
+                            <td th:if="${class.getClassName() != ''}" th:text="${class.getClassName()}"> Name </td>
+                            <td th:if="${class.getClassId() != ''}" th:text="${class.getClassId()}"> Class </td>
+                            <td th:if="${class.getDayOfWeek() != ''}" th:text="${class.getDayOfWeek()}"> Day </td>
+                            <td th:if="${class.getTimeStart() != '' and class.getTimeEnd() != ''}" th:text="${class.getTimeStart()} +'-'+${class.getTimeEnd()}"> Time </td>
+                            <td th:if="${class.getRoom() != ''}" th:text="${class.getRoom()}"> Room </td>
+                          </tr>
+                  </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+</body>
+</html>

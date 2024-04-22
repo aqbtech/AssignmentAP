@@ -1,6 +1,7 @@
 package com.hcmutap.elearning.controller.api;
 
 
+import com.hcmutap.elearning.exception.NotFoundException;
 import com.hcmutap.elearning.model.StudentModel;
 import com.hcmutap.elearning.service.IStudentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,11 +23,19 @@ public class StudentAPI {
 	}
 	@PutMapping("/student")
 	public void update(@RequestBody StudentModel studentModel) {
-		studentService.update(studentModel);
+		try {
+			studentService.update(studentModel);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	@DeleteMapping("/student")
 	public void delete(@RequestBody List<String> ids) {
-		studentService.delete(ids);
+		try {
+			studentService.delete(ids);
+		} catch (NotFoundException e) {
+			throw new RuntimeException(e);
+		}
 
 	}
 }

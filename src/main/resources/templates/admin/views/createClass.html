@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/admin-layout.html}">
+<head>
+    <title>Tạo lớp học</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/2.8.0/slimselect.min.css" integrity="sha512-QhrDqeRszsauAfwqszbR3mtxV3ZWp44Lfuio9t1ccs7H15+ggGbpOqaq4dIYZZS3REFLqjQEC1BjmYDxyqz0ZA==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Content -->
+    <div class="container">
+        <h1>Tạo lớp học</h1>
+        <hr>
+        <div class="alert alert-danger" id="errorMessage1" style="display: none;">
+            Cần phải chọn khóa học để tạo lớp
+        </div>
+        <div class="alert alert-danger" id="errorMessage2" style="display: none;">
+            Thời gian không hợp lệ
+        </div>
+        <form name="data-form" th:action="@{/admin-management/add-class}" th:object="${class}" method="post" id="myForm" class="form-group">
+            <div class="row">
+                <div class="col">
+                    <label for="className">Tên lớp:</label>
+                    <input type="text" id="className" name="className" class="form-control"
+                           th:value="${class.className}" required><br>
+                </div>
+                <div class="col">
+                    <label for="courseId">Khóa học:</label>
+                    <select id="courseId" name="courseId" class="form-control" required>
+                        <option value="" selected disabled>Chọn khóa học</option>
+                        <option th:each="course : ${courses}" th:value="${course.courseId}" th:selected="${course.courseId == class.courseId}"
+                                th:text="${course.courseName}+' '+' ('+${course.courseId}+')'"></option>
+                    </select><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="dayOfWeek">Ngày học:</label>
+                    <select id="dayOfWeek" name="dayOfWeek" class="form-control"  required>
+                        <option value="Monday" th:selected="${class.dayOfWeek} == 'Monday'">Thứ hai</option>
+                        <option value="Tuesday" th:selected="${class.dayOfWeek} == 'Tuesday'">Thứ ba</option>
+                        <option value="Wednesday" th:selected="${class.dayOfWeek} == 'Wednesday'">Thứ tư</option>
+                        <option value="Thursday" th:selected="${class.dayOfWeek} == 'Thursday'">Thứ năm</option>
+                        <option value="Friday" th:selected="${class.dayOfWeek} == 'Friday'">Thứ sáu</option>
+                        <option value="Saturday" th:selected="${class.dayOfWeek} == 'Saturday'">Thứ bảy</option>
+                        <option value="Sunday" th:selected="${class.dayOfWeek} == 'Sunday'">Chủ nhật</option>
+                    </select><br>
+                </div>
+                <div class="col">
+                    <label for="room">Phòng:</label>
+                    <input type="text" id="room" name="room" class="form-control"
+                           th:value="${class.room}" required><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="timeStart">Thời gian vào tiết:</label>
+                    <input type="time" id="timeStart" name="timeStart" class="form-control"
+                           th:value="${class.timeStart}" required><br>
+                </div>
+                <div class="col">
+                    <label for="timeStudy">Số tiết:</label>
+                    <input type="number" id="timeStudy" name="timeStudy" class="form-control"
+                           th:value="${class.timeStudy}" required min="1"><br>
+                </div>
+            </div>
+            <label for="semesterId">Học kì:</label>
+            <select id="semesterId" name="semesterId" class="form-control" required>
+                <option th:each="hk : ${semester}" th:value="${hk.semesterName}" th:selected="${class.getSemesterId == hk.semesterName}"
+                        th:text="${hk.semesterName}"></option>
+            </select><br>
+            <input type="submit" value="Submit" class="btn btn-primary float-right">
+        </form>
+    </div>
+    <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+    <div th:id="error" style="display: none;" th:attr="message=${error}"></div>
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary float-right" data-dismiss="modal" id="modalExit"></button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/2.8.0/slimselect.min.js" integrity="sha512-mG8eLOuzKowvifd2czChe3LabGrcIU8naD1b9FUVe4+gzvtyzSy+5AafrHR57rHB+msrHlWsFaEYtumxkC90rg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let check1;
+            let check2;
+            if(document.getElementById("courseId").value === "") {
+                document.getElementById("errorMessage1").style.display = "block";
+                check1=false;
+            }
+            else {
+                document.getElementById("errorMessage1").style.display = "none";
+                check1=true;
+            }
+
+            const parts = document.getElementById("timeStart").value.split(':');
+            let hour = parseInt(parts[0], 10);
+            hour += parseInt(document.getElementById("timeStudy").value, 10);
+            if(hour > 24) {
+                document.getElementById("errorMessage2").style.display = "block";
+                check2=false;
+            } else {
+                document.getElementById("errorMessage2").style.display = "none";
+                check2=true;
+            }
+            if(check1 && check2) {
+                this.submit();
+            }
+        });
+
+        window.addEventListener("load", function(){
+            const message = document.getElementById("message").getAttribute("message");
+            if(message) {
+                const modalBody = document.getElementById("modalBody");
+                const modalExit = document.getElementById("modalExit");
+                modalBody.innerText = message;
+                modalExit.innerText = "Đóng";
+                $('#modal').modal('show');
+            }
+            const error = document.getElementById("error").getAttribute("message");
+            if(!error) {
+                document.getElementById("className").value = "";
+                document.getElementById("courseId").value = "";
+                document.getElementById("dayOfWeek").value = "";
+                document.getElementById("timeStart").value = "";
+                document.getElementById("timeStudy").value = "";
+                document.getElementById("room").value = "";
+                document.getElementById("semesterId").value = "";
+            }
+        });
+
+        function parseTime(timeStr) {
+            const [hours, minutes] = timeStr.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hours, 10));
+            date.setMinutes(parseInt(minutes, 10));
+            return date;
+        }
+
+        new SlimSelect({
+            select: "#courseId"
+        });
+    </script>
+</div>
+</body>
+</html>

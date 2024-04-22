@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Đăng ký khóa học</title>
+    <link th:href="@{/template/web/css/registration.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
+</head>
+<body>
+
+
+
+<div layout:fragment="content">
+    <div class="header">
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3>Đăng ký khóa học</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-4 col-sm-6 m-4 box-search1">
+                <h4 class="mt-3">Khóa học đang đăng ký</h4>
+                <div class="ele1 mb-3" th:each="e : ${class_course_of_student}" style="overflow: auto" id="registed">
+                    <div class="courseid">
+                        <p th:text="${e.getCourse().getCourseId()}">Id</p>
+                    </div>
+                    <div class="coursename">
+                        <p th:text="${e.getCourse().getCourseName()}">Name</p>
+                    </div>
+                    <div class="coursename">
+                        <p th:text="${e.getLophoc().getClassName()}">Name</p>
+                    </div>
+                    <div class="time">
+                        <p th:text="${e.getLophoc().getDayOfWeek()}">Time</p>
+                    </div>
+                    <div class="time">
+                        <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-6 m-4 ">
+
+                <div class="box p-3 mb-4">
+                    <form style="width: 100%; display: flex" method="get" id="my-search" >
+                        <input style="" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId" th:unless="${message=='Hiện không được đăng ký'}">
+                        <button th:unless="${message=='Hiện không được đăng ký'}" type="submit" style="background: none; border: none"><span class="material-symbols-outlined">search</span></button>
+                        <input style="" type="text" class="text" placeholder="Search here..." id="courseId" name="courseId" th:if="${message=='Hiện không được đăng ký'}" disabled>
+                        <span th:if="${message=='Hiện không được đăng ký'}" class="material-symbols-outlined">search</span>
+                    </form>
+                </div>
+
+                <div th:switch="${message}">
+                    <div th:case="null" class="" th:text="${message}"></div>
+                    <div th:case="'Đăng ký thành công'" class="alert alert-success" th:text="${message}"></div>
+                    <div th:case="*" class="alert alert-danger" th:text="${message}"></div>
+                </div>
+
+                <div class="box-search">
+
+                    <div class="ele" th:each="e : ${class_course}" id = "my_search">
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <div class="row">
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getCourse().getCourseName()}">Tên khóa học</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getLophoc().getClassId()}">Mã lớp học</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getLophoc().getDayOfWeek()}">Ngày học</p>
+                                    </div>
+                                    <div class="col-sm-6" style="overflow: auto">
+                                        <p th:text="${e.getLophoc().getTimeStart()} + '-' + ${e.getLophoc().getTimeEnd()}">Time</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2 mt-4" style="overflow: auto">
+                                <form th:action="@{/student/registration?courseId=}" method="post" id="select-course">
+                                    <input type="hidden" id="classId" name="classId" th:value="${e.getLophoc().getClassId()}">
+                                    <input type="submit" style="background-color: #212529;border: none;color: white"  value="select">
+                                </form>
+                            </div>
+                            <div th:id="message" style="display: none;" th:attr="message=${message}"></div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Thông báo</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body" id="modalBody">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" id="modalExit"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:attr="courses" id="courses" style="display: none"></div>
+
+</body>
+</html>

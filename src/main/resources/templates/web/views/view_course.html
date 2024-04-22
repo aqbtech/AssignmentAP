@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title th:text="${'Khoá: '+courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')_HK'+class.semesterId}"></title> <!-- kiểm tra và lấy thông tin của khóa học từ courseModel được gửi ra từ controller-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .nav-link {
+            transition: background-color 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: rgba(0, 123, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Content -->
+    <div class="container">
+        <h4 class="text-center mb-4" th:text="${courseName +' ('+class.courseId + ')_' + class.teacherName +'_(' +class.classId+')_HK'+class.semesterId}" style="margin-top: 20px;"></h4>
+
+        <div class="border-top border-bottom">
+            <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="'/course?id=' + ${class.classId}">Khoá học</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasAuthority('TEACHER')">
+                        <a class="nav-link" th:href="'/list-student?id=' + ${class.classId}" style="color: #6c757d">Danh sách lớp</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasAuthority('TEACHER')">
+                        <a class="nav-link" th:href="'/teacher/update_student?classId=' + ${class.classId} + '&courseId=' + ${class.courseId}" style="color: #6c757d">Nhập điểm</a>
+                    </li>
+                </ul>
+                <div class="ms-auto d-flex align-items-center" sec:authorize="hasAuthority('TEACHER')">
+                    <label class="form-check-label me-2 text-primary mb-0" for="editModeSwitch" style="margin-right: 10px;">Chỉnh sửa</label>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="editModeSwitch" onchange="toggleEditButton()">
+                        <label class="custom-control-label" for="editModeSwitch"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-check form-switch d-flex align-items-center" sec:authorize="hasAuthority('TEACHER')">
+            <div class="d-flex justify-content-between" style="margin-top: 15px; margin-bottom: 10px;">
+                <button type="button" class="btn btn-outline-primary mr-2" id="addGroupButton" style="display: none;" data-toggle="modal" data-target="#addGroupModal" sec:authorize="hasAuthority('TEACHER')">
+                    Thêm nhóm
+                </button>
+                <button type="button" class="btn btn-outline-primary mr-2" id="deleteGroupButton" style="display: none;" data-toggle="modal" data-target="#deleteGroupModal" sec:authorize="hasAuthority('TEACHER')">
+                    Xoá nhóm
+                </button>
+            </div>
+        </div>
+
+        <div id="accordion">
+            <div th:if="${#lists.isEmpty(info.listDocument)}">
+                <div style="margin-top: 50px">
+                    <div>
+                        <p class="text-center text-muted">Chưa có tài liệu nào trong khoá học này</p>
+                    </div>
+                </div>
+            </div>
+            <div th:each="infoItem, iterStat : ${info.listDocument}">
+                <div class="card m-2">
+                    <div class="card-header" id="heading[[${iterStat.index}]]">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" th:attr="data-target='#collapse'+${iterStat.index}, aria-controls='collapse'+${iterStat.index}" aria-expanded="true" th:text="${infoItem.title}">
+                                </button>
+                            </h5>
+                            <div class="d-flex" role="group">
+                                <button type="button" class="btn btn-outline-primary mr-2 edit-title-button" th:id="'editTitleButton'+${iterStat.index}" th:data-title="${infoItem.title}" style="display: none;" data-toggle="modal" data-target="#editTitle" sec:authorize="hasAuthority('TEACHER')">
+                                    Sửa tiêu đề
+                                </button>
+                                <button type="button" class="btn btn-outline-primary mr-2 add-document-button" th:id="'addDocumentButton'+${iterStat.index}" th:data-title="${infoItem.title}" style="display: none;" data-toggle="modal" data-target="#addPdfModal" sec:authorize="hasAuthority('TEACHER')">
+                                    Thêm tài liệu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:id="'collapse' + ${iterStat.index}" class="collapse show" aria-labelledby="heading[[${iterStat.index}]]">
+                        <div class="card-body">
+                            <div th:each="fileItem, iterStat2 : ${infoItem.listFile}">
+                                <div class="border rounded p-3" style="margin-bottom: 10px;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-pdf bi-4x"></i>
+                                            <a th:href="@{'/download/' + ${fileItem.folder} + '/' + ${fileItem.fileName}}" class="ms-2" style="font-size: 1rem;" th:text="${fileItem.fileName}"></a>
+                                        </div>
+                                        <form th:action="@{'/delete/' + ${fileItem.folder} + '/' + ${fileItem.fileName} + '/' + ${class.classId} + '/' + ${infoItem.title} + '/' + ${class.infoId}}" method="get" style="display: none;" th:id="'deleteDocumentButton'+${iterStat.index}">
+                                            <a href="javascript:;" role="button" style="color: red; text-decoration: none;" onclick="this.closest('form').submit();">Xoá</a>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- /.container -->
+
+    <div class="modal fade" id="editTitle" tabindex="-1" aria-labelledby="editTitleLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTitleLabel">Sửa Tiêu Đề</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newTitle" class="form-label">Tiêu đề mới</label>
+                        <form th:action="@{/saveNewTitle}" id="saveNewTitleForm" method="post" class="form-group">
+                            <input type="hidden" id="currentTitle" name="currentTitle">
+                            <input type="hidden" id="classId" name="classId" th:value="${class.classId}">
+                            <input type="hidden" id="infoId" name="infoId" th:value="${class.infoId}">
+                            <input type="text" class="form-control" id="newTitle" name="newTitle" placeholder="Nhập tiêu đề mới">
+                        </form>
+                        <div id="saveNewTitleAlert" class="alert alert-danger mt-2" style="display: none;">Vui lòng nhập tiêu đề.</div>
+                        <div id="saveNewTitleAlert2" class="alert alert-success mt-2" style="display: none;">Cập nhật tiêu đề thành công.</div>
+                        <div id="saveNewTitleAlert3" class="alert alert-danger mt-2" style="display: none;">Tiêu đề đã tồn tại.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewTitle()">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- /.modal edit title -->
+
+    <div class="modal fade" id="addPdfModal" tabindex="-1" aria-labelledby="addPdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPdfModalLabel">Thêm tài liệu</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="formFileMultiple" class="form-label">Tải lên tài liệu định dạng .doc, .pdf,...</label>
+                        <form th:action="@{/upload}" enctype="multipart/form-data" id="uploadForm" method="post">
+                            <div class="form-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="formFileMultiple" name="file">
+                                    <input type="hidden" id="folder" name="folder" value="" />
+                                    <input type="hidden" id="classId" name="classId" th:value="${class.classId}">
+                                    <input type="hidden" id="currentTitleForUpload" name="currentTitleForUpload">
+                                    <input type="hidden" id="infoId" name="infoId" th:value="${class.infoId}">
+                                    <label class="custom-file-label" for="formFileMultiple">Chọn file...</label>
+                                </div>
+                                <label for="formFileMultiple" class="form-label" id="selected-file" style="margin-top: 10px; margin-left: 10px; color: #007bff"></label>
+                            </div>
+                        </form>
+                        <div id="upLoadAlert" class="alert alert-danger mt-2" style="display: none;">Vui lòng chọn file.</div>
+                        <div id="upLoadAlert2" class="alert alert-success mt-2" style="display: none;">Tải tài liệu lên thành công.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thoát</button>
+                    <button type="button" class="btn btn-primary" onclick="uploadFile()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>  <!-- /.modal add pdf -->
+
+    <div class="modal fade" id="addGroupModal" tabindex="-1" aria-labelledby="addGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGroupModalLabel">Thêm nhóm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <form th:action="@{/addGroup}" id="addGroupForm" method="post" class="form-group">
+                            <label for="groupTitle" class="form-label">Tiêu đề nhóm</label>
+                            <input type="text" class="form-control" id="groupTitle" name="groupTitle" placeholder="Nhập tiêu đề">
+                            <input type="hidden" id="classId" name="classId" th:value="${class.classId}">
+                            <input type="hidden" id="infoId" name="infoId" th:value="${class.infoId}">
+                        </form>
+                        <div id="groupTitleAlert" class="alert alert-danger mt-2" style="display: none;">Vui lòng nhập tiêu đề.</div>
+                        <div id="groupTitleAlert2" class="alert alert-success mt-2" style="display: none;">Thêm nhóm thành công.</div>
+                        <div id="groupTitleAlert3" class="alert alert-danger mt-2" style="display: none;">Tiêu đề đã tồn tai.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thoát</button>
+                    <button type="button" class="btn btn-primary" onclick="addGroup()">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- /.modal add group -->
+
+    <div class="modal fade" id="deleteGroupModal" tabindex="-1" aria-labelledby="deleteGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteGroupModalLabel">Xoá nhóm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <form th:action="@{/deleteGroup}" id="deleteGroupForm" method="post" class="form-group">
+                            <label for="groupToDelete" class="form-label">Chọn nhóm để xoá</label>
+                            <input type="hidden" id="classId" name="classId" th:value="${class.classId}">
+                            <input type="hidden" id="infoId" name="infoId" th:value="${class.infoId}">
+                            <select class="form-select" id="groupToDelete" name="groupToDelete" style="width: 200px;">
+                                <option value="">Chọn nhóm cần xoá</option>
+                                <option th:each="infoItem : ${info.listDocument}" th:value="${infoItem.title}" th:text="${infoItem.title}">
+                            </select>
+                        </form>
+                        <div id="deleteGroupTitleAlert" class="alert alert-danger mt-2" style="display: none;">Vui lòng chọn nhóm.</div>
+                        <div id="deleteGroupTitleAlert2" class="alert alert-success mt-2" style="display: none;">Xoá nhóm thành công.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thoát</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteGroup()">Xoá nhóm</button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- /.modal delete group -->
+
+
+</div> <!--/. layout:fragment="content" -->
+</body>
+<div layout:fragment="custom-scripts">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var existingTitles = /*[[${info.listDocument.![title]}]]*/ [];
+        /*]]>*/
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('.custom-file-input').on('change', function() {
+                let numberOfFiles = $(this)[0].files.length;
+                let fileLabel = numberOfFiles > 1 ? numberOfFiles + ' files selected' : $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileLabel);
+                $('#selected-file').html(fileLabel);
+            });
+        });
+
+        $(document).ready(function() {
+            $('.edit-title-button').click(function() {
+                var title = $(this).data('title');
+                $('#currentTitle').val(title);
+            });
+            $('.add-document-button').click(function() {
+                var title = $(this).data('title');
+                $('#currentTitleForUpload').val(title);
+            });
+        });
+
+        function uploadFile() {
+            var fileInput = document.getElementById('formFileMultiple');
+            if (!fileInput.value) {
+                document.getElementById('upLoadAlert').style.display = 'block';
+                document.getElementById('upLoadAlert2').style.display = 'none';
+                return;
+            }
+            document.getElementById('uploadForm').submit();
+            document.getElementById('upLoadAlert').style.display = 'none';
+            document.getElementById('upLoadAlert2').style.display = 'block';
+        }
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            uploadFile();
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            var folderInput = document.getElementById('folder');
+            var timestamp = new Date().getTime();
+            folderInput.value = timestamp;
+
+            var classIdInput = document.getElementById('classId');
+            classIdInput.value = '[[${class.classId}]]';
+
+            var storedValue = localStorage.getItem('editMode');
+            if (storedValue !== null) {
+                if (storedValue === 'true') {
+                    document.getElementById('editModeSwitch').checked = true;
+                } else {
+                    document.getElementById('editModeSwitch').checked = false;
+                }
+                toggleEditButton();
+            }
+        });
+
+
+
+        function addGroup() {
+            var groupTitle = document.getElementById("groupTitle").value;
+
+            if (groupTitle.trim() === '') {
+                document.getElementById('groupTitleAlert').style.display = 'block';
+                document.getElementById('groupTitleAlert2').style.display = 'none';
+                document.getElementById('groupTitleAlert3').style.display = 'none';
+            }else if (existingTitles.includes(groupTitle.trim())) {
+                document.getElementById('groupTitleAlert').style.display = 'none';
+                document.getElementById('groupTitleAlert2').style.display = 'none';
+                document.getElementById('groupTitleAlert3').style.display = 'block';
+
+            } else {
+                document.getElementById('groupTitleAlert').style.display = 'none';
+                document.getElementById('groupTitleAlert3').style.display = 'none';
+                document.getElementById('groupTitleAlert2').style.display = 'block';
+                document.getElementById('addGroupForm').submit();
+            }
+        }
+        document.getElementById('addGroupForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            addGroup();
+        });
+
+        function deleteGroup() {
+            var groupTitle = document.getElementById("groupToDelete").value;
+            console.log(groupTitle);
+            if (groupTitle.trim() === '') {
+                document.getElementById('deleteGroupTitleAlert').style.display = 'block';
+                document.getElementById('deleteGroupTitleAlert2').style.display = 'none';
+            } else {
+                document.getElementById('deleteGroupTitleAlert').style.display = 'none';
+                document.getElementById('deleteGroupTitleAlert2').style.display = 'block';
+                document.getElementById('deleteGroupForm').submit();
+            }
+        }
+
+        document.getElementById('deleteGroupForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            deleteGroup();
+        });
+
+        function saveNewTitle() {
+            var groupTitle = document.getElementById("newTitle").value;
+
+            if (groupTitle.trim() === '') {
+                document.getElementById('saveNewTitleAlert').style.display = 'block';
+                document.getElementById('saveNewTitleAlert2').style.display = 'none';
+                document.getElementById('saveNewTitleAlert3').style.display = 'none';
+            }else if (existingTitles.includes(groupTitle.trim())) {
+                document.getElementById('saveNewTitleAlert').style.display = 'none';
+                document.getElementById('saveNewTitleAlert2').style.display = 'none';
+                document.getElementById('saveNewTitleAlert3').style.display = 'block';
+
+            } else {
+                document.getElementById('saveNewTitleAlert').style.display = 'none';
+                document.getElementById('saveNewTitleAlert3').style.display = 'none';
+                document.getElementById('saveNewTitleAlert2').style.display = 'block';
+                document.getElementById('saveNewTitleForm').submit();
+            }
+        }
+        document.getElementById('saveNewTitleForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            saveNewTitle();
+        });
+
+
+
+        function toggleEditButton() {
+            var switchToggle = document.getElementById('editModeSwitch');
+            var addGroupButton = document.getElementById('addGroupButton');
+            var deleteGroupButton = document.getElementById('deleteGroupButton');
+            var editTitleButtons = document.querySelectorAll("[id^='editTitleButton']");
+            var addDocumentButtons = document.querySelectorAll("[id^='addDocumentButton']");
+            var deleteDocumentButtons = document.querySelectorAll("[id^='deleteDocumentButton']");
+
+            const toggleDisplay = (elements, display) => {
+                elements.forEach(element => {
+                    element.style.display = display;
+                });
+            };
+
+            if (switchToggle.checked) {
+                localStorage.setItem('editMode', 'true');
+                addGroupButton.style.display = 'block';
+                deleteGroupButton.style.display = 'block';
+                toggleDisplay(editTitleButtons, 'block');
+                toggleDisplay(addDocumentButtons, 'block');
+                toggleDisplay(deleteDocumentButtons, 'block');
+            } else {
+                localStorage.setItem('editMode', 'false');
+                addGroupButton.style.display = 'none';
+                deleteGroupButton.style.display = 'none';
+                toggleDisplay(editTitleButtons, 'none');
+                toggleDisplay(addDocumentButtons, 'none');
+                toggleDisplay(deleteDocumentButtons, 'none');
+            }
+        }
+    </script>
+</div>
+</html>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<body>
+    <!-- Footer -->
+    <footer th:fragment="footer" class="mt-auto bg-dark">
+        <!-- Remove the container if you want to extend the Footer to full width. -->
+        <div class="container">
+            <!-- Footer -->
+                    <!-- Section: Links -->
+<!--                    <section class="mt-5">-->
+                        <!-- Grid row-->
+                        <div class="row pt-4 align-items-center">
+                            <div class="col-sm-9">
+                                <img src="https://mybk.hcmut.edu.vn/my/images/logo.png">
+                            </div>
+                            <!-- Grid column -->
+<!--                            <img src="https://mybk.hcmut.edu.vn/my/images/logo.png">-->
+                            <div class="col-md-3 d-block justify-content-center align-items-center">
+                                <h6 class="text-uppercase font-weight-bold">
+                                    <a th:href="@{/about}" class="text-white">About us</a>
+                                </h6>
+                                <h6 class="text-uppercase font-weight-bold">
+                                    <a th:href="@{/contact}" class="text-white">Contact</a>
+                                </h6>
+                            </div>
+                            <!-- Grid column -->
+
+                            <!-- Grid column -->
+<!--                            div class="col-md-3">-->
+<!--                            <h6 class="text-uppercase font-weight-bold">-->
+<!--                                <a th:href="@{/contact}" class="text-white">Contact</a>-->
+<!--                            </h6>-->
+<!--                        </div><-->
+                            <!-- Grid column -->
+                        </div>
+                        <!-- Grid row-->
+<!--                    </section>-->
+                    <!-- Section: Links -->
+
+                    <hr class="my-2" />
+
+                    <!-- Section: Text -->
+                    <section class="">
+                        <div class="row d-flex justify-content-center">
+                            <div class="col-lg-8 d-flex justify-content-center text-white">
+                                <p>
+                                    © 2024 Copyright
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Section: Text -->
+        </div>
+                <!-- Grid container -->
+
+                <!-- Copyright -->
+<!--                <div-->
+<!--                        class="text-center p-3"-->
+<!--                        style="background-color: rgba(0, 0, 0, 0.2)"-->
+<!--                >-->
+<!--                    © 2024 Copyright:-->
+<!--                    <a class="text-white" href="https://mdbootstrap.com/"-->
+<!--                    >MDBootstrap.com</a-->
+<!--                    >-->
+<!--                </div>-->
+                <!-- Copyright -->
+        <!-- End of .container -->
+    </footer>
+</body>
+</html>

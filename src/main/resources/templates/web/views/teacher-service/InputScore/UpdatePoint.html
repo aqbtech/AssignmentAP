@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/web-layout.html}">
+<head>
+    <title>Student Management System</title>
+    <link th:href="@{/template/web/css/student_view.css}" rel="stylesheet">
+
+    <style>
+        a.button {
+            padding: 1px 6px;
+            border: 1px outset buttonborder;
+            border-radius: 3px;
+            color: buttontext;
+            background-color: buttonface;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+
+<body>
+<div layout:fragment="content">
+
+    <div class="header">
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3 th:text="${name}" style="display: inline"></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 mt-3">
+                <div class="border-top border-bottom" style="margin-bottom: 20px;">
+                    <div class="container d-flex justify-content-between align-items-center" style="margin-top: 10px; margin-bottom: 10px;">
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link active" th:href="'/course?id=' + ${classId}" style="color: #6c757d">Khoá học</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="'/list-student?id=' + ${classId}" style="color: #6c757d">Danh sách lớp</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="'/teacher/update_student?classId=' + ${classId} + '&courseId=' + ${courseId}">Nhập điểm</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+</body>
+</html>
